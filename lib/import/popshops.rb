@@ -14,8 +14,8 @@ class Import::Popshops
 
   CATEGORIES = {
     3000 => 'Clothing & Accessories',
-    3300 => 'Women\'s Clothing',
-    3315 => 'Women\'s Pants & Jeans',
+    3300 => "Women's Clothing",
+    3315 => "Women's Pants & Jeans",
     4400 => 'Jewelry & Watches',
     4425 => 'Watches',
     4435 => "Women's Watches",

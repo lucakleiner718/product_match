@@ -49,7 +49,7 @@
     <% products.each do |suggested_product| %>
       <% product = suggested_product.suggested %>
       <div class="col-sm-3 col-xs-6" data-percentage="<%= suggested_product.percentage %>">
-        <div class="thumbnail" style="background: <%= match_item_bg suggested_product %>">
+        <div class="thumbnail" style="background: <%= match_item_bg suggested_product %>" data-id="<%= suggested_product.id %>">
           <strong><%= product.title %></strong></br>
           <em>Color:</em> <%= product.color %></br>
           <em>Size:</em> <%= product.size %></br>
