@@ -61,7 +61,7 @@ class ProductsController < ApplicationController
     end
     @product = Product.find(product_id)
 
-    @suggested_products = ProductSuggestion.where(product_id: product_id).order(percentage: :desc).includes(:suggested)
+    @suggested_products = ProductSuggestion.where(product_id: product_id).order(percentage: :desc).limit(20).includes(:suggested)
   end
 
   def match_select

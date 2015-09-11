@@ -6,6 +6,9 @@ class Product < ActiveRecord::Base
     end
   end
 
+  scope :shopbop, -> { where source: :shopbop }
+  scope :not_shopbop, -> { where('source != ?', :shopbop) }
+
 
   def self.export_to_csv source: 'popshops', brand: 'Current/Elliott', category: nil
     products = Product.where(source: source, brand: brand)
@@ -28,7 +31,9 @@ class Product < ActiveRecord::Base
     title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'the']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    params_count += (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
+    title_similarity = (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
+
+    return 0 if title_similarity < 2
 
     params_count += 5 if suggested.color.present? && self.color.present? && suggested.color.gsub(/\s/, '').downcase == self.color.gsub(/\s/, '').downcase
 

@@ -22,7 +22,7 @@ class ProductSuggestion < ActiveRecord::Base
 
       related_products.each do |suggested|
         percentage = product.similarity_to suggested
-        ProductSuggestion.create product: product, suggested: suggested, percentage: percentage
+        ProductSuggestion.create product: product, suggested: suggested, percentage: percentage if percentage > 0
       end
     end
   end

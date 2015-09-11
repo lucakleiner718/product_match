@@ -59,9 +59,11 @@
           <em>UPC:</em> <%= product.upc %></br>
           <em>Link:</em> <%= link_to 'link', product.url %></br>
 
-          <a href="/product/<%= product.id %>" style="margin: 5px 0; display: block;">
-            <%= image_tag product_image(product.image), class: "img-responsive portfolio-item" %>
-          </a>
+          <div style="margin: 5px 0;">
+            <!--<a href="/product/<%#= product.id %>" >-->
+              <%= image_tag product_image(product.image), class: "img-responsive portfolio-item" %>
+            <!--</a>-->
+          </div>
 
           <div class="btn-group" role="group" aria-label="...">
             <%= link_to 'Found', select_path(product_id: @product.id, selected_id: product.id), class: "btn btn-success select-product-found", remote: true, method: :post %>
