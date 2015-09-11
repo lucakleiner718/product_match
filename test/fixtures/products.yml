@@ -1,0 +1,29 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  item_group_id: MyString
+  item_id: MyString
+  title: MyString
+  product_type: MyString
+  google_category: MyString
+  link: MyString
+  image_link: MyString
+  price: MyString
+  sale_price: MyString
+  color: MyString
+  size: MyString
+  upc: MyString
+
+two:
+  item_group_id: MyString
+  item_id: MyString
+  title: MyString
+  product_type: MyString
+  google_category: MyString
+  link: MyString
+  image_link: MyString
+  price: MyString
+  sale_price: MyString
+  color: MyString
+  size: MyString
+  upc: MyString

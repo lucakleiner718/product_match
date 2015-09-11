@@ -1,0 +1,49 @@
+class Product < ActiveRecord::Base
+
+  before_save do
+    if self.brand.downcase == 'current/elliott' && self.brand != 'Current/Elliott'
+      self.brand = 'Current/Elliott'
+    end
+  end
+
+
+  def self.export_to_csv source: 'popshops', brand: 'Current/Elliott', category: nil
+    products = Product.where(source: source, brand: brand)
+    products = products.where(category: category) if category
+
+    csv_string = CSV.generate do |csv|
+      csv << Product.column_names.select{|r| !r.in?(['id', 'created_at', 'updated_at'])}
+      products.each do |product|
+        csv << product.attributes.select{|k,v| !k.in?(['id', 'created_at', 'updated_at'])}.values
+      end
+    end
+
+    File.write "tmp/#{source}-#{brand.gsub('/', '-')}-#{Time.now.to_i}.csv", csv_string
+  end
+
+  def similarity_to suggested
+    params_amount = 14
+    params_count = 0
+
+    title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
+    title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'the']
+    suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
+    params_count += (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
+
+    params_count += 5 if suggested.color.present? && self.color.present? && suggested.color.gsub(/\s/, '').downcase == self.color.gsub(/\s/, '').downcase
+
+    if suggested.size.present? && self.size.present?
+      size_s = suggested.size.gsub(/\s/, '').downcase
+      size_p = self.size.gsub(/\s/, '').downcase
+      if size_s == size_p || (size_s == 'small' && size_p == 's') || (size_s == 'large' && size_p == 'l') ||
+          (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs')
+        params_count += 2
+      end
+    end
+
+    params_count += 2 if suggested.price.present? && self.price.present? && suggested.price.to_i == self.price.to_i
+
+    (params_count/params_amount.to_f * 100).to_i
+  end
+
+end

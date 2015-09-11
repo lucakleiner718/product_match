@@ -1,0 +1,19 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th>Brand Name</th>
+    <th>Total Products</th>
+    <th>Products with Suggestions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% brands = ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] %>
+  <% brands.each do |brand| %>
+    <tr>
+      <td><%= brand %></td>
+      <td><%= Product.where(brand: brand).size %></td>
+      <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand}).size %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

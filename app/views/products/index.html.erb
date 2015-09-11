@@ -1,0 +1,44 @@
+<div class="page-header">
+  <h1>Products</h1>
+</div>
+
+<div class="btn-group" role="group" aria-label="...">
+  <% ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'].each do |brand_name| %>
+    <%= link_to brand_name, products_path(brand: brand_name), class: "btn btn-default#{' active' if params[:brand] == brand_name}" %>
+  <% end %>
+</div>
+<br>
+<br>
+<table class="table">
+  <thead>
+  <tr>
+    <th>Title</th>
+    <th>Brand</th>
+    <th>Source</th>
+    <th>Size</th>
+    <th>Color</th>
+    <th>Style Code</th>
+    <th>UPC</th>
+    <th>Retailer</th>
+    <th>Category</th>
+    <th>Link</th>
+  </tr>
+  </thead>
+  <% @products.each do |product| %>
+    <tr class="<%= 'warning' if product.source == 'shopbop' %>">
+      <td><%= product.title %></td>
+      <td><%= product.brand %></td>
+      <td><%= product.source %></td>
+      <td><%= product.size %></td>
+      <td><%= product.color %></td>
+      <td><%= product.style_code %></td>
+      <td><%= product.upc %></td>
+      <td><%= product.retailer %></td>
+      <td><%= product.category %></td>
+      <td><%= link_to 'link', product.url if product.url.present? %></td>
+    </tr>
+  <% end %>
+</table>
+
+
+<%= paginate @products %>
