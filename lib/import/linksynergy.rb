@@ -29,7 +29,7 @@ class Import::Linksynergy
   end
 
   def process_xml
-    filename = "tmp/#{@mid}_2388513_mp.xml"
+    filename = "tmp/sources/#{@mid}_2388513_mp.xml"
     xml = Nokogiri::XML(File.read(filename))
     binding.pry
   end

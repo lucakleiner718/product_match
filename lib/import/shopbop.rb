@@ -10,7 +10,7 @@ class Import::Shopbop
       Product.where(source: source).delete_all
     end
 
-    filename = 'tmp/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
+    filename = 'tmp/sources/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
 
     SmarterCSV.process(filename, chunk_size: 1_000) do |rows|
       items = prepare_data rows

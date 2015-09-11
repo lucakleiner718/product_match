@@ -7,13 +7,18 @@ class Import::Popshops
     172832 => 'Honeydew Intimates',
     706936 => 'Michael Kors',
     85340 => 'Kate Spade',
-    75499 => 'Tory Burch'
+    75499 => 'Tory Burch',
+    710349 => 'Michele Watches'
   }
 
   CATEGORIES = {
     3000 => 'Clothing & Accessories',
     3300 => 'Women\'s Clothing',
-    3315 => 'Women\'s Pants &amp; Jeans'
+    3315 => 'Women\'s Pants & Jeans',
+    4400 => 'Jewelry & Watches',
+    4425 => 'Watches',
+    4435 => 'Women\'s Watches',
+    4445 => 'Watch Parts & Accessories',
   }
 
   URL = {
