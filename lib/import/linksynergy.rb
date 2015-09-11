@@ -35,7 +35,7 @@ class Import::Linksynergy
   end
 
   def process_csv
-    filename = Dir.glob("tmp/#{@mid}_2388513_mp.*").first
+    filename = Dir.glob("tmp/sources/#{@mid}_2388513_mp.*").first
     columns = %w(id title id2 category1 category2 url image emtp1 description_short description_full empt2 amount price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock upc numb2 currency id3 url2 empt6 category3 size empt7 color sex empt8 empt9 empt10 empt11 char).map(&:to_sym)
 
     chunk = []

@@ -8,7 +8,8 @@ class Import::Popshops
     706936 => 'Michael Kors',
     85340 => 'Kate Spade',
     75499 => 'Tory Burch',
-    710349 => 'Michele Watches'
+    710349 => 'Michele Watches',
+    1916908 => 'Kate Spade Watches',
   }
 
   CATEGORIES = {
@@ -17,8 +18,9 @@ class Import::Popshops
     3315 => 'Women\'s Pants & Jeans',
     4400 => 'Jewelry & Watches',
     4425 => 'Watches',
-    4435 => 'Women\'s Watches',
+    4435 => "Women's Watches",
     4445 => 'Watch Parts & Accessories',
+    11000 => 'Miscellaneous'
   }
 
   URL = {
