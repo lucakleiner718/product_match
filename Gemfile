@@ -26,6 +26,13 @@ group :development do
   gem 'quiet_assets'
   gem 'better_errors'
   gem 'binding_of_caller'
+
+  gem 'capistrano', '~> 3.4.0'
+  gem 'capistrano-bundler'#, '~> 1.1', require: false
+  gem 'capistrano-rails'#, '~> 1.1', require: false
+  gem 'capistrano3-puma'#, '~> 0.9.0', require: false
+  gem 'capistrano-rvm'#, '~> 0.1', require: false
+  # gem 'capistrano-sidekiq'#, require: false
 end
 
 group :production do
