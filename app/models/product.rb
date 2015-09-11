@@ -33,6 +33,8 @@ class Product < ActiveRecord::Base
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
 
+    params_count += title_similarity
+
     return 0 if title_similarity < 2
 
     params_count += 5 if suggested.color.present? && self.color.present? && suggested.color.gsub(/\s/, '').downcase == self.color.gsub(/\s/, '').downcase

@@ -49,11 +49,11 @@
     <% products.each do |suggested_product| %>
       <% product = suggested_product.suggested %>
       <div class="col-sm-3 col-xs-6" data-percentage="<%= suggested_product.percentage %>">
-        <div class="thumbnail" style="background: <%= match_item_bg suggested_product %>" data-id="<%= suggested_product.id %>">
+        <div class="thumbnail" style="background: <%= match_item_bg suggested_product %>" data-id="<%= product.id %>">
           <strong><%= product.title %></strong></br>
           <em>Color:</em> <%= product.color %></br>
           <em>Size:</em> <%= product.size %></br>
-          <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale %></br>
+          <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
           <em>Category:</em> <%= product.category %></br>
           <em>Source:</em> <%= product.source %></br>
           <em>UPC:</em> <%= product.upc %></br>
