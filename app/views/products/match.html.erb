@@ -34,6 +34,7 @@
     <h5><em>Material:</em> <%= @product.material || 'N/A' %></h5>
     <h5><em>Bop Cat:</em> <%= @product.category %></h5>
     <h5><em>Goog Cat:</em> <%= @product.google_category %></h5>
+    <h5><em>Shopbop Product:</em> <%= link_to 'link', @product.url, target: :_blank %></h5>
   </div>
 </div>
 
@@ -61,7 +62,7 @@
           <em>Category:</em> <%= product.category %></br>
           <em>Source:</em> <%= product.source %></br>
           <em>UPC:</em> <%= product.upc %></br>
-          <em>Link:</em> <%= link_to 'link', product.url %></br>
+          <em>Link:</em> <%= link_to 'link', product.url, target: :_blank %></br>
 
           <div style="margin: 5px 0;">
             <!--<a href="/product/<%#= product.id %>" >-->
