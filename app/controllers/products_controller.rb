@@ -92,7 +92,7 @@ class ProductsController < ApplicationController
   end
 
   def selected_export
-    products = selected_products
+    products = selected_products.values
 
     if params[:only]
       if params[:only] == 'found'
@@ -105,7 +105,7 @@ class ProductsController < ApplicationController
         'item_group_id', 'id', 'title', 'found_match', 'no_match', 'no_color_match', 'no_size_match', 'avg_similarity',
         'product_type', 'google_product_category', 'link', 'brand', 'color', 'size', 'gtin'
       ]
-      products.each do |product_id, row|
+      products.each do |row|
         pr = row[:product]
         csv << [
           pr.style_code, pr.source_id, pr.title, row[:found_votes], row[:nothing_votes], row[:no_color_votes],
