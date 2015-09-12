@@ -87,34 +87,95 @@ class ProductsController < ApplicationController
   end
 
   def selected
-    @products = {}
-    ProductSelect.includes(:product, :selected).all.each do |select|
-      @products[select.product_id] ||= {
-        product: select.product,
-        selected: select.selected,
-        found_votes: 0,
-        nothing_votes: 0,
-        no_color_votes: 0,
-        no_size_votes: 0,
-        total_similarity: 0,
-        count: 0
-      }
-      if select[:decision] == 'found'
-        @products[select.product_id][:found_votes] += 1
-        @products[select.product_id][:total_similarity] += select.selected_percentage
-        @products[select.product_id][:count] += 1
-      elsif select[:decision] == 'no-color'
-        @products[select.product_id][:no_color_votes] += 1
-      elsif select[:decision] == 'no-size'
-        @products[select.product_id][:no_size_votes] += 1
-      elsif select[:decision] == 'nothing'
-        @products[select.product_id][:nothing_votes] += 1
+    @products = selected_products
+    @products = @products.values.sort{|a,b| b[:found_votes] <=> a[:found_votes]}
+  end
+
+  def selected_export
+    products = selected_products
+
+    if params[:only]
+      if params[:only] == 'found'
+        products.select!{|r| r[:found_votes] > 0}
       end
-
-
     end
 
-    @products = @products.values.sort{|a,b| b[:found_votes] <=> a[:found_votes]}
+    csv_string = CSV.generate do |csv|
+      csv << [
+        'item_group_id', 'id', 'title', 'found_match', 'no_match', 'no_color_match', 'no_size_match', 'avg_similarity',
+        'product_type', 'google_product_category', 'link', 'brand', 'color', 'size', 'gtin'
+      ]
+      products.each do |product_id, row|
+        pr = row[:product]
+        csv << [
+          pr.style_code, pr.source_id, pr.title, row[:found_votes], row[:nothing_votes], row[:no_color_votes],
+          row[:no_size_votes], row[:avg_similarity], pr.category, pr.google_category, pr.url, pr.brand,
+          pr.color, pr.size, (row[:selected].upc if row[:selected])
+        ]
+      end
+    end
+
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "shopbop-upc-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+  end
+
+  def selected_products
+    # ProductSelect.includes(:product, :selected).all.each do |select|
+    #   @products[select.product_id] ||= {
+    #     product: select.product,
+    #     selected: select.selected,
+    #     found_votes: 0,
+    #     nothing_votes: 0,
+    #     no_color_votes: 0,
+    #     no_size_votes: 0,
+    #     total_similarity: 0,
+    #     count: 0
+    #   }
+    #   if select[:decision] == 'found'
+    #     @products[select.product_id][:found_votes] += 1
+    #     @products[select.product_id][:total_similarity] += select.selected_percentage
+    #     @products[select.product_id][:count] += 1
+    #   elsif select[:decision] == 'no-color'
+    #     @products[select.product_id][:no_color_votes] += 1
+    #   elsif select[:decision] == 'no-size'
+    #     @products[select.product_id][:no_size_votes] += 1
+    #   elsif select[:decision] == 'nothing'
+    #     @products[select.product_id][:nothing_votes] += 1
+    #   end
+    # end
+
+    ar = ProductSelect.connection.execute("
+SELECT *
+FROM (
+  SELECT product_id, selected_id,
+    sum(CASE WHEN decision='found' THEN 1 ELSE 0 END) as found_count,
+    sum(CASE WHEN decision='no-color' THEN 1 ELSE 0 END) as no_color_count,
+    sum(CASE WHEN decision='no-size' THEN 1 ELSE 0 END) as no_size_count,
+    sum(CASE WHEN decision='nothing' THEN 1 ELSE 0 END) as nothing_count,
+    count(product_id) as amount,
+    sum(selected_percentage) as similarity,
+    (sum(selected_percentage)/count(product_id)) as avg_similarity
+  FROM product_selects
+  GROUP by product_id, selected_id
+) AS t
+ORDER BY t.found_count desc, avg_similarity desc
+").to_a
+
+    products = {}
+    ar.each do |row|
+      products[row['product_id']] = {
+        product: Product.find(row['product_id']),
+        selected: (Product.find(row['selected_id']) if row['selected_id']),
+        found_votes: row['found_count'].to_i,
+        nothing_votes: row['nothing_count'].to_i,
+        no_color_votes: row['no_color_count'].to_i,
+        no_size_votes: row['no_size_count'].to_i,
+        total_similarity: row['similarity'].to_i,
+        count: row['amount'].to_i,
+        avg_similarity: row['avg_similarity'].to_i
+      }
+    end
+
+    products
   end
 
 end

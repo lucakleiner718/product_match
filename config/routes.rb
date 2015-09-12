@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   post 'match/:product_id' => 'products#match_select', as: :select
   get 'products/statistic' => 'products#statistic', as: :products_statistic
   get 'products/selected' => 'products#selected', as: :products_selected
+  get 'products/selected/export' => 'products#selected_export', as: :products_selected_export
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
