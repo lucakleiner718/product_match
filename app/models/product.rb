@@ -21,7 +21,7 @@ class Product < ActiveRecord::Base
       end
     end
 
-    File.write "tmp/#{source}-#{brand.gsub('/', '-')}-#{Time.now.to_i}.csv", csv_string
+    File.write "tmp/#{source}-#{brand.gsub('/', '-')}#{"-#{category.gsub(/\'/, '').gsub(/\s/, '-')}" if category}-#{Time.now.to_i}.csv", csv_string
   end
 
   def similarity_to suggested
@@ -29,7 +29,7 @@ class Product < ActiveRecord::Base
     params_count = 0
 
     title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'the']
+    title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'the']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
 

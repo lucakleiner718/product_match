@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150911104638) do
+ActiveRecord::Schema.define(version: 20150911183144) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20150911104638) do
     t.integer  "selected_percentage"
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
+    t.string   "decision"
   end
 
   create_table "product_suggestions", force: :cascade do |t|

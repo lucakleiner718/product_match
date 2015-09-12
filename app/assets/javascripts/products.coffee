@@ -1,4 +1,4 @@
 jQuery ($) ->
-  $('.select-product-found').on
+  $('.select-action').on
     'ajax:success': ->
       window.location.reload()

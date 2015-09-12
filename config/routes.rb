@@ -3,8 +3,9 @@ Rails.application.routes.draw do
   root to: 'products#root'
   get 'products' => 'products#index', as: :products
   get 'match' => 'products#match', as: :match
-  post 'match/:product_id/:selected_id' => 'products#match_select', as: :select
-  get 'products-statistic' => 'products#statistic', as: :products_statistic
+  post 'match/:product_id' => 'products#match_select', as: :select
+  get 'products/statistic' => 'products#statistic', as: :products_statistic
+  get 'products/selected' => 'products#selected', as: :products_selected
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

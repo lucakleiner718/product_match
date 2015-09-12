@@ -1,4 +1,4 @@
-class Import::Popshops
+  class Import::Popshops
 
   BRANDS = {
     51539 => 'Current/Elliott',
@@ -10,6 +10,7 @@ class Import::Popshops
     75499 => 'Tory Burch',
     710349 => 'Michele Watches',
     1916908 => 'Kate Spade Watches',
+    54558 => 'Michele'
   }
 
   CATEGORIES = {
@@ -18,9 +19,13 @@ class Import::Popshops
     3315 => "Women's Pants & Jeans",
     4400 => 'Jewelry & Watches',
     4425 => 'Watches',
+    4430 => "Men's Watches",
     4435 => "Women's Watches",
     4445 => 'Watch Parts & Accessories',
-    11000 => 'Miscellaneous'
+    4480 => 'Jewelry',
+    4540 => 'Bracelets',
+    11000 => 'Miscellaneous',
+    33184 => 'Unisex Watches"',
   }
 
   URL = {

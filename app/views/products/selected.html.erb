@@ -1,0 +1,26 @@
+<table class="table">
+  <thead>
+  <tr>
+    <td>Title</td>
+    <td>Found Votes</td>
+    <td>Nothing Votes</td>
+    <td>No Color Votes</td>
+    <td>No Size Votes</td>
+    <td>AVG Similarity</td>
+    <td>UPC</td>
+  </tr>
+  </thead>
+  <tbody>
+  <% @products.each do |product| %>
+    <tr>
+      <td><%= link_to product[:product].title, match_path(product_id: product[:product].id) %></td>
+      <td><%= product[:found_votes] %></td>
+      <td><%= product[:nothing_votes] %></td>
+      <td><%= product[:no_color_votes] %></td>
+      <td><%= product[:no_size_votes] %></td>
+      <td><%= (product[:total_similarity] / product[:count]) if product[:count] > 0 %></td>
+      <td><%= product[:selected].upc if product[:selected] %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

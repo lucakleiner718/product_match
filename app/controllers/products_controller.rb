@@ -57,6 +57,7 @@ class ProductsController < ApplicationController
     product_id = params[:product_id]
     unless product_id
       products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)').joins(:product).where(products: { brand: ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] }).to_a.map(&:product_id)
+      products_ids -= session[:processed].map(&:to_i) if session[:processed].present?
       product_id = products_ids.sample
     end
     @product = Product.find(product_id)
@@ -65,9 +66,16 @@ class ProductsController < ApplicationController
   end
 
   def match_select
-    product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
-    if product_suggestion
-      ProductSelect.create(product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage)
+    session[:processed] ||= []
+    session[:processed] << params[:product_id]
+
+    if params[:decision] == 'found' && params[:selected_id]
+      product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
+      if product_suggestion
+        ProductSelect.create(product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
+      end
+    elsif params[:decision].in?(['nothing', 'no-size', 'no-color'])
+      ProductSelect.create(product_id: params[:product_id], decision: params[:decision])
     end
 
     render json: { }
@@ -75,6 +83,37 @@ class ProductsController < ApplicationController
 
   def statistic
 
+  end
+
+  def selected
+    @products = {}
+    ProductSelect.includes(:product, :selected).all.each do |select|
+      @products[select.product_id] ||= {
+        product: select.product,
+        selected: select.selected,
+        found_votes: 0,
+        nothing_votes: 0,
+        no_color_votes: 0,
+        no_size_votes: 0,
+        total_similarity: 0,
+        count: 0
+      }
+      if select[:decision] == 'found'
+        @products[select.product_id][:found_votes] += 1
+        @products[select.product_id][:total_similarity] += select.selected_percentage
+        @products[select.product_id][:count] += 1
+      elsif select[:decision] == 'no-color'
+        @products[select.product_id][:no_color_votes] += 1
+      elsif select[:decision] == 'no-size'
+        @products[select.product_id][:no_size_votes] += 1
+      elsif select[:decision] == 'nothing'
+        @products[select.product_id][:nothing_votes] += 1
+      end
+
+
+    end
+
+    @products = @products.values.sort{|a,b| b[:found_votes] <=> a[:found_votes]}
   end
 
 end
