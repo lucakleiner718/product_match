@@ -56,13 +56,14 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)').joins(:product).where(products: { brand: ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] }).to_a.map(&:product_id)
-      products_ids -= session[:processed].map(&:to_i) if session[:processed].present?
-      product_id = products_ids.sample
+      products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).where(products: { brand: ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] }).order('products.title')
+      products_ids = products_ids.where.not(product_id: session[:processed]) if session[:processed].present?
+      product_id = products_ids.first.try(:product_id)
     end
-    @product = Product.find(product_id)
-
-    @suggested_products = ProductSuggestion.where(product_id: product_id).order(percentage: :desc).limit(20).includes(:suggested)
+    if product_id
+      @product = Product.find(product_id)
+      @suggested_products = ProductSuggestion.where(product_id: product_id).order(percentage: :desc).limit(20).includes(:suggested)
+    end
   end
 
   def match_select
