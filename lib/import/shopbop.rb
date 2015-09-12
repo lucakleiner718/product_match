@@ -55,6 +55,7 @@ class Import::Shopbop
         url: r[:link],
         image: r[:image_link],
         price: r[:price],
+        price_sale: (r[:sale_price].present? ? r[:sale_price] : nil),
         color: r[:color],
         size: r[:size],
         upc: r[:gtin],
