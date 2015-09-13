@@ -1,6 +1,6 @@
 require 'net/ftp'
 
-class Import::Linksynergy
+class Import::Linksynergy < Import::Base
 
   RETAILERS = {
     1237 => 'Nordstrom',
@@ -105,8 +105,6 @@ class Import::Linksynergy
 
   def prepare_data rows
     items = []
-    brand = r[:brand]
-    brand = 'Michele' if brand == 'MICHELE'
     rows.each do |r|
       item = {
         source: source,
@@ -114,7 +112,7 @@ class Import::Linksynergy
         title: r[:title].sub(/#{Regexp.quote r[:brand]}\s?/, '').split(',').first,
         url: r[:url],
         image: r[:image],
-        brand: brand,
+        brand: normalize_brand(r[:brand]),
         style_code: r[:style_code],
         upc: r[:upc],
         size: r[:size],

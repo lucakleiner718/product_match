@@ -1,4 +1,4 @@
-class Import::Shopbop
+class Import::Shopbop < Import::Base
 
   def self.perform rewrite: false
     instance = self.new
@@ -44,14 +44,12 @@ class Import::Shopbop
 
   def prepare_data rows
     items = []
-    brand = r[:brand]
-    brand = 'Michele' if brand == 'MICHELE'
     rows.each do |r|
       items << {
         source: source,
         source_id: r[:id],
         style_code: r[:item_group_id],
-        brand: brand,
+        brand: normalize_brand(r[:brand]),
         title: r[:title].sub(/#{r[:brand]}\s?/, ''),
         category: r[:product_type],
         google_category: r[:google_product_category],

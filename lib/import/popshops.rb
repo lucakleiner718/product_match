@@ -1,4 +1,4 @@
-  class Import::Popshops
+class Import::Popshops < Import::Base
 
   BRANDS = {
     51539 => 'Current/Elliott',
@@ -105,7 +105,7 @@
     items = []
     products.each do |r|
       brand = @xml.search('resources brands brand[id="'+r.attr('brand')+'"]').first.attr('name')
-      brand = 'Current/Elliott' if brand == 'Current/elliott'
+      brand = normalize_brand(brand)
       item = {
         source: source,
         source_id: r.attr('id'),
