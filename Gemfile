@@ -58,3 +58,13 @@ gem 'sidekiq', '~> 3.5.0'
 gem 'sidekiq-failures', github: 'antonzaytsev/sidekiq-failures', branch: 'short-error-message'
 gem 'sidekiq-unique-jobs'
 gem 'sinatra', require: false # Web interface of Sidekiq processes
+
+gem 'god'
+gem 'redis', '~> 3.2.1'
+gem 'redis-rails'
+gem 'clockwork'
+
+gem 'dotenv'
+gem 'dotenv-deployment', require: 'dotenv/deployment'
+
+gem 'rubyzip', require: 'zip'

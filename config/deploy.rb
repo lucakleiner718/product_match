@@ -17,7 +17,7 @@ set :ssh_options, {
 
 set :log_level, :info #:debug
 
-set :linked_files, fetch(:linked_files, []).push('config/database.yml', 'config/secrets.yml')
+set :linked_files, fetch(:linked_files, []).push('config/database.yml', 'config/secrets.yml', 'config/god.rb', '.env')
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'tmp/sources', 'vendor/bundle')
 
 set :keep_releases, 5
@@ -37,15 +37,54 @@ set :bundle_binstubs, nil
 
 after 'deploy:restart', 'puma:restart'
 
-# namespace :deploy do
-#
-#   after :restart, :clear_cache do
-#     on roles(:web), in: :groups, limit: 3, wait: 10 do
-#       # Here we can do anything such as:
-#       # within release_path do
-#       #   execute :rake, 'cache:clear'
-#       # end
-#     end
-#   end
-#
-# end
+set :god_pid, "#{shared_path}/tmp/pids/god.pid"
+set :god_config, "#{release_path}/config/god.rb"
+
+namespace :god do
+  def god_is_running
+    capture(:bundle, "exec god status > /dev/null 2>&1 || echo 'god not running'") != 'god not running'
+  end
+
+  # Must be executed within SSHKit context
+  def start_god
+    execute :bundle, "exec god -c #{fetch :god_config}"
+  end
+
+  desc "Start god and his processes"
+  task :start do
+    on roles(:web) do
+      within release_path do
+        with RAILS_ENV: fetch(:rails_env) do
+          start_god
+        end
+      end
+    end
+  end
+
+  desc "Terminate god and his processes"
+  task :stop do
+    on roles(:web) do
+      within release_path do
+        if god_is_running
+          execute :bundle, "exec god terminate"
+        end
+      end
+    end
+  end
+
+  desc "Restart god's child processes"
+  task :restart do
+    on roles(:web) do
+      within release_path do
+        with RAILS_ENV: fetch(:rails_env) do
+          if god_is_running
+            execute :bundle, "exec god terminate"
+          end
+          start_god
+        end
+      end
+    end
+  end
+end
+
+after "deploy:updated", "god:restart"
