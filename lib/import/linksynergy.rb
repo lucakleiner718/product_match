@@ -41,7 +41,7 @@ class Import::Linksynergy
 
     unless File.exists? filename
       ftp = Net::FTP.new('aftp.linksynergy.com')
-      ftp.login 'ladylux', 'MLeCS7fA'
+      ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
       ftp.getbinaryfile("#{@mid}_2388513_mp.txt.gz", Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz"), 1024)
       gz_file = Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz")
       txt = Zlib::GzipReader.open(gz_file).read
