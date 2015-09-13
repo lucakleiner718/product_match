@@ -105,12 +105,11 @@ class Import::Popshops < Import::Base
     items = []
     products.each do |r|
       brand = @xml.search('resources brands brand[id="'+r.attr('brand')+'"]').first.attr('name')
-      brand = normalize_brand(brand)
       item = {
         source: source,
         source_id: r.attr('id'),
-        brand: brand,
-        title: r.attr('name').sub(/#{brand}\s?/i, '').split(',').first.gsub('&#39;', '\''),
+        brand: normalize_brand(brand),
+        title: normalize_title(r.attr('name'), brand),
         image: r.attr('image_url_large'),
         upc: nil,
         mpn: nil,

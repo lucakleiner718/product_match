@@ -6,4 +6,9 @@ class Import::Base
     brand_name
   end
 
+  def normalize_title title, brand
+    title.sub(/#{Regexp.quote brand}\s?/i, '').sub(/^,/, '').strip#.split(',').select{|el| el.present?}.first
+      # .sub(/#{brand}\s?/i, '').split(',').first.gsub('&#39;', '\'')
+  end
+
 end

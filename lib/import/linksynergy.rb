@@ -109,7 +109,7 @@ class Import::Linksynergy < Import::Base
       item = {
         source: source,
         source_id: r[:id],
-        title: r[:title].sub(/#{Regexp.quote r[:brand]}\s?/, '').split(',').first,
+        title: normalize_title(r[:title], r[:brand]),
         url: r[:url],
         image: r[:image],
         brand: normalize_brand(r[:brand]),

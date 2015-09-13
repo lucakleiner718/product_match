@@ -3,6 +3,7 @@
   <tr>
     <th>Brand Name</th>
     <th>Shopbop Products</th>
+    <th>Shopbop Products without UPC</th>
     <th>Other soures Products</th>
     <th>Products with Suggestions</th>
   </tr>
@@ -13,6 +14,7 @@
     <tr>
       <td><%= brand %></td>
       <td><%= Product.where(brand: brand).shopbop.size %></td>
+      <td><%= Product.where(brand: brand).shopbop.where("upc is null OR upc = ''").size %></td>
       <td><%= Product.where(brand: brand).not_shopbop.size %></td>
       <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand}).pluck(:product_id).uniq.size %></td>
     </tr>

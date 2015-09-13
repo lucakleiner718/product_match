@@ -26,6 +26,19 @@
       <h5><em>Goog Cat:</em> <%= @product.google_category %></h5>
       <h5><em>Shopbop Product:</em> <%= link_to 'link', @product.url, target: :_blank %></h5>
     </div>
+    <div class="col-md-2">
+      <div class="dropdown pull-right">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <%= params[:brand] ? params[:brand] : 'All' %>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <% Brand.in_use.each do |brand| %>
+            <li><%= link_to brand.name, match_path(brand: brand.name) %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div class="row">
@@ -72,5 +85,23 @@
   <% end %>
 
 <% else %>
-  <h3>There is no products for you</h3>
+  <div class="row">
+    <div class="col-sm-8">
+      <h3>There is no products for you</h3>
+    </div>
+    <div class="col-sm-4">
+      <div class="dropdown pull-right">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <%= params[:brand] ? params[:brand] : 'All' %>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <% Brand.in_use.each do |brand| %>
+            <li><%= link_to brand.name, match_path(brand: brand.name) %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+
 <% end %>
