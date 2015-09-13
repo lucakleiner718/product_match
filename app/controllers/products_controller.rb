@@ -160,11 +160,14 @@ FROM (
 ORDER BY t.found_count desc, avg_similarity desc
 ").to_a
 
+    products_ids = ar.map{|row| row['product_id']} + ar.map{|row| row['selected_id']}
+    products_exists = Product.where(id: products_ids)
+
     products = {}
     ar.each do |row|
       products[row['product_id']] = {
-        product: Product.find(row['product_id']),
-        selected: (Product.find(row['selected_id']) if row['selected_id']),
+        product: products_exists.select{|pr| pr.id == row['product_id'].to_i}.first,
+        selected: (products_exists.select{|pr| pr.id == row['selected_id'].to_i}.first if row['selected_id']),
         found_votes: row['found_count'].to_i,
         nothing_votes: row['nothing_count'].to_i,
         no_color_votes: row['no_color_count'].to_i,
