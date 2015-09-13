@@ -70,7 +70,7 @@ ActiveRecord::Schema.define(version: 20150913095118) do
   end
 
   create_table "product_sources", force: :cascade do |t|
-    t.string   "brand_name"
+    t.string   "name"
     t.string   "source_name"
     t.string   "source_id"
     t.datetime "collected_at"
@@ -78,7 +78,7 @@ ActiveRecord::Schema.define(version: 20150913095118) do
     t.datetime "updated_at",   null: false
   end
 
-  add_index "product_sources", ["brand_name"], name: "index_product_sources_on_brand_name", using: :btree
+  add_index "product_sources", ["name"], name: "index_product_sources_on_name", using: :btree
   add_index "product_sources", ["source_name", "source_id"], name: "index_product_sources_on_source_name_and_source_id", unique: true, using: :btree
 
   create_table "product_suggestions", force: :cascade do |t|
