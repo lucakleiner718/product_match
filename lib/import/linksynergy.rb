@@ -105,6 +105,8 @@ class Import::Linksynergy
 
   def prepare_data rows
     items = []
+    brand = r[:brand]
+    brand = 'Michele' if brand == 'MICHELE'
     rows.each do |r|
       item = {
         source: source,
@@ -112,7 +114,7 @@ class Import::Linksynergy
         title: r[:title].sub(/#{Regexp.quote r[:brand]}\s?/, '').split(',').first,
         url: r[:url],
         image: r[:image],
-        brand: r[:brand],
+        brand: brand,
         style_code: r[:style_code],
         upc: r[:upc],
         size: r[:size],
