@@ -17,7 +17,7 @@ set :ssh_options, {
 
 set :log_level, :info #:debug
 
-set :linked_files, fetch(:linked_files, []).push('config/database.yml', 'config/secrets.yml', 'config/god.rb', '.env')
+set :linked_files, fetch(:linked_files, []).push('config/database.yml', 'config/secrets.yml', 'config/god.rb', 'config/sidekiq.yml', '.env')
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'tmp/sources', 'vendor/bundle')
 
 set :keep_releases, 5
