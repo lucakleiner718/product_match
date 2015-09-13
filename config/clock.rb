@@ -12,4 +12,6 @@ module Clockwork
     config[:tz] = Time.zone
   end
 
+  every(1.day, 'ProductSuggestionsWorker', at: "00:00") { ProductSuggestionsWorker.spawn }
+
 end
