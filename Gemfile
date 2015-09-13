@@ -55,7 +55,7 @@ gem 'bootstrap-kaminari-views'
 gem 'activeadmin', '~> 1.0.0.pre1'
 gem 'devise'
 gem 'sidekiq', '~> 3.5.0'
-gem 'sidekiq-failures', github: 'antonzaytsev/sidekiq-failures', branch: 'short-error-message'
+gem 'sidekiq-failures', '~> 0.4.5'
 gem 'sidekiq-unique-jobs'
 gem 'sinatra', require: false # Web interface of Sidekiq processes
 
