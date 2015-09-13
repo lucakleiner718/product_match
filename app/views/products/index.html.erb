@@ -3,7 +3,7 @@
 </div>
 
 <div class="btn-group" role="group" aria-label="...">
-  <% ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'].each do |brand_name| %>
+  <% Brand.in_use.pluck(:name).each do |brand_name| %>
     <%= link_to brand_name, products_path(brand: brand_name), class: "btn btn-default#{' active' if params[:brand] == brand_name}" %>
   <% end %>
 </div>

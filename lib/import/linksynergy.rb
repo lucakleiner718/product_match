@@ -1,3 +1,5 @@
+require 'net/ftp'
+
 class Import::Linksynergy
 
   RETAILERS = {
@@ -34,9 +36,28 @@ class Import::Linksynergy
     binding.pry
   end
 
+  def get_file
+    filename = "tmp/sources/#{@mid}_2388513_mp.txt"
+
+    unless File.exists? filename
+      ftp = Net::FTP.new('aftp.linksynergy.com')
+      ftp.login 'ladylux', 'MLeCS7fA'
+      ftp.getbinaryfile("#{@mid}_2388513_mp.txt.gz", Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz"), 1024)
+      gz_file = Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz")
+      txt = Zlib::GzipReader.open(gz_file).read
+      File.write Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt"), txt
+      File.delete gz_file
+    end
+
+    filename
+  end
+
   def process_csv
-    filename = Dir.glob("tmp/sources/#{@mid}_2388513_mp.*").first
+    filename = get_file
+
     columns = %w(id title id2 category1 category2 url image emtp1 description_short description_full empt2 amount price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock upc numb2 currency id3 url2 empt6 category3 size empt7 color sex empt8 empt9 empt10 empt11 char).map(&:to_sym)
+
+    return false unless filename
 
     chunk = []
     chunk_limit = 1_000
@@ -88,7 +109,7 @@ class Import::Linksynergy
       item = {
         source: source,
         source_id: r[:id],
-        title: r[:title].sub(/#{r[:brand]}\s?/, '').split(',').first,
+        title: r[:title].sub(/#{Regexp.quote r[:brand]}\s?/, '').split(',').first,
         url: r[:url],
         image: r[:image],
         brand: r[:brand],

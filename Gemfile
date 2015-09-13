@@ -28,11 +28,11 @@ group :development do
   gem 'binding_of_caller'
 
   gem 'capistrano', '~> 3.4.0'
-  gem 'capistrano-bundler'#, '~> 1.1', require: false
-  gem 'capistrano-rails'#, '~> 1.1', require: false
-  gem 'capistrano3-puma'#, '~> 0.9.0', require: false
-  gem 'capistrano-rvm'#, '~> 0.1', require: false
-  # gem 'capistrano-sidekiq'#, require: false
+  gem 'capistrano-bundler', '~> 1.1.4', require: false
+  gem 'capistrano-rails', '~> 1.1.3', require: false
+  gem 'capistrano3-puma', '~> 1.2.1', require: false
+  gem 'capistrano-rvm', '~> 0.1.2', require: false
+  gem 'capistrano-sidekiq', '~> 0.5.3', require: false
 end
 
 group :production do
@@ -51,3 +51,10 @@ gem 'bootstrap-sass', '~> 3.3.5'
 gem 'bootstrap-generators', '~> 3.3.4'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
+
+gem 'activeadmin', '~> 1.0.0.pre1'
+gem 'devise'
+gem 'sidekiq', '~> 3.5.0'
+gem 'sidekiq-failures', github: 'antonzaytsev/sidekiq-failures', branch: 'short-error-message'
+gem 'sidekiq-unique-jobs'
+gem 'sinatra', require: false # Web interface of Sidekiq processes

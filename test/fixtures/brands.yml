@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  popshops_id: MyString
+
+two:
+  name: MyString
+  popshops_id: MyString

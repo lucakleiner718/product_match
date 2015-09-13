@@ -8,7 +8,7 @@
   </tr>
   </thead>
   <tbody>
-  <% brands = ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] %>
+  <% brands = Brand.in_use.pluck(:name) %>
   <% brands.each do |brand| %>
     <tr>
       <td><%= brand %></td>

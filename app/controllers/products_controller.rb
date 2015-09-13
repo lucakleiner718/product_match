@@ -56,7 +56,7 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).where(products: { brand: ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'] }).order('products.title')
+      products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).where(products: { brand: Brand.in_use.pluck(:name) }).order('products.title')
       products_ids = products_ids.where.not(product_id: session[:processed]) if session[:processed].present?
       product_id = products_ids.first.try(:product_id)
     end
