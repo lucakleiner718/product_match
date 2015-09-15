@@ -62,7 +62,10 @@ class ProductsController < ApplicationController
       else
         products_ids = products_ids.where(products: { brand: Brand.in_use.pluck(:name) })
       end
-      products_ids = products_ids.where.not(product_id: session[:processed]) if session[:processed].present?
+
+      selected_products = ProductSelect.where(user_id: current_user.id).pluck(:product_id).uniq
+      products_ids = products_ids.where.not(product_id: selected_products) if selected_products.size > 0
+
       product_id = products_ids.first.try(:product_id)
     end
     if product_id
@@ -72,16 +75,13 @@ class ProductsController < ApplicationController
   end
 
   def match_select
-    session[:processed] ||= []
-    session[:processed] << params[:product_id]
-
     if params[:decision] == 'found' && params[:selected_id]
       product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
       if product_suggestion
-        ProductSelect.create(product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
+        ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
       end
     elsif params[:decision].in?(['nothing', 'no-size', 'no-color'])
-      ProductSelect.create(product_id: params[:product_id], decision: params[:decision])
+      ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], decision: params[:decision])
     end
 
     render json: { }
