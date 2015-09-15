@@ -50,7 +50,7 @@ class ImportHerroomWorker
   end
 
   def self.spawn
-    rows = CSV.read('tmp/sources/herrom-products-links.csv')[0..1000]
+    rows = CSV.read('tmp/sources/herrom-products-links.csv')
     rows.each do |row|
       self.perform_async "http://www.herroom.com/#{row.first}"
     end
