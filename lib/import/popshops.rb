@@ -146,6 +146,12 @@ class Import::Popshops < Import::Base
         item[:sku] ||= offer.attr('sku')
       end
 
+      if item[:size].blank? && item[:color].blank? && item[:sku] && item[:mpn] && item[:sku].gsub('_', ' ') == item[:mpn] && item[:brand] == 'Joie'
+        mpn = item[:mpn].split(' ')
+        item[:size] = mpn[2]
+        item[:color] = mpn[1]
+      end
+
       items << item
     end
     items
