@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  devise_for :admin_users, ActiveAdmin::Devise.config
+  devise_for :users#, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 
   root to: 'products#root'
@@ -13,7 +13,7 @@ Rails.application.routes.draw do
 
   require 'sidekiq/web'
   if Rails.env.production?
-    authenticate :admin_user do
+    authenticate :user do
       mount Sidekiq::Web, at: "/sidekiq"
     end
   else
