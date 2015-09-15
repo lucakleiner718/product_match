@@ -25,7 +25,7 @@ class ProductSuggestionsWorker
 
   def self.spawn brand: nil, delete_exists: false
     if delete_exists && brand
-      ProductSuggestion.where(id: Product.shopbop.where(brand: brand).pluck(:id)).delete_all
+      ProductSuggestion.where(product_id: Product.shopbop.where(brand: brand).pluck(:id)).delete_all
       exists_ids = []
     else
       exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
