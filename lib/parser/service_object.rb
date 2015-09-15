@@ -1,0 +1,3 @@
+module Parser::ServiceObject
+
+end

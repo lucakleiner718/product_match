@@ -68,3 +68,5 @@ gem 'dotenv'
 gem 'dotenv-deployment', require: 'dotenv/deployment'
 
 gem 'rubyzip', require: 'zip'
+
+gem 'progress_bar'

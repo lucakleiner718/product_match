@@ -174,6 +174,7 @@ GEM
     has_scope (0.6.0)
       actionpack (>= 3.2, < 5)
       activesupport (>= 3.2, < 5)
+    highline (1.7.5)
     hitimes (1.2.3)
     i18n (0.7.0)
     inherited_resources (1.6.0)
@@ -210,10 +211,14 @@ GEM
     net-ssh (2.9.2)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
+    options (2.3.2)
     orm_adapter (0.5.0)
     pg (0.18.3)
     polyamorous (1.2.0)
       activerecord (>= 3.0)
+    progress_bar (1.0.5)
+      highline (~> 1.6)
+      options (~> 2.3.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -378,6 +383,7 @@ DEPENDENCIES
   kaminari
   nokogiri
   pg
+  progress_bar
   pry-rails
   puma (~> 2.8.2)
   quiet_assets

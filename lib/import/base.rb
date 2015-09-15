@@ -11,4 +11,12 @@ class Import::Base
       # .sub(/#{brand}\s?/i, '').split(',').first.gsub('&#39;', '\'')
   end
 
+  def source
+    self.class.name.match(/\:\:(.*)/)[1].downcase
+  end
+
+  def csv_chunk_size
+    1_000
+  end
+
 end
