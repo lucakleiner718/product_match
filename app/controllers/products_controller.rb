@@ -89,7 +89,7 @@ class ProductsController < ApplicationController
   end
 
   def statistic
-    @brands = Brand.in_use
+    @brands = Brand.in_use.order(:name)
   end
 
   def selected
