@@ -9,14 +9,13 @@
   </tr>
   </thead>
   <tbody>
-  <% brands = Brand.in_use.pluck(:name) %>
-  <% brands.each do |brand| %>
+  <% @brands.each do |brand| %>
     <tr>
-      <td><%= brand %></td>
-      <td><%= Product.where(brand: brand).shopbop.size %></td>
-      <td><%= Product.where(brand: brand).shopbop.where("upc is null OR upc = ''").size %></td>
-      <td><%= Product.where(brand: brand).not_shopbop.size %></td>
-      <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand}).pluck(:product_id).uniq.size %></td>
+      <td><%= brand.name %></td>
+      <td><%= Product.where(brand: brand.names).shopbop.size %></td>
+      <td><%= Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size %></td>
+      <td><%= Product.where(brand: brand.names).not_shopbop.size %></td>
+      <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size %></td>
     </tr>
   <% end %>
   </tbody>

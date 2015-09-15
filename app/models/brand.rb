@@ -12,4 +12,16 @@ class Brand < ActiveRecord::Base
     self.synonyms = synonyms_text.split(',')
   end
 
+  def self.names_in_use
+    self.in_use.pluck(:name, :synonyms).flatten
+  end
+
+  def names
+    [self.name, self.synonyms].flatten
+  end
+
+  def self.get_by_name name
+    self.where("name = ? OR synonyms @> ?", name, "{#{name}}").first
+  end
+
 end

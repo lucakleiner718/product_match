@@ -5,7 +5,7 @@ class ProductSuggestionsWorker
 
   def perform product_id
     product = Product.find(product_id)
-    related_products = Product.where.not(source: :shopbop).where(brand: product.brand)
+    related_products = Product.where.not(source: :shopbop).where(brand: Brand.get_by_name(product.brand).names)
 
     title_parts = product.title.split(/\s/).map(&:downcase) - ['the']
     special_category = ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties'] & title_parts
@@ -24,9 +24,13 @@ class ProductSuggestionsWorker
   end
 
   def self.spawn brand: nil
-    exitsts_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
-    products = Product.where(brand: Brand.in_use.pluck(:name)).where.not(id: exitsts_ids).where(source: :shopbop).where('upc is NULL')
-    products = products.where(brand: brand) if brand
+    exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
+    products = Product.where.not(id: exists_ids).where(source: :shopbop).where(upc: nil)
+    if brand
+      products = products.where(brand: Brand.find_by_name(brand).names)
+    else
+      products = products.where(brand: Brand.names_in_use)
+    end
     products.find_each do |product|
       self.perform_async product.id
     end

@@ -14,7 +14,9 @@ ActiveAdmin.register Brand do
   index do
     selectable_column
     column :name
-    column :synonyms_text
+    column :synonyms do |brand|
+      brand.synonyms_text
+    end
     column :in_use
     column :created_at
     column :updated_at
