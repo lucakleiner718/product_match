@@ -10,6 +10,8 @@ class ImportHerroomWorker
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if page =~ /is no longer available/ || html.css('#hdnSizeColors').size == 0
+
     variants = html.css('#hdnSizeColors').first.attr('value')
     return false if variants.blank?
 
@@ -43,7 +45,7 @@ class ImportHerroomWorker
         image: image,
         additional_images: images
       }
-      product.save
+      product.save if product.changed?
     end
 
     data.size
