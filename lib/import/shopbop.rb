@@ -50,7 +50,7 @@ class Import::Shopbop < Import::Base
         source_id: r[:id],
         style_code: r[:item_group_id],
         brand: normalize_brand(r[:brand]),
-        title: r[:title].sub(/#{r[:brand]}\s?/, ''),
+        title: normalize_title(r[:title], r[:brand]),
         category: r[:product_type],
         google_category: r[:google_product_category],
         url: r[:link],

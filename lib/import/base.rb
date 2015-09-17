@@ -1,15 +1,15 @@
 class Import::Base
 
   def normalize_brand brand_name
-    brand_name = 'Michele' if brand_name.downcase == 'michele'
-    brand_name = 'Current/Elliott' if brand_name.downcase == 'current/elliott'
+    replacements = ['Michele', 'Current/Elliott', 'Alice + Olivia']
+    replacements.each do |replacement|
+      brand_name = replacement if brand_name.downcase == replacement.downcase
+    end
     brand_name
   end
 
   def normalize_title title, brand
     title.sub(/#{Regexp.quote brand}\s?/i, '').sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
-    #.split(',').select{|el| el.present?}.first
-      # .sub(/#{brand}\s?/i, '').split(',').first
   end
 
   def source
