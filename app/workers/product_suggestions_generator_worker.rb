@@ -3,7 +3,12 @@ class ProductSuggestionsGeneratorWorker
   include Sidekiq::Worker
   sidekiq_options queue: :middle
 
-  def perform brand: nil, delete_exists: false
+  def perform *args
+    options = args.extract_options!
+    options.symbolize_keys!
+    brand = options[:brand]
+    delete_exists = options[:delete_exists]
+    
     if delete_exists && brand
       ProductSuggestion.where(product_id: Product.shopbop.where(brand: brand).pluck(:id)).delete_all
       exists_ids = []
