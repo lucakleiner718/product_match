@@ -4,7 +4,7 @@ class Brand < ActiveRecord::Base
 
   scope :in_use, -> { where in_use: true }
 
-  after_commit on: [:create, :update] do
+  after_save do
     if self.in_use && self.in_use_changed?
       ProductSuggestionsGeneratorWorker.perform_async brand: self.name
     end
