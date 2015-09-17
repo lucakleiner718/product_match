@@ -4,6 +4,14 @@ class Brand < ActiveRecord::Base
 
   scope :in_use, -> { where in_use: true }
 
+  after_save do
+    if self.in_use && self.in_use_changed?
+      ProductSuggestionsWorker.spawn brand: self.name
+    end
+  end
+
+  validates :name, uniqueness: true
+
   def synonyms_text
     self.synonyms.join(',')
   end
