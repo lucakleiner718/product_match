@@ -7,7 +7,6 @@ class Brand < ActiveRecord::Base
   after_save do
     if self.in_use
       if self.in_use_changed? || self.name_changed? || self.synonyms_changed?
-        binding.pry
         ProductSuggestionsGeneratorWorker.perform_async brand: self.name
       end
     end

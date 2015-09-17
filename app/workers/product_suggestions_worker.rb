@@ -8,7 +8,7 @@ class ProductSuggestionsWorker
     related_products = Product.where.not(source: :shopbop).where(brand: Brand.get_by_name(product.brand).names)
 
     title_parts = product.title.split(/\s/).map(&:downcase) - ['the']
-    special_category = ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties'] & title_parts
+    special_category = ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'bra'] & title_parts
     if special_category.size > 0
       special_category.each do |category|
         related_products = related_products.where("title ILIKE :word or category ILIKE :word", word: "%#{category}%")

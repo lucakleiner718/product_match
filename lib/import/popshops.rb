@@ -166,4 +166,23 @@ class Import::Popshops < Import::Base
     "#{URL[:base]}?#{url_params.map{|k,v| "#{k}=#{v}"}.join('&')}"
   end
 
+  def self.get_info brand_id
+    url = self.new.build_url(brand: brand_id, count: 1)
+
+    resp = Curl.get(url)
+    body = resp.body
+    xml = Nokogiri::XML(body)
+
+    brand_tag = xml.search('resources brands brand[id="'+brand_id+'"]').first
+    brand_name = brand_tag ? brand_tag.attr('name') : nil
+
+    products_tag = xml.search('results products').first
+    count = products_tag ? products_tag.attr('count').to_i : 0
+
+    {
+      name: brand_name,
+      count: count
+    }
+  end
+
 end

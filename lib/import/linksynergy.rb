@@ -55,7 +55,11 @@ class Import::Linksynergy < Import::Base
   def process_csv
     filename = get_file
 
-    columns = %w(id title id2 category1 category2 url image emtp1 description_short description_full empt2 amount price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock upc numb2 currency id3 url2 empt6 category3 size empt7 color sex empt8 empt9 empt10 empt11 char).map(&:to_sym)
+    columns = %w(
+      id title part_number category_primary category_secondary url image emtp1 description_short description_full empt2
+      discount_type price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock upc numb2 currency id3
+      url2 empt6 category3 size empt7 color sex empt8 empt9 empt10 empt11 char
+    ).map(&:to_sym)
 
     return false unless filename
 

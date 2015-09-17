@@ -8,7 +8,7 @@ class ProductSuggestionsGeneratorWorker
     options.symbolize_keys!
     brand = options[:brand]
     delete_exists = options[:delete_exists]
-    
+
     if delete_exists && brand
       ProductSuggestion.where(product_id: Product.shopbop.where(brand: brand).pluck(:id)).delete_all
       exists_ids = []
