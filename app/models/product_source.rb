@@ -3,6 +3,8 @@ class ProductSource < ActiveRecord::Base
   validates :source_name, presence: true
   validates :source_id, presence: true
 
+  validates_uniqueness_of :source_id, scope: :source_name
+
   before_validation do
     if self.name_changed? && self.name.blank?
       if self.source_name == 'popshops'

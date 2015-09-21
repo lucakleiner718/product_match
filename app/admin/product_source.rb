@@ -23,4 +23,8 @@ ActiveAdmin.register ProductSource do
     f.actions
   end
 
+  filter :name
+  filter :source_name
+  filter :source_id, label: 'Source ID'
+
 end
