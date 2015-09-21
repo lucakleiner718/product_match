@@ -61,6 +61,7 @@ class Import::Popshops < Import::Base
 
       products = @xml.search('results products product')
       @categories = @xml.search('categories category').map{|c| [c.attr('id'), c.attr('name')]}.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
+      @merchants = @xml.search('merchants merchant').map{|m| [m.attr('id'), m.attr('name')]}.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
 
       break if products.size == 0
 
@@ -120,7 +121,8 @@ class Import::Popshops < Import::Base
         color: nil,
         sku: nil,
         category: nil,
-        description: r.attr('description')
+        description: r.attr('description'),
+        retailer: nil
       }
 
       if r.attr('category')
@@ -144,6 +146,7 @@ class Import::Popshops < Import::Base
         item[:size] ||= offer.attr('description').match(/Size: ([^\.\,]+)(\.|,)/)[1] rescue nil
         item[:color] ||= offer.attr('description').match(/Color: ([^\.\,]+)(\.|,)/)[1] rescue nil
         item[:sku] ||= offer.attr('sku')
+        item[:retailer] = @merchants[offer.attr('merchant')] if offer.attr('merchant')
       end
 
       if item[:size].blank? && item[:color].blank? && item[:sku] && item[:mpn] && item[:sku].gsub('_', ' ') == item[:mpn] && item[:brand] == 'Joie'
@@ -151,6 +154,8 @@ class Import::Popshops < Import::Base
         item[:size] = mpn[2]
         item[:color] = mpn[1]
       end
+
+      item[:retailer] = normalize_retailer(item[:retailer]) if item[:retailer]
 
       items << item
     end

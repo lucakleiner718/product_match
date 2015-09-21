@@ -12,6 +12,10 @@ class Import::Base
     title.sub(/#{Regexp.quote brand}\s?/i, '').sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
   end
 
+  def normalize_retailer retailer
+    retailer
+  end
+
   def source
     self.class.name.match(/\:\:(.*)/)[1].downcase
   end
