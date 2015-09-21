@@ -17,8 +17,10 @@ class Export::Brands
         row = []
         row << brand.name
         retailers.each do |retailer|
-          row << products.select{|r| r[0] == retailer}.size
-          row << products.select{|r| r[0] == retailer && r[1].present?}.size
+          size_total = products.select{|r| r[0] == retailer}.size
+          size_with_upc = products.select{|r| r[0] == retailer && r[1].present?}.size
+          row << (size_total > 0 ? size_total : '')
+          row << (size_with_upc > 0 ? size_with_upc : '')
         end
         csv << row
       end

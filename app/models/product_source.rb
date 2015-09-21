@@ -18,4 +18,8 @@ class ProductSource < ActiveRecord::Base
     end
   end
 
+  after_commit on: :create do
+    BrandCollectDataWorker.perform_async self.id
+  end
+
 end
