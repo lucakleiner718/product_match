@@ -10,7 +10,7 @@
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <% Rails.cache.fetch("brand-statistic/#{brand.id}", expires_in: 1.hour) do %>
+    <%= Rails.cache.fetch("brand-statistic/#{brand.id}", expires_in: 1.hour) do %>
       <tr>
         <td><%= brand.name %></td>
         <td><%= Product.where(brand: brand.names).shopbop.size %></td>
