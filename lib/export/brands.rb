@@ -11,8 +11,8 @@ class Export::Brands
     csv_string = CSV.generate do |csv|
       csv << header
 
-      Brand.all.each do |brand|
-        products = Product.where(brand: brand.name).where.not(retailer: nil).pluck(:retailer, :upc)
+      Brand.order(:name).each do |brand|
+        products = Product.where(brand: brand.names).where.not(retailer: nil).pluck(:retailer, :upc)
 
         row = []
         row << brand.name
@@ -24,7 +24,9 @@ class Export::Brands
       end
     end
 
-    File.write "tmp/brand-data-#{Time.now.to_i}.csv", csv_string
+    filename = "brand-data-#{Time.now.to_i}.csv"
+    File.write Rails.root.join("public/#{filename}"), csv_string
+    "http://upc.socialrootdata.com/#{filename}"
   end
 
 end

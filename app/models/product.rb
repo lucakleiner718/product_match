@@ -9,7 +9,6 @@ class Product < ActiveRecord::Base
   scope :shopbop, -> { where source: :shopbop }
   scope :not_shopbop, -> { where('source != ?', :shopbop) }
 
-
   def self.export_to_csv source: 'popshops', brand: 'Current/Elliott', category: nil
     products = Product.where(source: source, brand: brand)
     products = products.where(category: category) if category
