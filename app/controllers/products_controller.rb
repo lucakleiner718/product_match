@@ -54,6 +54,8 @@ class ProductsController < ApplicationController
     #
     # @related_products = @related_products.limit(1000).sample(100)
 
+    @brands_choose = Brand.order(:name).in_use
+
     product_id = params[:product_id]
     unless product_id
       products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).order('products.title')

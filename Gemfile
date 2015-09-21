@@ -52,7 +52,7 @@ gem 'bootstrap-generators', '~> 3.3.4'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
 
-gem 'activeadmin', '~> 1.0.0.pre1'
+gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
 gem 'sidekiq', '~> 3.5.0'
 gem 'sidekiq-failures', '~> 0.4.5'
