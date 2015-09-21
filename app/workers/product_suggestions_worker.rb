@@ -17,9 +17,13 @@ class ProductSuggestionsWorker
       related_products = related_products.where(title_parts.map{|el| "title iLIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
     end
 
+    exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id))
     related_products.each do |suggested|
       percentage = product.similarity_to suggested
-      ProductSuggestion.create product: product, suggested: suggested, percentage: percentage if percentage > 0
+      ps = exists.select{|ps| ps.product_id == product.id && ps.suggested_id == suggested }.first
+      ps = ProductSuggestion.new product: product, suggested: suggested unless ps
+      ps.percentage = percentage if percentage > 0
+      ps.save if ps.changed?
     end
   end
 
