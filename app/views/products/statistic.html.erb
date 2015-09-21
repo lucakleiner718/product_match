@@ -10,16 +10,18 @@
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <tr>
-      <td><%= brand.name %></td>
-      <td><%= Product.where(brand: brand.names).shopbop.size %></td>
-      <td><%= Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size %></td>
-      <td>
-        <% amounts = Product.amount_by_brand_and_source(brand.names) %>
-        <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= amounts.to_a.map{|el| el.join(': ')}.join('<br>') %>"><%= amounts.values.sum %></span>
-      </td>
-      <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size %></td>
-    </tr>
+    <% Rails.cache.fetch("brand-statistic/#{brand.id}", expires_in: 1.hour) do %>
+      <tr>
+        <td><%= brand.name %></td>
+        <td><%= Product.where(brand: brand.names).shopbop.size %></td>
+        <td><%= Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size %></td>
+        <td>
+          <% amounts = Product.amount_by_brand_and_source(brand.names) %>
+          <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= amounts.to_a.map{|el| el.join(': ')}.join('<br>') %>"><%= amounts.values.sum %></span>
+        </td>
+        <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size %></td>
+      </tr>
+    <% end %>
   <% end %>
   </tbody>
 </table>
