@@ -10,7 +10,7 @@ ActiveAdmin.register ProductSource do
     column :collected_at
     actions
     column 'Source' do |item|
-      link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id) if item.source_name == 'popshops'
+      link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id), target: :_blank if item.source_name == 'popshops'
     end
   end
 

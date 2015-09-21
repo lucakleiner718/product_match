@@ -2,7 +2,7 @@ class Export::Brands
 
   def self.perform
     header = ['Brand']
-    retailers = Product.select('distinct(retailer)').map(&:retailer).compact
+    retailers = Product.select('distinct(retailer)').map(&:retailer).compact.sort
     retailers.each do |retailer|
       header << "#{retailer} Total"
       header << "#{retailer} has UPC"

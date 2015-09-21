@@ -52,7 +52,7 @@ class Import::Popshops < Import::Base
     end
 
     page = 1
-    while true do
+    while page <= 100 do
       url = build_url(brand: brand_id, category: category_id, page: page)
 
       resp = Curl.get(url)
