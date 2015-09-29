@@ -5,7 +5,8 @@ class ProductSuggestionsWorker
 
   def perform product_id
     product = Product.find(product_id)
-    related_products = Product.where.not(source: :shopbop).where(brand: Brand.get_by_name(product.brand).names)
+    brand = Brand.get_by_name(product.brand) || Brand.create(name: product.brand)
+    related_products = Product.where.not(source: :shopbop).where(brand: brand.names).where("upc is not null AND upc != ''")
 
     title_parts = product.title.split(/\s/).map(&:downcase) - ['the']
     special_category = ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'bra'] & title_parts
