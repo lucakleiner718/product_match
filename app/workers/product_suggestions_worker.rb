@@ -24,7 +24,10 @@ class ProductSuggestionsWorker
       ps = ProductSuggestion.new product: product, suggested: suggested unless ps
       if percentage && percentage > 0
         ps.percentage = percentage
-        ps.save if ps.changed?
+        begin
+          ps.save if ps.changed?
+        rescue ActiveRecord::RecordNotUnique => e
+        end
       end
     end
   end
