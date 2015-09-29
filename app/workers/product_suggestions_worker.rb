@@ -22,9 +22,10 @@ class ProductSuggestionsWorker
       percentage = product.similarity_to suggested
       ps = exists.select{|ps| ps.product_id == product.id && ps.suggested_id == suggested }.first
       ps = ProductSuggestion.new product: product, suggested: suggested unless ps
-      percentage = 0 unless percentage
-      ps.percentage = percentage
-      ps.save if ps.changed?
+      if percentage && percentage > 0
+        ps.percentage = percentage
+        ps.save if ps.changed?
+      end
     end
   end
 
