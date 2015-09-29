@@ -30,7 +30,7 @@ class Product < ActiveRecord::Base
     title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'the']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_similarity = (title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f * 5).to_i
+    title_similarity = ((title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * 5).to_i
 
     params_count += title_similarity
 
