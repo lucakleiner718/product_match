@@ -15,9 +15,9 @@ jQuery ($) ->
           $.getJSON "/products/statistic_brand?brand_id=#{$(this).data('id')}", (resp) ->
             $.each resp, (k,v) ->
               tr.innerHTML = tr.innerHTML.replace("{{#{k}}}", v)
-            $(tr).removeClass('hide')
+
+            $(tr).removeClass('hide').data('grabbed', true)
             $('[data-toggle="popover"]', tr).popover()
-            $(tr).data('grabbed', true)
             get_row()
 
           return false
