@@ -7,24 +7,22 @@ class ProductsController < ApplicationController
   def index
     @products = Product.all
 
-    if params[:brand]
-      @products = @products.where(brand: params[:brand])
-    end
+    if params[:filter]
+      f = params[:filter]
+      @search = true
 
-    if params[:title]
-      @products = @products.where('title ILIKE ?', "%#{params[:title]}%")
-    end
+      @products = @products.where(brand: f[:brand]) if f[:brand]
 
-    if params[:source]
-      @products = @products.where(source: params[:source])
-    end
+      if f[:brand_id]
+        brand = Brand.find(f[:brand_id])
+        @products = @products.where(brand: brand.names)
+      end
 
-    if params[:upc]
-      @products = @products.where(upc: params[:upc])
-    end
-
-    if params[:retailer]
-      @products = @products.where(retailer: params[:retailer])
+      @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]
+      @products = @products.where(source: f[:source]) if f[:source]
+      @products = @products.where(upc: f[:upc]) if f[:upc]
+      @products = @products.where(retailer: f[:retailer]) if f[:retailer]
+      @products = @products.without_upc if f[:no_upc]
     end
 
     # @products = @products.where("(source = 'shopbop' AND (upc is null OR upc = '')) OR (source != 'shopbop' AND upc is not null AND upc != '')")

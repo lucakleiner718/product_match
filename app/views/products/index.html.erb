@@ -2,43 +2,77 @@
   <h1>Products</h1>
 </div>
 
-<div class="btn-group" role="group" aria-label="...">
-  <% Brand.in_use.pluck(:name).each do |brand_name| %>
-    <%= link_to brand_name, products_path(brand: brand_name), class: "btn btn-default#{' active' if params[:brand] == brand_name}" %>
+<button class="btn btn-primary" role="button" data-toggle="collapse" data-target="#filterbox">Show/hide filter</button>
+<div class="filter collapse<%= ' in' unless @search %>" id="filterbox">
+  <h2>Filter</h2>
+  <%= form_tag products_path, method: :get do %>
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="form-group">
+          <label for="filter_brand_id">Brand</label>
+          <%= select_tag 'filter[brand_id]', ("<option value=''>All</option>" + options_from_collection_for_select(Brand.in_use, :id, :name, (params[:filter] && params[:filter][:brand_id]))).html_safe, class: "form-control" %>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-group">
+          <label for="filter_source">Source</label>
+          <%= select_tag 'filter[source]', options_for_select([['All', ''], ['Shopbop', 'shopbop'], ['Popshops', 'popshops'], ['Linksynergy', 'linksynergy']], (params[:filter] && params[:filter][:source])), class: "form-control" %>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="checkbox">
+          <label>
+            <%= check_box_tag 'filter[no_upc]', '1', (params[:filter] && params[:filter][:no_upc]) %> Without UPC
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-default">Search</button>
   <% end %>
 </div>
+
 <br>
 <br>
-<table class="table">
-  <thead>
-  <tr>
-    <th>Title</th>
-    <th>Brand</th>
-    <th>Source</th>
-    <th>Size</th>
-    <th>Color</th>
-    <th>Style Code</th>
-    <th>UPC</th>
-    <th>Retailer</th>
-    <th>Category</th>
-    <th>Link</th>
-  </tr>
-  </thead>
-  <% @products.each do |product| %>
-    <tr class="<%= 'warning' if product.source == 'shopbop' %>">
-      <td><%= product.title %></td>
-      <td><%= product.brand %></td>
-      <td><%= product.source %></td>
-      <td><%= product.size %></td>
-      <td><%= product.color %></td>
-      <td><%= product.style_code %></td>
-      <td><%= product.upc %></td>
-      <td><%= product.retailer %></td>
-      <td><%= product.category %></td>
-      <td><%= link_to 'link', product.url if product.url.present? %></td>
+
+<% if @search %>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Title</th>
+      <th>Brand</th>
+      <th>Source</th>
+      <th>Size</th>
+      <th>Color</th>
+      <th>Style Code</th>
+      <th>UPC</th>
+      <th>Retailer</th>
+      <th>Category</th>
+      <th></th>
     </tr>
-  <% end %>
-</table>
+    </thead>
+    <% @products.each do |product| %>
+      <tr class="<%#= 'warning' if product.source == 'shopbop' %>">
+        <td><%= product.title %></td>
+        <td><%= product.brand %></td>
+        <td><%= product.source %></td>
+        <td><%= product.size %></td>
+        <td><%= product.color %></td>
+        <td><%= product.style_code %></td>
+        <td><%= product.upc %></td>
+        <td><%= product.retailer %></td>
+        <td><%= product.category %></td>
+        <td>
+          <%= link_to 'Source link', product.url, class: 'btn btn-default btn-xs', target: :_blank if product.url.present? %>
+          <%= link_to 'Match', match_path(product_id: product.id), class: 'btn btn-default btn-xs', target: :_blank if product.source == 'shopbop' %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
 
-
-<%= paginate @products %>
+  <%= paginate @products %>
+<% else %>
+  <p class="text-danger">Use filter to see products</p>
+<% end %>
