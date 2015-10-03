@@ -1,27 +1,24 @@
-<table class="table">
+<table class="table statistic-table">
   <thead>
   <tr>
     <th>Brand Name</th>
     <th>Shopbop Products</th>
     <th>Shopbop Products without UPC</th>
-    <th>Other soures Products</th>
+    <th>Other sources Products</th>
     <th>Products with Suggestions</th>
   </tr>
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <% cache "brand/#{brand.id}/statistic", expires_in: 1.minute do %>
-      <tr>
-        <td><%= brand.name %></td>
-        <td><%= Product.where(brand: brand.names).shopbop.size %></td>
-        <td><%= Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size %></td>
-        <td>
-          <% amounts = Product.amount_by_brand_and_source(brand.names) %>
-          <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= amounts.to_a.map{|el| el.join(': ')}.join('<br>') %>"><%= amounts.values.sum %></span>
-        </td>
-        <td><%= ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size %></td>
-      </tr>
-    <% end %>
+    <tr data-brand="<%= brand.name %>" class="hide">
+      <td>{{name}}</td>
+      <td>{{shopbop_size}}</td>
+      <td>{{shopbop_noupc_size}}</td>
+      <td>
+        <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="{{amounts_content}}">{{amounts_values}}</span>
+      </td>
+      <td>{{suggestions}}</td>
+    </tr>
   <% end %>
   </tbody>
 </table>

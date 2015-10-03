@@ -94,6 +94,27 @@ class ProductsController < ApplicationController
     @brands = Brand.in_use.order(:name)
   end
 
+  def statistic_brand
+    brand = Brand.find_by_name(params[:brand])
+
+    resp =
+      cache "brand/#{brand.id}/data", expires_in: 1.day do
+        amounts = Product.amount_by_brand_and_source(brand.names)
+        {
+          name: brand.name,
+          shopbop_size: Product.where(brand: brand.names).shopbop.size,
+          shopbop_noupc_size: Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size,
+          amounts_content: amounts.to_a.map{|el| el.join(': ')}.join('<br>'),
+          amounts_values: amounts.values.sum,
+          suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size
+        }
+      end
+
+    respond_to do |format|
+      format.json { render json: resp }
+    end
+  end
+
   def selected
     @products = selected_products
     @products = @products.values.sort{|a,b| b[:found_votes] <=> a[:found_votes]}

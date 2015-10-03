@@ -16,6 +16,8 @@ class ProductSource < ActiveRecord::Base
         self.name = info[:name] if info[:name]
       end
     end
+
+    self.source_id = self.source_id.gsub(/\s/, '').strip.gsub(/^,/, '').gsub(/,$/, '')
   end
 
   after_commit on: :create do
