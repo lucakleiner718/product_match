@@ -98,7 +98,7 @@ class ProductsController < ApplicationController
     brand = Brand.find(params[:brand_id])
 
     resp =
-      cache "brand/#{brand.id}/data", expires_in: 1.day do
+      Rails.cache.fetch "brand/#{brand.id}/data", expires_in: 1.day do
         amounts = Product.amount_by_brand_and_source(brand.names)
         {
           name: brand.name,
