@@ -10,7 +10,7 @@
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide">
+    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide" data-hash="<%= Rails.cache.read("brand/#{brand.id}/data").to_json %>">
       <td>{{name}}</td>
       <td>{{shopbop_size}}</td>
       <td>{{shopbop_noupc_size}}</td>
@@ -22,3 +22,5 @@
   <% end %>
   </tbody>
 </table>
+
+<%= paginate @brands %>

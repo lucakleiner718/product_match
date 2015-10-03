@@ -91,7 +91,7 @@ class ProductsController < ApplicationController
   end
 
   def statistic
-    @brands = Brand.in_use.order(:name)
+    @brands = Brand.in_use.order(:name).page(params[:page]).per(20)
   end
 
   def statistic_brand
