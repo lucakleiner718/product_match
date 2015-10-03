@@ -95,7 +95,7 @@ class ProductsController < ApplicationController
   end
 
   def statistic_brand
-    brand = Brand.find_by_name(params[:brand])
+    brand = Brand.find(params[:brand_id])
 
     resp =
       cache "brand/#{brand.id}/data", expires_in: 1.day do

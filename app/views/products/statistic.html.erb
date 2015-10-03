@@ -10,7 +10,7 @@
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <tr data-brand="<%= brand.name %>" class="hide">
+    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide">
       <td>{{name}}</td>
       <td>{{shopbop_size}}</td>
       <td>{{shopbop_noupc_size}}</td>

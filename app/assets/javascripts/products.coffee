@@ -12,7 +12,7 @@ jQuery ($) ->
       $('tbody tr', table).each ->
         tr = this
         unless $(this).data('grabbed')
-          $.getJSON "/products/statistic_brand?brand=#{$(this).data('brand')}", (resp) ->
+          $.getJSON "/products/statistic_brand?brand_id=#{$(this).data('id')}", (resp) ->
             $.each resp, (k,v) ->
               tr.innerHTML = tr.innerHTML.replace("{{#{k}}}", v)
             $(tr).removeClass('hide')
