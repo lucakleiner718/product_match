@@ -25,8 +25,6 @@ class ProductsController < ApplicationController
       @products = @products.without_upc if f[:no_upc]
     end
 
-    # @products = @products.where("(source = 'shopbop' AND (upc is null OR upc = '')) OR (source != 'shopbop' AND upc is not null AND upc != '')")
-
     @products = @products.order(title: :asc).page(params[:page]).per(50)
 
     @filter_brands = Brand.in_use.order(name: :asc)

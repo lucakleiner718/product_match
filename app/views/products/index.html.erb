@@ -3,7 +3,7 @@
 </div>
 
 <button class="btn btn-primary" role="button" data-toggle="collapse" data-target="#filterbox">Show/hide filter</button>
-<div class="filter collapse<%= ' in' unless @search %>" id="filterbox">
+<div class="filter collapse<%= ' in' if !@search || ((!params[:page] || params[:page] == 1) && @products.size == 0) %>" id="filterbox">
   <h2>Filter</h2>
   <%= form_tag products_path, method: :get do %>
     <div class="row">
