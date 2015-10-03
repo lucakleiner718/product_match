@@ -15,4 +15,10 @@ class BrandCollectDataWorker
     end
   end
 
+  def self.spawn
+    ProductSource.limit(30).where('collected_at < ?', 1.week.ago).each do |ps|
+      self.perform_async ps.id
+    end
+  end
+
 end
