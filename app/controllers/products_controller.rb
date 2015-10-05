@@ -94,10 +94,7 @@ class ProductsController < ApplicationController
 
   def statistic_brand
     brand_id = params[:brand_id]
-    resp =
-      Rails.cache.fetch "brand/#{brand_id}/data", expires_in: 1.day do
-        BrandStatWorker brand_id
-      end
+    resp = BrandStat.cached brand_id
 
     respond_to do |format|
       format.json { render json: resp }

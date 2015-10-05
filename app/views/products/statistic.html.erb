@@ -4,16 +4,18 @@
     <th>Brand Name</th>
     <th>Shopbop Products</th>
     <th>Shopbop Products without UPC</th>
+    <th>Shopbop Products Matched</th>
     <th>Other sources Products</th>
     <th>Products with Suggestions</th>
   </tr>
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide" data-hash="<%= Rails.cache.read("brand/#{brand.id}/data").to_json %>">
+    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide" data-hash="<%= BrandStat.cached(brand.id).to_json %>">
       <td>{{name}}</td>
       <td>{{shopbop_size}}</td>
       <td>{{shopbop_noupc_size}}</td>
+      <td>{{shopbop_matched_size}}</td>
       <td>
         <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="{{amounts_content}}">{{amounts_values}}</span>
       </td>
