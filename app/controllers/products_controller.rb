@@ -14,8 +14,8 @@ class ProductsController < ApplicationController
       @products = @products.where(brand: f[:brand]) if f[:brand]
 
       if f[:brand_id]
-        brand = Brand.find(f[:brand_id])
-        @products = @products.where(brand: brand.names)
+        brand = Brand.where(id: f[:brand_id])
+        @products = @products.where(brand: brand.map(&:names))
       end
 
       @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]

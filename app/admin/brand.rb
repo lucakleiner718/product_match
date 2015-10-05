@@ -2,6 +2,8 @@ ActiveAdmin.register Brand do
 
   permit_params :name, :synonyms_text, :in_use
 
+  config.sort_order = 'name_asc'
+
   form do |f|
     f.inputs do
       f.input :name

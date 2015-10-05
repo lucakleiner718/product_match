@@ -15,4 +15,5 @@
 // require turbolinks
 //= require bootstrap
 //= require products
+//= require select2
 // require_tree .

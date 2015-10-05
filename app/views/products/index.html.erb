@@ -10,7 +10,11 @@
       <div class="col-sm-3">
         <div class="form-group">
           <label for="filter_brand_id">Brand</label>
-          <%= select_tag 'filter[brand_id]', ("<option value=''>All</option>" + options_from_collection_for_select(@filter_brands, :id, :name, (params[:filter] && params[:filter][:brand_id]))).html_safe, class: "form-control" %>
+          <div class="row">
+            <div class="col-sm-12">
+              <%= select_tag 'filter[brand_id]', ("<option value=''>All</option>" + options_from_collection_for_select(@filter_brands, :id, :name, (params[:filter] && params[:filter][:brand_id]))).html_safe, class: "form-control", style: 'width: 100%; height: 34px;' %>
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-sm-3">

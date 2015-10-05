@@ -27,3 +27,5 @@ jQuery ($) ->
           return false
 
     get_row()
+
+  $('#filter_brand_id').select2()
