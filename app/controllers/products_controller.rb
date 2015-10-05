@@ -93,19 +93,10 @@ class ProductsController < ApplicationController
   end
 
   def statistic_brand
-    brand = Brand.find(params[:brand_id])
-
+    brand_id = params[:brand_id]
     resp =
-      Rails.cache.fetch "brand/#{brand.id}/data", expires_in: 1.day do
-        amounts = Product.amount_by_brand_and_source(brand.names)
-        {
-          name: brand.name,
-          shopbop_size: Product.where(brand: brand.names).shopbop.size,
-          shopbop_noupc_size: Product.where(brand: brand.names).shopbop.where("upc is null OR upc = ''").size,
-          amounts_content: amounts.to_a.map{|el| el.join(': ')}.join('<br>'),
-          amounts_values: amounts.values.sum,
-          suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: brand.names}).pluck(:product_id).uniq.size
-        }
+      Rails.cache.fetch "brand/#{brand_id}/data", expires_in: 1.day do
+        BrandStatWorker brand_id
       end
 
     respond_to do |format|

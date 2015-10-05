@@ -13,6 +13,7 @@ module Clockwork
   end
 
   every(1.day, 'ProductSuggestionsGeneratorWorker', at: "02:00") { ProductSuggestionsGeneratorWorker.perform_async }
+  every(1.day, 'BrandStatWorker', at: "01:00") { BrandStatWorker.spawn }
   every(1.day, 'BrandCollectDataWorker', at: "00:00") { BrandCollectDataWorker.spawn }
 
 end
