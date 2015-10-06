@@ -9,7 +9,7 @@ class Import::Base
   end
 
   def normalize_title title, brand
-    title.sub(/#{Regexp.quote brand}\s?/i, '').sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
+    title.sub(/#{Regexp.quote brand.to_s}\s?/i, '').sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
   end
 
   def normalize_retailer retailer
