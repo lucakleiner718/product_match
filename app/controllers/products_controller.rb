@@ -58,8 +58,11 @@ class ProductsController < ApplicationController
     unless product_id
       products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).order('products.title')
       if params[:brand]
-        brand = Brand.where(name: params[:brand]).first
-        products_ids = products_ids.where(products: { brand: brand.names }) if brand
+        @brand = Brand.where(name: params[:brand]).first
+        products_ids = products_ids.where(products: { brand: @brand.names }) if @brand
+      elsif params[:brand_id]
+        @brand = Brand.find(params[:brand_id])
+        products_ids = products_ids.where(products: { brand: @brand.names }) if @brand
       else
         products_ids = products_ids.where(products: { brand: Brand.names_in_use })
       end
