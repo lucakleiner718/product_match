@@ -25,4 +25,11 @@
   </tbody>
 </table>
 
-<%= paginate @brands %>
+<div class="row">
+  <div class="col-sm-8">
+    <%= paginate @brands %>
+  </div>
+  <div class="col-sm-4">
+    <%= link_to 'Export', products_statistic_export_path, class: 'pull-right btn btn-success', style: 'margin: 20px 0;' %>
+  </div>
+</div>

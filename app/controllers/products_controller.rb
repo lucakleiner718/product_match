@@ -103,6 +103,26 @@ class ProductsController < ApplicationController
     @brands = brands.page(params[:page]).per(20)
   end
 
+  def statistic_export
+    brands = Brand.in_use.includes(:brand_stat).order(:name)
+
+    csv_string = CSV.generate do |csv|
+      csv << [
+        'Brand', 'Shopbop Products', 'Shopbop Products without UPC', 'Shopbop Products Matched', 'Other sources Products',
+        'Products with Suggestions'
+      ]
+      brands.each do |brand|
+        stat = brand.stat
+        csv << [
+          brand.name, stat.shopbop_size, stat.shopbop_noupc_size, stat.shopbop_matched_size, stat.amounts_values,
+          stat.suggestions
+        ]
+      end
+    end
+
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "upc-brands-statistic-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+  end
+
   # def statistic_brand
   #   brand_id = params[:brand_id]
   #   brand = Brand.find(brand_id)
