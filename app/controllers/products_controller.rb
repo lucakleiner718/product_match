@@ -13,7 +13,7 @@ class ProductsController < ApplicationController
 
       @products = @products.where(brand: f[:brand]) if f[:brand]
 
-      if f[:brand_id]
+      if f[:brand_id].present?
         brand = Brand.where(id: f[:brand_id])
         @products = @products.where(brand: brand.map(&:names))
       end

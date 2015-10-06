@@ -1,5 +1,7 @@
 class Product < ActiveRecord::Base
 
+  has_many :suggestions, class_name: ProductSuggestion
+
   before_save do
     if self.brand.downcase == 'current/elliott' && self.brand != 'Current/Elliott'
       self.brand = 'Current/Elliott'
