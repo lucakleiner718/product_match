@@ -31,27 +31,6 @@ class ProductsController < ApplicationController
   end
 
   def match
-    # product_id = params[:product_id]
-    # product_id ||= Product.where(source: :shopbop).where('upc is NULL').where(brand: 'Current/Elliott').limit(100_000).pluck(:id).sample
-    # @product = Product.find(product_id)
-    #
-    # @related_products = Product.where.not(source: :shopbop).where(brand: @product.brand)
-    #
-    # title_parts = @product.title.split(/\s/).map(&:downcase) - ['the']
-    # special_category = ['shorts', 'skirt', 'dress'] & title_parts
-    # if special_category.size > 0
-    #   special_category.each do |category|
-    #     @related_products = @related_products.where("title ILIKE :word or category ILIKE :word", word: "%#{category}%")
-    #   end
-    # else
-    #   @related_products = @related_products.where(title_parts.map{|el| "title iLIKE '%#{el}%'"}.join(' OR '))
-    # end
-    #
-    # @related_products = @related_products.where('lower(color) = lower(?)', @product.color) if @product.color.present?
-    # # @related_products = @related_products.where('lower(size) = lower(?)', @product.size) if @product.size.present?
-    #
-    # @related_products = @related_products.limit(1000).sample(100)
-
     @brands_choose = Brand.order(:name).in_use
 
     product_id = params[:product_id]

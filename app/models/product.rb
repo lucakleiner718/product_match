@@ -8,6 +8,8 @@ class Product < ActiveRecord::Base
     end
   end
 
+  CLOTH_KIND = %w(trousers shorts shirt skirt dress jeans pants panties bra neckle jacket earrings bodysuit clutch)
+
   scope :shopbop, -> { where source: :shopbop }
   scope :not_shopbop, -> { where("source != ?", :shopbop) }
   scope :without_upc, -> { where("upc is null OR upc = ''") }
@@ -32,7 +34,7 @@ class Product < ActiveRecord::Base
     params_count = 0
 
     title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_parts -= ['shorts', 'shirt', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'the', 'neckle', 'jacket']
+    title_parts -= Product::CLOTH_KIND+['the']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = ((title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * 5).to_i
 
