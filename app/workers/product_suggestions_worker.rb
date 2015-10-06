@@ -18,10 +18,10 @@ class ProductSuggestionsWorker
       related_products = related_products.where(title_parts.map{|el| "title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
     end
 
-    exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id))
+    exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id)).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
     related_products.find_each do |suggested|
       percentage = product.similarity_to suggested
-      ps = exists.select{|ps| ps.product_id == product.id && ps.suggested_id == suggested }.first
+      ps = exists["#{product.id}_#{suggested.id}"]
       ps = ProductSuggestion.new product: product, suggested: suggested unless ps
       if percentage && percentage > 0
         ps.percentage = percentage
