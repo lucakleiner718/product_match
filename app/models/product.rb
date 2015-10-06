@@ -11,6 +11,7 @@ class Product < ActiveRecord::Base
   scope :shopbop, -> { where source: :shopbop }
   scope :not_shopbop, -> { where("source != ?", :shopbop) }
   scope :without_upc, -> { where("upc is null OR upc = ''") }
+  scope :with_upc, -> { where("upc is not null AND upc != ''") }
 
   def self.export_to_csv source: 'popshops', brand: 'Current/Elliott', category: nil
     products = Product.where(source: source, brand: brand)
@@ -31,7 +32,7 @@ class Product < ActiveRecord::Base
     params_count = 0
 
     title_parts = self.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_parts -= ['shorts', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'the']
+    title_parts -= ['shorts', 'shirt', 'skirt', 'dress', 'jeans', 'pants', 'panties', 'the', 'neckle', 'jacket']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = ((title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * 5).to_i
 
@@ -66,10 +67,14 @@ class Product < ActiveRecord::Base
           (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs')
         params_count += 2
       elsif size_s =~ /us/i && size_s =~ /eu/
-        eu_size = size_s.match(/(\d{1,2}\.?\d)eu/i)[1]
+        eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)[1]
         if size_p == eu_size
           params_count += 2
         end
+      end
+    else
+      if suggested.size.blank? && self.size.present? && self.size.downcase == 'one size'
+        params_count += 2
       end
     end
 
