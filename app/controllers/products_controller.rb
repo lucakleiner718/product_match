@@ -69,12 +69,13 @@ class ProductsController < ApplicationController
 
       selected_products = ProductSelect.where(user_id: current_user.id).pluck(:product_id).uniq
       products_ids = products_ids.where.not(product_id: selected_products) if selected_products.size > 0
+      products_ids = products_ids.where(product_id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: @brand.names}).where(percentage: 100).pluck(:product_id).uniq) if params[:has_color] == 'green' && @brand
 
       product_id = products_ids.first.try(:product_id)
     end
     if product_id
       @product = Product.find(product_id)
-      @suggested_products = ProductSuggestion.where(product_id: product_id).where('percentage is not null AND percentage > 0').joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc, products.size asc').limit(20)
+      @suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc, products.size asc').where('percentage is not null AND percentage > 0').limit(20)
     end
   end
 

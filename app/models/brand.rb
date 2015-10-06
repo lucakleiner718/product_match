@@ -66,7 +66,9 @@ class Brand < ActiveRecord::Base
       shopbop_matched_size: shopbop_matched_size,
       amounts_content: amounts.to_a.map{|el| el.join(': ')}.join("<br>"),
       amounts_values: amounts.values.sum,
-      suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).pluck(:product_id).uniq.size
+      suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).pluck(:product_id).uniq.size,
+      suggestions_green: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).where(percentage: 100).pluck(:product_id).uniq.size,
+      suggestions_yellow: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
     }
   end
 
