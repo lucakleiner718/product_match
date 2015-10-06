@@ -31,6 +31,11 @@ class ProductSuggestionsWorker
         end
       end
     end
+
+    # delete not needed suggestions if we have some popular
+    if ProductSuggestion.where(product_id: product.id).where('percentage > 50').size > 0
+      ProductSuggestion.where(product_id: product.id).where('percentage <= 40').delete_all
+    end
   end
 
 end
