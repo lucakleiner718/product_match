@@ -8,7 +8,7 @@ class Product < ActiveRecord::Base
     end
   end
 
-  CLOTH_KIND = %w(trousers shorts shirt skirt dress jeans pants panties bra neckle jacket earrings bodysuit clutch)
+  CLOTH_KIND = %w(trousers shorts shirt skirt dress jeans pants panties bra neckle jacket earrings bodysuit clutch belt)
 
   scope :shopbop, -> { where source: :shopbop }
   scope :not_shopbop, -> { where("source != ?", :shopbop) }
