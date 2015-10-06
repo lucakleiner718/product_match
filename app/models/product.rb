@@ -37,7 +37,24 @@ class Product < ActiveRecord::Base
 
     return 0 if title_similarity < 2
 
-    params_count += 5 if suggested.color.present? && self.color.present? && suggested.color.gsub(/\s/, '').downcase == self.color.gsub(/\s/, '').downcase
+    if suggested.color.present? && self.color.present?
+      if suggested.color.gsub(/\s/, '').downcase == self.color.gsub(/\s/, '').downcase
+        params_count += 5
+      else
+        color_s = suggested.color.gsub(/\s/, '').downcase.split('/')
+        color_p = self.color.gsub(/\s/, '').downcase.split('/')
+
+        if color_s.size == 2 && color_p.size == 1
+          if color_s.first == color_p.first || color_s.last == color_p.first
+            params_count += 5
+          end
+        elsif color_s.size == 2 && color_p.size == 2
+          if color_s.sort.join == color_p.sort.join
+            params_count += 5
+          end
+        end
+      end
+    end
 
     if suggested.size.present? && self.size.present?
       size_s = suggested.size.gsub(/\s/, '').downcase
