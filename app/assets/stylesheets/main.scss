@@ -3,3 +3,20 @@
   max-height: 200px;
   overflow-x: hidden;
 }
+
+.pretty{
+  th{
+    .current {
+      padding-right: 12px;
+      background-repeat: no-repeat;
+      background-position: right center;
+    }
+
+    .asc {
+      background-image: image_url('up_arrow.gif');
+    }
+    .desc {
+      background-image: image_url('down_arrow.gif');
+    }
+  }
+}

@@ -3,7 +3,8 @@ class BrandStatWorker
   include Sidekiq::Worker
 
   def perform brand_id
-    BrandStat.write brand_id
+    brand = Brand.find(brand_id)
+    brand.update_stat
   end
 
   def self.spawn

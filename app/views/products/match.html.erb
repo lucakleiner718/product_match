@@ -96,7 +96,7 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1">
-          <% Brand.in_use.each do |brand| %>
+          <% @brands_choose.each do |brand| %>
             <li><%= link_to brand.name, match_path(brand: brand.name) %></li>
           <% end %>
         </ul>

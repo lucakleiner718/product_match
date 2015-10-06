@@ -1,25 +1,25 @@
-<table class="table statistic-table">
+<table class="table statistic-table pretty">
   <thead>
   <tr>
-    <th>Brand Name</th>
-    <th>Shopbop Products</th>
-    <th>Shopbop Products without UPC</th>
-    <th>Shopbop Products Matched</th>
-    <th>Other sources Products</th>
-    <th>Products with Suggestions</th>
+    <th><%= sortable 'name', 'Brand Name' %></th>
+    <th><%= sortable 'stats.shopbop_size', 'Shopbop Products' %></th>
+    <th><%= sortable 'stats.shopbop_noupc_size', 'Shopbop Products without UPC' %></th>
+    <th><%= sortable 'stats.shopbop_matched_size', 'Shopbop Products Matched' %></th>
+    <th><%= sortable 'stats.amounts_values', 'Other sources Products' %></th>
+    <th><%= sortable 'stats.suggestions', 'Products with Suggestions' %></th>
   </tr>
   </thead>
   <tbody>
   <% @brands.each do |brand| %>
-    <tr data-brand="<%= brand.name %>" data-id="<%= brand.id %>" class="hide" data-hash="<%= BrandStat.cached(brand.id).to_json %>">
-      <td>{{name}}</td>
-      <td>{{shopbop_size}}</td>
-      <td>{{shopbop_noupc_size}}</td>
-      <td>{{shopbop_matched_size}}</td>
+    <tr data-id="<%= brand.id %>">
+      <td><%= brand.name %></td>
+      <td><%= brand.stat.shopbop_size %></td>
+      <td><%= brand.stat.shopbop_noupc_size %></td>
+      <td><%= brand.stat.shopbop_matched_size %></td>
       <td>
-        <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="{{amounts_content}}">{{amounts_values}}</span>
+        <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= brand.stat.amounts_content %>"><%= brand.stat.amounts_values %></span>
       </td>
-      <td>{{suggestions}}</td>
+      <td><%= brand.stat.suggestions %></td>
     </tr>
   <% end %>
   </tbody>

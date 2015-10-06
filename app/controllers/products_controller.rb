@@ -89,17 +89,25 @@ class ProductsController < ApplicationController
   end
 
   def statistic
-    @brands = Brand.in_use.order(:name).page(params[:page]).per(20)
-  end
+    brands = Brand.in_use.joins(:brand_stat)
 
-  def statistic_brand
-    brand_id = params[:brand_id]
-    resp = BrandStat.cached brand_id
-
-    respond_to do |format|
-      format.json { render json: resp }
+    if params[:sort] =~ /^stats\./
+      col = params[:sort].match(/^stats\.(.*)$/)[1]
+      brands = brands.order("brand_stats.#{col} #{sort_direction}")
+    else
+      brands = brands.order("#{sort_column} #{sort_direction}")
     end
+    @brands = brands.page(params[:page]).per(20)
   end
+
+  # def statistic_brand
+  #   brand_id = params[:brand_id]
+  #   brand = Brand.find(brand_id)
+  #
+  #   respond_to do |format|
+  #     format.json { render json: brand.stat }
+  #   end
+  # end
 
   def selected
     @products = selected_products
@@ -194,6 +202,18 @@ ORDER BY t.found_count desc, avg_similarity desc
     end
 
     products
+  end
+
+  helper_method :sort_column, :sort_direction
+
+  private
+
+  def sort_column
+    params[:sort] || 'name'
+  end
+
+  def sort_direction
+    %w[asc desc].include?(params[:direction]) ? params[:direction] : (sort_column == 'name' ? "asc" : 'desc')
   end
 
 end
