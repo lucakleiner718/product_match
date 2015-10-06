@@ -68,9 +68,9 @@ class Product < ActiveRecord::Base
       if size_s == size_p || (size_s == 'small' && size_p == 's') || (size_s == 'large' && size_p == 'l') ||
           (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs')
         params_count += 2
-      elsif size_s =~ /us/i && size_s =~ /eu/
-        eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)[1]
-        if size_p == eu_size
+      elsif size_s =~ /us/ && size_s =~ /eu/
+        eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)
+        if eu_size && size_p == eu_size[1]
           params_count += 2
         end
       end
