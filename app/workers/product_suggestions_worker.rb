@@ -19,7 +19,7 @@ class ProductSuggestionsWorker
     end
 
     exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id))
-    related_products.each do |suggested|
+    related_products.find_each do |suggested|
       percentage = product.similarity_to suggested
       ps = exists.select{|ps| ps.product_id == product.id && ps.suggested_id == suggested }.first
       ps = ProductSuggestion.new product: product, suggested: suggested unless ps

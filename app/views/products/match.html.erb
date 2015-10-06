@@ -24,6 +24,7 @@
       <h5><em>Material:</em> <%= @product.material || 'N/A' %></h5>
       <h5><em>Bop Cat:</em> <%= @product.category %></h5>
       <h5><em>Goog Cat:</em> <%= @product.google_category %></h5>
+      <h5><em>Style Code:</em> <%= @product.style_code %></h5>
       <h5><em>Shopbop Product:</em> <%= link_to 'link', @product.url, target: :_blank %></h5>
     </div>
     <div class="col-md-2">
@@ -62,21 +63,17 @@
             <em>Color:</em> <%= product.color %></br>
             <em>Size:</em> <%= product.size %></br>
             <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
-            <em>Category:</em> <%= product.category %></br>
+            <!--<em>Category:</em> <%= product.category %></br>-->
             <em>Source:</em> <%= product.source %></br>
             <em>UPC:</em> <%= product.upc %></br>
-            <em>Link:</em> <%= link_to 'link', product.url, target: :_blank %></br>
 
             <div style="margin: 5px 0;">
-              <!--<a href="/product/<%#= product.id %>" >-->
-                <%= image_tag product_image(product.image), class: "img-responsive portfolio-item" %>
-              <!--</a>-->
+              <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank, title: 'Click on me to open source product page' %>
             </div>
 
-            <div class="btn-group" role="group" aria-label="...">
-              <%= link_to 'Found', select_path(product_id: @product.id, selected_id: product.id, decision: :found), class: "btn btn-success select-action", remote: true, method: :post %>
-              <%#= link_to 'Almost', '', class: "btn btn-warning", remote: true %>
-            </div>
+            <%= link_to 'Found', select_path(product_id: @product.id, selected_id: product.id, decision: :found), class: "btn btn-success select-action", remote: true, method: :post %>
+
+
           </div>
         </div>
       <% end %>
