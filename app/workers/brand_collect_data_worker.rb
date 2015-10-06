@@ -12,11 +12,14 @@ class BrandCollectDataWorker
     elsif product_source.source_name == 'linksynergy'
       Import::Linksynergy.perform mid: product_source.source_id
       product_source.update_column :collected_at, Time.now
+    elsif product_source.source_name == 'shopbop'
+      Import::Shopbop.perform url: product_source.source_id, update_file: true
+      product_source.update_column :collected_at, Time.now
     end
   end
 
   def self.spawn
-    ProductSource.limit(30).where('collected_at < ?', 1.week.ago).each do |ps|
+    ProductSource.where('collected_at < ?', 23.hours.ago).each do |ps|
       self.perform_async ps.id
     end
   end

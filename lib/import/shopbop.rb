@@ -1,17 +1,30 @@
 class Import::Shopbop < Import::Base
 
-  def self.perform rewrite: false
+  def self.perform rewrite: false, update_file: false, url: nil
     instance = self.new
-    instance.perform rewrite: rewrite
+    instance.perform rewrite: rewrite, update_file: update_file, url: url
   end
 
-  def perform rewrite: rewrite()
+  def get_file update_file=false, url=nil
+    filename = "tmp/sources/shopbop.csv"
+
+    url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
+
+    if update_file || !File.exists?(filename)
+      body = Curl.get(url).body
+      body.force_encoding('UTF-8')
+      File.write filename, body
+    end
+
+    filename
+  end
+
+  def perform rewrite: false, update_file: false, url: nil
     if rewrite
       Product.where(source: source).delete_all
     end
 
-    url = 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
-    filename = 'tmp/sources/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
+    filename = get_file update_file, url
 
     SmarterCSV.process(filename, chunk_size: 1_000) do |rows|
       items = prepare_data rows

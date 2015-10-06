@@ -3,7 +3,7 @@ class Import::Base
   def normalize_brand brand_name
     replacements = ['Michele', 'Current/Elliott', 'Alice + Olivia']
     replacements.each do |replacement|
-      brand_name = replacement if brand_name.downcase == replacement.downcase
+      brand_name = replacement if brand_name.to_s.downcase == replacement.downcase
     end
     brand_name
   end
