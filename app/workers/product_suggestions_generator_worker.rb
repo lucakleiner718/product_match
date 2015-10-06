@@ -7,6 +7,7 @@ class ProductSuggestionsGeneratorWorker
     options = args.extract_options!
     options.symbolize_keys!
     brand = options[:brand]
+    brand = Brand.find(options[:brand_id]) if options[:brand_id]
     delete_exists = options[:delete_exists]
 
     if delete_exists && brand
