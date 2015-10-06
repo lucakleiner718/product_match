@@ -74,7 +74,7 @@ class ProductsController < ApplicationController
     end
     if product_id
       @product = Product.find(product_id)
-      @suggested_products = ProductSuggestion.where(product_id: product_id).order(percentage: :desc).where('percentage is not null AND percentage > 0').limit(20).joins(:suggested).where("products.upc is not null AND products.upc != ''")
+      @suggested_products = ProductSuggestion.where(product_id: product_id).where('percentage is not null AND percentage > 0').joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc, products.size asc').limit(20)
     end
   end
 

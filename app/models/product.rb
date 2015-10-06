@@ -42,9 +42,15 @@ class Product < ActiveRecord::Base
     if suggested.size.present? && self.size.present?
       size_s = suggested.size.gsub(/\s/, '').downcase
       size_p = self.size.gsub(/\s/, '').downcase
+
       if size_s == size_p || (size_s == 'small' && size_p == 's') || (size_s == 'large' && size_p == 'l') ||
           (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs')
         params_count += 2
+      elsif size_s =~ /us/i && size_s =~ /eu/
+        eu_size = size_s.match(/(\d{1,2})eu/i)[1]
+        if size_p.to_i == eu_size
+          params_count += 2
+        end
       end
     end
 
