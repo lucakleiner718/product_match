@@ -8,7 +8,7 @@ class Brand < ActiveRecord::Base
   after_save do
     if self.in_use
       if self.in_use_changed? || self.name_changed? || self.synonyms_changed?
-        ProductSuggestionsGeneratorWorker.perform_async brand: self.name
+        ProductSuggestionsGeneratorWorker.perform_async brand_id: self.id
       end
     end
   end

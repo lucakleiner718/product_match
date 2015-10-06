@@ -6,12 +6,15 @@ class ProductSuggestionsGeneratorWorker
   def perform *args
     options = args.extract_options!
     options.symbolize_keys!
-    brand = options[:brand]
+
+    brand = nil
+    brand = Brand.find_by_name(options[:brand]) if options[:brand]
     brand = Brand.find(options[:brand_id]) if options[:brand_id]
+
     delete_exists = options[:delete_exists]
 
     if delete_exists && brand
-      ProductSuggestion.where(product_id: Product.shopbop.where(brand: brand).pluck(:id)).delete_all
+      ProductSuggestion.where(product_id: Product.shopbop.where(brand: brand.names).pluck(:id)).delete_all
       exists_ids = []
     else
       exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
@@ -19,7 +22,7 @@ class ProductSuggestionsGeneratorWorker
 
     products = Product.where.not(id: exists_ids).where(source: :shopbop).where(upc: nil)
     if brand
-      products = products.where(brand: Brand.find_by_name(brand).names)
+      products = products.where(brand: brand.names)
     else
       products = products.where(brand: Brand.names_in_use)
     end
