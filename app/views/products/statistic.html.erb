@@ -14,7 +14,7 @@
   <tbody>
   <% @brands.each do |brand| %>
     <tr data-id="<%= brand.id %>">
-      <td><%= link_to brand.name, match_path(brand_id: brand.id), target: :_blank %></td>
+      <td><%= link_to brand.name, match_path(brand_id: brand.id), target: :_blank, title: "Stat Updated: #{brand.stat.updated_at.strftime('%Y-%m-%d %H:%M:%S')}" %></td>
       <td><%= brand.stat.shopbop_size %></td>
       <td><%= brand.stat.shopbop_noupc_size %></td>
       <td><%= brand.stat.shopbop_matched_size %></td>

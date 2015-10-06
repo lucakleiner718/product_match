@@ -15,38 +15,37 @@ class Import::Linksynergy < Import::Base
     39655 => 'Sugnlass Hut',
   }
 
-  def self.perform mid: 1237, rewrite: false, update: true
-    instance = self.new mid: mid, rewrite: rewrite, update: update
+  def self.perform mid: 1237, rewrite: false, update: true, daily: nil, last_update: nil
+    instance = self.new mid: mid, rewrite: rewrite, update: update, daily: daily, last_update: last_update
     instance.process_csv
   end
 
-  def initialize mid: 1237, rewrite: false, update: true
+  def initialize mid: 1237, rewrite: false, update: true, daily: nil, last_update: nil
     @retailer = RETAILERS[mid.to_i]
     @mid = mid
     @update = update
+    @daily = daily
+    @last_update = last_update
 
     if rewrite
       Product.where(source: source, retailer: @retailer).delete_all
     end
   end
 
-  def process_xml
-    filename = "tmp/sources/#{@mid}_2388513_mp.xml"
-    xml = Nokogiri::XML(File.read(filename))
-    binding.pry
-  end
-
   def get_file
-    filename = "tmp/sources/#{@mid}_2388513_mp.txt"
+    filename = "tmp/sources/#{@mid}_2388513_mp#{"_delta" if @daily}.txt"
+    filename_gz = "#{filename}.gz"
 
-    unless File.exists? filename
+    if !File.exists?(filename) || File.mtime(filename) < 12.hours.ago
       ftp = Net::FTP.new('aftp.linksynergy.com')
       ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
-      ftp.getbinaryfile("#{@mid}_2388513_mp.txt.gz", Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz"), 1024)
-      gz_file = Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt.gz")
-      txt = Zlib::GzipReader.open(gz_file).read
-      File.write Rails.root.join("tmp/sources/#{@mid}_2388513_mp.txt"), txt
-      File.delete gz_file
+
+      if !@last_update || ftp.mtime(File.basename(filename_gz)) > @last_update.utc
+        ftp.getbinaryfile(File.basename(filename_gz), filename_gz)
+        txt = Zlib::GzipReader.open(filename_gz).read
+        File.write Rails.root.join(filename), txt
+        File.delete filename_gz
+      end
     end
 
     filename

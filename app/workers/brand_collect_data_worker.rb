@@ -10,7 +10,7 @@ class BrandCollectDataWorker
       Import::Popshops.perform brand_id: product_source.source_id
       product_source.update_column :collected_at, Time.now
     elsif product_source.source_name == 'linksynergy'
-      Import::Linksynergy.perform mid: product_source.source_id
+      Import::Linksynergy.perform mid: product_source.source_id, daily: true, last_update: product_source.collected_at
       product_source.update_column :collected_at, Time.now
     elsif product_source.source_name == 'shopbop'
       Import::Shopbop.perform url: product_source.source_id, update_file: true
@@ -19,7 +19,7 @@ class BrandCollectDataWorker
   end
 
   def self.spawn
-    ProductSource.where('collected_at < ?', 23.hours.ago).each do |ps|
+    ProductSource.where('collected_at < ?', 24.hours.ago).limit(50).each do |ps|
       self.perform_async ps.id
     end
   end
