@@ -91,18 +91,15 @@ class Product < ActiveRecord::Base
   def self.amount_by_brand_and_source brand_names
     brand_names = [brand_names] if brand_names.is_a?(String)
     sql = "
-SELECT count(id), source
-FROM (
-  SELECT *
-  FROM products
-  WHERE brand IN (#{brand_names.map{|n| Product.sanitize(n)}.join(',')}) AND source != 'shopbop'
-) as products
-group by source
-
-"
+      SELECT count(id), source
+      FROM (
+        SELECT *
+        FROM products
+        WHERE brand IN (#{brand_names.map{|n| Product.sanitize(n)}.join(',')}) AND source != 'shopbop' AND upc IS NOT NULL AND upc != ''
+      ) AS products
+      GROUP BY source
+    "
     Product.connection.execute(sql).to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
-    # Product.where(brand: brand.names).not_shopbop.size
-
   end
 
 end
