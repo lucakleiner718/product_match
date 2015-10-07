@@ -45,6 +45,7 @@ class Import::Popshops < Import::Base
 
   def perform brand_id: nil, rewrite: false, category_id: nil
     raise unless brand_id
+    @affected_brands = []
 
     brand = BRANDS[brand_id]
     if rewrite
@@ -77,6 +78,7 @@ class Import::Popshops < Import::Base
 
       process_to_create to_create
       process_to_update to_update
+      process_brands_suggestions
 
       page += 1
     end
@@ -104,8 +106,9 @@ class Import::Popshops < Import::Base
 
   def prepare_data products
     items = []
+    brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = el.attr('name'); obj}
     products.each do |r|
-      brand = @xml.search('resources brands brand[id="'+r.attr('brand')+'"]').first.attr('name')
+      brand = brands[r.attr('brand')]
       item = {
         source: source,
         source_id: r.attr('id'),
@@ -158,6 +161,8 @@ class Import::Popshops < Import::Base
       item[:retailer] = normalize_retailer(item[:retailer]) if item[:retailer]
 
       items << item
+
+      @affected_brands << brand unless @affected_brands.include?(brand)
     end
     items
   end
@@ -188,6 +193,15 @@ class Import::Popshops < Import::Base
       name: brand_name,
       count: count
     }
+  end
+
+  def process_brands_suggestions
+    @affected_brands.each do |brand_name|
+      brand = Brand.get_by_name(brand_name)
+      if brand
+        ProductSuggestionsGeneratorWorker.perform_async brand_id: brand.id
+      end
+    end
   end
 
 end

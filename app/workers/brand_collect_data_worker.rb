@@ -8,14 +8,16 @@ class BrandCollectDataWorker
 
     if product_source.source_name == 'popshops'
       Import::Popshops.perform brand_id: product_source.source_id
-      product_source.update_column :collected_at, Time.now
     elsif product_source.source_name == 'linksynergy'
       Import::Linksynergy.perform mid: product_source.source_id, daily: true, last_update: product_source.collected_at
-      product_source.update_column :collected_at, Time.now
     elsif product_source.source_name == 'shopbop'
       Import::Shopbop.perform url: product_source.source_id, update_file: true
-      product_source.update_column :collected_at, Time.now
+    else
+      return
     end
+
+    product_source.update_column :collected_at, Time.now
+
   end
 
   def self.spawn
