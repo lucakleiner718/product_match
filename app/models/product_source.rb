@@ -5,8 +5,8 @@ class ProductSource < ActiveRecord::Base
 
   validates_uniqueness_of :source_id, scope: :source_name
 
-  before_validation do
-    if self.name_changed? && self.name.blank?
+  before_save do
+    if self.name.blank?
       if self.source_name == 'popshops'
         info = Import::Popshops.get_info(self.source_id)
         if info[:count] > 0
@@ -17,7 +17,9 @@ class ProductSource < ActiveRecord::Base
       end
     end
 
-    self.source_id = self.source_id.gsub(/\s/, '').strip.gsub(/^,/, '').gsub(/,$/, '')
+    if self.source_id.present? && self.source_id_changed?
+      self.source_id = self.source_id.gsub(/\s/, '').strip.gsub(/^,/, '').gsub(/,$/, '')
+    end
   end
 
   after_commit on: :create do
