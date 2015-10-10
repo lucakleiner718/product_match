@@ -66,6 +66,7 @@ class Import::Marcjacobs < Import::Demandware
     url = "#{BASEURL}#{url}" if url !~ /^http/
 
     brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
+    brand_name = 'Marc Jacobs' if brand_name.downcase == 'n/a'
 
     results = []
 
