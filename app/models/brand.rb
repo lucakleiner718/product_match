@@ -2,6 +2,7 @@ class Brand < ActiveRecord::Base
 
   has_many :sources, class_name: 'ProductSource', foreign_key: :brand_name, primary_key: :name
   has_one :brand_stat
+  has_many :products
 
   scope :in_use, -> { where in_use: true }
 
