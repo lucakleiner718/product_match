@@ -25,19 +25,19 @@ class ProductsController < ApplicationController
       @products = @products.without_upc if f[:no_upc]
     end
 
-    @products = @products.order(title: :asc).page(params[:page]).per(50)
+    @products = @products.order(:title).page(params[:page]).per(50)
 
-    @filter_brands = Brand.in_use.order(sye: :asc)
+    @filter_brands = Brand.in_use.order(:name)
   end
 
   def match
-    @brands_choose = Brand.order(:name).in_use
+    @brands_choose = Brand.in_use.order(:name)
 
     product_id = params[:product_id]
     unless product_id
       products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).order('products.title')
       if params[:brand]
-        @brand = Brand.where(name: params[:brand]).first
+        @brand = Brand.get_by_name(params[:brand]).first
         products_ids = products_ids.where(products: { brand_id: @brand.id }) if @brand
       elsif params[:brand_id]
         @brand = Brand.find(params[:brand_id])
