@@ -10,7 +10,7 @@ class MigrateProductsBrandWorker
   end
 
   def self.spawn
-    brands_names = Product.select('distinct(brand)').map{|pr| pr.brand}.sort
+    brands_names = Product.where(brand_id: nil).select('distinct(brand)').map{|pr| pr.brand}.select{|br| br.present? }.sort
     brands_names.each { |bn| MigrateProductsBrandWorker.perform_async bn }
   end
 
