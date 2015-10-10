@@ -3,12 +3,10 @@ class MigrateProductsBrandWorker
   include Sidekiq::Worker
 
   def perform brand_name
-    brands_names.each do |brand_name|
-      products = Product.where(brand_id: nil).where(brand: brand_name)
-      brand = Brand.get_by_name(brand_name)
-      brand = Brand.create(name: brand_name) unless brand
-      products.update_all(brand_id: brand.id)
-    end
+    products = Product.where(brand_id: nil).where(brand: brand_name)
+    brand = Brand.get_by_name(brand_name)
+    brand = Brand.create(name: brand_name) unless brand
+    products.update_all(brand_id: brand.id)
   end
 
   def self.spawn
