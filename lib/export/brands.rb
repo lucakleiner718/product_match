@@ -12,7 +12,7 @@ class Export::Brands
       csv << header
 
       Brand.order(:name).each do |brand|
-        products = Product.where(brand: brand.names).where.not(retailer: nil).pluck(:retailer, :upc)
+        products = Product.where(brand_id: brand.id).where.not(retailer: nil).pluck(:retailer, :upc)
 
         row = []
         row << brand.name

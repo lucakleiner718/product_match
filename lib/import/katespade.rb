@@ -123,8 +123,6 @@ class Import::Katespade < Import::Demandware
             upc: upc,
             url: color_url,
             image: image_url,
-            brand: 'Kate Spade',
-            source: 'katespade.com',
             source_id: product_id,
           }
         end
@@ -142,16 +140,18 @@ class Import::Katespade < Import::Demandware
           upc: upc,
           url: url,
           image: image_url,
-          brand: 'Kate Spade',
-          source: 'katespade.com',
           source_id: product_id
         }
       end
     end
 
+    brand = Brand.get_by_name('Kate Spade')
+    source = 'katespade.com'
+
     results.each do |row|
-      product = Product.where(source: row[:source], source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
+      product.brand_id = brand.id
       product.save
     end
 

@@ -24,4 +24,21 @@ class Import::Base
     1_000
   end
 
+  def convert_brand items
+    brands_names = items.map{|it| it[:brand]}.uniq.select{|it| it.present?}
+    exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e}.join(',')}}")
+    brands = brands_names.map do |brand_name|
+      brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
+      # brand = Brand.get_by_name(brand_name)
+      brand = Brand.create(name: brand_name) unless brand
+      brand
+    end
+    items.map do |item|
+      br = brands.select{|b| b.name == item[:brand] || item[:brand].in?(b.synonyms) }.first
+      item[:brand_id] = br.try(:id)
+      item.delete :brand
+    end
+    items
+  end
+
 end

@@ -106,13 +106,13 @@ class Import::Popshops < Import::Base
 
   def prepare_data products
     items = []
-    brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = el.attr('name'); obj}
+    brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = normalize_brand(el.attr('name')); obj}
     products.each do |r|
       brand = brands[r.attr('brand')]
       item = {
         source: source,
         source_id: r.attr('id'),
-        brand: normalize_brand(brand),
+        brand: brand,
         title: normalize_title(r.attr('name'), brand),
         image: r.attr('image_url_large'),
         upc: nil,
@@ -164,6 +164,9 @@ class Import::Popshops < Import::Base
 
       @affected_brands << brand unless @affected_brands.include?(brand)
     end
+
+    convert_brand(items)
+
     items
   end
 

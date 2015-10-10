@@ -21,7 +21,7 @@ ActiveAdmin.register Brand do
     end
     column :in_use
     column :products do |brand|
-      Product.where(brand: brand.names).size
+      Product.where(brand_id: brand.id).size
     end
     column 'Sources' do |brand|
       size = ProductSource.where(name: brand.names).size

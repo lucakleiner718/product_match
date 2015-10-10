@@ -23,10 +23,6 @@ class Brand < ActiveRecord::Base
     self.synonyms = synonyms_text.split(',')
   end
 
-  def self.names_in_use
-    self.in_use.pluck(:name, :synonyms).flatten
-  end
-
   def names
     [self.name, self.synonyms].flatten
   end
@@ -55,20 +51,20 @@ class Brand < ActiveRecord::Base
       SELECT count(product_id) as amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision='found' AND pr.brand IN (#{self.names.map{|el| Product.sanitize el}.join(',')})
+      WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
     # shopbop_matched_size
-    amounts = Product.amount_by_brand_and_source(self.names)
+    amounts = Product.amount_by_brand_and_source(self.id)
     {
-      shopbop_size: Product.where(brand: self.names).shopbop.size,
-      shopbop_noupc_size: Product.where(brand: self.names).shopbop.where("upc is null OR upc = ''").size,
+      shopbop_size: Product.where(brand_id: self.id).shopbop.size,
+      shopbop_noupc_size: Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size,
       shopbop_matched_size: shopbop_matched_size,
       amounts_content: amounts.to_a.map{|el| el.join(': ')}.join("<br>"),
       amounts_values: amounts.values.sum,
-      suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).pluck(:product_id).uniq.size,
-      suggestions_green: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).where(percentage: 100).pluck(:product_id).uniq.size,
-      suggestions_yellow: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: self.names}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+      suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).pluck(:product_id).uniq.size,
+      suggestions_green: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).where(percentage: 100).pluck(:product_id).uniq.size,
+      suggestions_yellow: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
     }
   end
 

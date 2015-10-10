@@ -15,7 +15,7 @@ class ProductsController < ApplicationController
 
       if f[:brand_id].present?
         brand = Brand.where(id: f[:brand_id])
-        @products = @products.where(brand: brand.map(&:names))
+        @products = @products.where(brand_id: brand.id)
       end
 
       @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]
@@ -38,12 +38,12 @@ class ProductsController < ApplicationController
       products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).order('products.title')
       if params[:brand]
         @brand = Brand.where(name: params[:brand]).first
-        products_ids = products_ids.where(products: { brand: @brand.names }) if @brand
+        products_ids = products_ids.where(products: { brand_id: @brand.id }) if @brand
       elsif params[:brand_id]
         @brand = Brand.find(params[:brand_id])
-        products_ids = products_ids.where(products: { brand: @brand.names }) if @brand
+        products_ids = products_ids.where(products: { brand_id: @brand.id}) if @brand
       else
-        products_ids = products_ids.where(products: { brand: Brand.names_in_use })
+        products_ids = products_ids.where(products: { brand_id: Brand.in_use.pluck(:id) })
       end
 
       selected_products_found = ProductSelect.where(user_id: current_user.id).where(decision: 'found').pluck(:product_id)
@@ -51,7 +51,7 @@ class ProductsController < ApplicationController
       selected_products = (selected_products_found + selected_products_nothing).uniq
 
       products_ids = products_ids.where.not(product_id: selected_products) if selected_products.size > 0
-      products_ids = products_ids.where(product_id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand: @brand.names}).where(percentage: 100).pluck(:product_id).uniq) if params[:has_color] == 'green' && @brand
+      products_ids = products_ids.where(product_id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq) if params[:has_color] == 'green' && @brand
 
       product_id = products_ids.first.try(:product_id)
     end

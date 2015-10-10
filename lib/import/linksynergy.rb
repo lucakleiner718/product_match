@@ -94,9 +94,9 @@ class Import::Linksynergy < Import::Base
   def process_rows rows
     rows.select!{|r| r[:id] != 'HDR' && r[:id] != 'TRL'}
 
-    items = prepare_data rows
+    items = prepare_data(rows)
 
-    @exists_products = Product.where(source: 'linksynergy', retailer: @retailer, source_id: items.map{|r| r[:source_id]})
+    @exists_products = Product.where(source: source, retailer: @retailer, source_id: items.map{|r| r[:source_id]})
     to_update = []
     to_create = []
     items.each do |r|
@@ -129,6 +129,9 @@ class Import::Linksynergy < Import::Base
 
       items << item
     end
+
+    items = convert_brand(items)
+
     items
   end
 

@@ -32,14 +32,13 @@ class Product < ActiveRecord::Base
     File.write "tmp/#{source}-#{brand.gsub('/', '-')}#{"-#{category.gsub(/\'/, '').gsub(/\s/, '-')}" if category}-#{Time.now.to_i}.csv", csv_string
   end
 
-  def self.amount_by_brand_and_source brand_names
-    brand_names = [brand_names] if brand_names.is_a?(String)
+  def self.amount_by_brand_and_source brand_id
     sql = "
       SELECT count(id), source
       FROM (
         SELECT *
         FROM products
-        WHERE brand IN (#{brand_names.map{|n| Product.sanitize(n)}.join(',')}) AND source != 'shopbop' AND upc IS NOT NULL AND upc != ''
+        WHERE brand_id=#{Brand.sanitize brand_id} AND source != 'shopbop' AND upc IS NOT NULL AND upc != ''
       ) AS products
       GROUP BY source
     "
