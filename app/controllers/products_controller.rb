@@ -19,7 +19,7 @@ class ProductsController < ApplicationController
       end
 
       @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]
-      @products = @products.where(source: f[:source]) if f[:source]
+      @products = @products.where(source: f[:source]) if f[:source].present?
       @products = @products.where(upc: f[:upc]) if f[:upc]
       @products = @products.where(retailer: f[:retailer]) if f[:retailer]
       @products = @products.without_upc if f[:no_upc]
