@@ -47,9 +47,11 @@ class Import::Popshops < Import::Base
     raise unless brand_id
     @affected_brands = []
 
-    brand = BRANDS[brand_id]
+    brand_name = BRANDS[brand_id]
+    brand = Brand.get_by_name(brand_name)
+
     if rewrite
-      Product.where(source: source, brand: brand).delete_all
+      Product.where(source: source, brand_id: brand.id).delete_all
     end
 
     page = 1

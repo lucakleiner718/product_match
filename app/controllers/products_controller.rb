@@ -27,7 +27,7 @@ class ProductsController < ApplicationController
 
     @products = @products.order(title: :asc).page(params[:page]).per(50)
 
-    @filter_brands = Brand.in_use.order(name: :asc)
+    @filter_brands = Brand.in_use.order(sye: :asc)
   end
 
   def match
