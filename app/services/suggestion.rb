@@ -12,7 +12,9 @@ class Suggestion
 
   def build_suggestions product_id
     product = Product.find(product_id)
-    brand = Brand.get_by_name(product.brand) || Brand.create(name: product.brand)
+    brand_name = product.brand.try(:name)
+    return false unless brand_name
+    brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
     related_products = Product.not_shopbop.where(brand_id: brand.id).with_upc
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
