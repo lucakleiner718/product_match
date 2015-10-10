@@ -92,7 +92,7 @@ class Import::Demandware < Import::Base
   #         }
   #       end
   #     else
-  #       size = 'N/A'
+  #       size = nil
   #       upc = html.css('#pid').first.attr('value')
   #       price = html.css('.price-sales').first.text.strip
   #

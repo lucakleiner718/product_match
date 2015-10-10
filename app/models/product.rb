@@ -2,12 +2,6 @@ class Product < ActiveRecord::Base
 
   has_many :suggestions, class_name: ProductSuggestion
 
-  before_save do
-    if self.brand.downcase == 'current/elliott' && self.brand != 'Current/Elliott'
-      self.brand = 'Current/Elliott'
-    end
-  end
-
   CLOTH_KIND = %w(
     trousers shorts shirt skirt dress jeans pants panties neckle jacket earrings bodysuit clutch belt thong
     robe chemise
