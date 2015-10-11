@@ -75,6 +75,8 @@ class Import::Toryburch < Import::Demandware
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if html.css('#pdp-top').size == 0
+
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
     product_id = url.match(PRODUCT_ID_PATTERN)[1]

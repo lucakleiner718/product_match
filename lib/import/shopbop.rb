@@ -80,7 +80,7 @@ class Import::Shopbop < Import::Base
     end
 
     convert_brand(items)
-    
+
     items
   end
 

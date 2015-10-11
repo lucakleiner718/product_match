@@ -1,7 +1,7 @@
 class BrandCollectDataWorker
 
   include Sidekiq::Worker
-  sidekiq_options unique: true
+  sidekiq_options unique: :until_executed
 
   def perform product_source_id
     product_source = ProductSource.find(product_source_id)
