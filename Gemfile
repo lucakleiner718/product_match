@@ -45,6 +45,7 @@ gem 'simple_form'
 gem 'nokogiri'
 gem 'curb'
 gem 'faraday'
+gem 'faraday_middleware'
 
 gem 'smarter_csv'
 gem 'bootstrap-sass', '~> 3.3.5'

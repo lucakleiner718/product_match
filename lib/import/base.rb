@@ -1,3 +1,5 @@
+require 'faraday_middleware'
+
 class Import::Base
 
   def normalize_brand brand_name
@@ -39,6 +41,14 @@ class Import::Base
       item.delete :brand
     end
     items
+  end
+
+  def get_request url
+    con = Faraday.new(url) do |b|
+      b.use FaradayMiddleware::FollowRedirects
+      b.adapter :net_http
+    end
+    con.get
   end
 
 end
