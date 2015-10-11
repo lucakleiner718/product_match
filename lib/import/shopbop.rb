@@ -78,6 +78,9 @@ class Import::Shopbop < Import::Base
         additional_images: [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2], r[:additional_image_link3], r[:additional_image_link4]].select{|img| img.present?}
       }
     end
+
+    convert_brand(items)
+    
     items
   end
 
