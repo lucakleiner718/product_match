@@ -63,13 +63,11 @@ class Import::Theory < Import::Demandware
       url = "#{BASEURL}#{url}" if url !~ /^http/
     end
 
-    # binding.pry
-    #
-    # if page.match(/dwvar_([a-z0-9]+)_/i)
-    #   product_id = page.match(/dwvar_([a-z0-9]+)_/i)[1]
-    # elsif page.match(/ID: "([A-Z0-9]+)"/)
-    #   product_id = page.match(/ID: "([A-Z0-9]+)"/)[1]
-    # end
+    binding.pry
+
+    if page.match(/styleID: "([A-Z0-9]+)"/)
+      product_id = page.match(/styleID: "([A-Z0-9]+)"/)[1]
+    end
     # product_id_param = product_id
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
