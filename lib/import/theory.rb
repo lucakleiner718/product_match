@@ -46,7 +46,7 @@ class Import::Theory < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    # product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
+    product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
 
     resp = get_request original_url
     return false if resp.response_code != 200
@@ -63,8 +63,14 @@ class Import::Theory < Import::Demandware
       url = "#{BASEURL}#{url}" if url !~ /^http/
     end
 
-    product_id = page.match(/dwvar_([a-z0-9]+)_/i)[1]
-    product_id_param = product_id
+    # binding.pry
+    #
+    # if page.match(/dwvar_([a-z0-9]+)_/i)
+    #   product_id = page.match(/dwvar_([a-z0-9]+)_/i)[1]
+    # elsif page.match(/ID: "([A-Z0-9]+)"/)
+    #   product_id = page.match(/ID: "([A-Z0-9]+)"/)[1]
+    # end
+    # product_id_param = product_id
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
     brand_name = BRAND_NAME# if brand_name.downcase == 'n/a'
