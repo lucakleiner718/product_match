@@ -43,4 +43,17 @@ ActiveAdmin.register Brand do
     actions
   end
 
+  batch_action :merge_to, confirm: 'Select brand you want to merge selected brands', form: {
+      brand_id: Brand.in_use.map{|b| [b.name, b.id]}.sort,
+    } do |ids, inputs|
+    brand = Brand.find(inputs['brand_id'])
+    Product.where(brand_id: ids).update_all(brand_id: brand.id)
+    names = Brand.where(id: ids).pluck(:name, :synonyms).flatten
+    brand.synonyms += names
+    brand.synonyms = brand.synonyms.uniq
+    brand.save
+    Brand.where(id: ids).destroy_all
+    redirect_to :back
+  end
+
 end
