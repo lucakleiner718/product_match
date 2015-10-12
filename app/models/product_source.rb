@@ -26,4 +26,6 @@ class ProductSource < ActiveRecord::Base
     BrandCollectDataWorker.perform_async self.id
   end
 
+  belongs_to :brand
+
 end

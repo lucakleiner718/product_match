@@ -4,6 +4,8 @@ ActiveAdmin.register Brand do
 
   config.sort_order = 'name_asc'
 
+  before_filter :brand_index, only: [:index]
+
   form do |f|
     f.inputs do
       f.input :name
@@ -24,10 +26,14 @@ ActiveAdmin.register Brand do
     #   Product.where(brand_id: brand.id).size
     # end
     column 'Sources' do |brand|
-      size = ProductSource.where(name: brand.names).size
-      link_to_if size > 0, size, admin_product_sources_path(q: { name_in: brand.names })
+      size = ProductSource.where(brand_id: brand.id).size
+      link_to_if size > 0, size, admin_product_sources_path(q: { brand_id_wq: brand.id })
     end
     actions
+  end
+
+  def brand_index
+    binding.pry
   end
 
 end
