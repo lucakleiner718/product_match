@@ -57,7 +57,7 @@ gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
 gem 'sidekiq', '~> 3.5.0'
 gem 'sidekiq-failures', '~> 0.4.5'
-gem 'sidekiq-unique-jobs'
+gem 'sidekiq-unique-jobs', '~> 4.0'
 gem 'sinatra', require: false # Web interface of Sidekiq processes
 
 gem 'god'
