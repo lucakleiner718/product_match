@@ -20,9 +20,9 @@ ActiveAdmin.register Brand do
       brand.synonyms_text
     end
     column :in_use
-    column :products do |brand|
-      Product.where(brand_id: brand.id).size
-    end
+    # column :products do |brand|
+    #   Product.where(brand_id: brand.id).size
+    # end
     column 'Sources' do |brand|
       size = ProductSource.where(name: brand.names).size
       link_to_if size > 0, size, admin_product_sources_path(q: { name_in: brand.names })
