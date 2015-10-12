@@ -34,11 +34,11 @@ ActiveAdmin.register Brand do
     end
     column :in_use
     column :products do |brand|
-    #   Product.where(brand_id: brand.id).size
+      Product.where(brand_id: brand.id).size
     end
     column 'Sources' do |brand|
       size = brand.sources.size
-      link_to_if size > 0, size, admin_product_sources_path(q: { brand_id_wq: brand.id })
+      link_to_if size > 0, size, admin_product_sources_path(q: { brand_id_eq: brand.id })
     end
     actions
   end
