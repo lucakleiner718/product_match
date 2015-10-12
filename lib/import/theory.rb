@@ -105,7 +105,7 @@ class Import::Theory < Import::Demandware
         upc: upc,
         url: color_url,
         image: image_url,
-        source_id: product_id,
+        style_code: product_id,
       }
     end
 
@@ -119,7 +119,7 @@ class Import::Theory < Import::Demandware
     end
 
     results.each do |row|
-      product = Product.where(source: SOURCE, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: SOURCE, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id
       product.save
