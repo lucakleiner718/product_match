@@ -15,7 +15,7 @@
 
     <div class="col-md-4">
       <h3><%= link_to @product.title, match_path(product_id: @product.id) %></h3>
-      <h3><em>Brand:</em> <%= @product.brand || 'N/A' %></h3>
+      <h3><em>Brand:</em> <%= @product.brand.name || 'N/A' %></h3>
       <h3><em>Color:</em> <%= @product.color || 'N/A' %></h3>
       <h3><em>Size:</em> <%= @product.size|| 'N/A' %></h3>
       <h3><em>Price:</em> <%= @product.price || 'N/A' %></h3>
