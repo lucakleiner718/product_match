@@ -46,7 +46,7 @@ class Import::Theory < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
+    # product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
 
     resp = get_request original_url
     return false if resp.response_code != 200
@@ -59,10 +59,11 @@ class Import::Theory < Import::Demandware
     # in case we have link with upc instead of inner uuid of product
     if html.css('link[rel="canonical"]').size == 1
       url = html.css('link[rel="canonical"]').first.attr('href').sub(/\?.*/, '')
-      product_id = url.match(PRODUCT_ID_PATTERN)[1].split(',').first
+      # product_id = url.match(PRODUCT_ID_PATTERN)[1].split(',').first
       url = "#{BASEURL}#{url}" if url !~ /^http/
     end
 
+    product_id = page.match(/dwvar_([a-z0-9]+)_/i)[1]
     product_id_param = product_id
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
