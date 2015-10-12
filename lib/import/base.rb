@@ -44,11 +44,14 @@ class Import::Base
   end
 
   def get_request url
-    con = Faraday.new(url) do |b|
-      b.use FaradayMiddleware::FollowRedirects
-      b.adapter :net_http
+    Curl.get(url) do |http|
+      http.follow_location = true
     end
-    con.get
+    # con = Faraday.new(url) do |b|
+    #   b.use FaradayMiddleware::FollowRedirects
+    #   b.adapter :net_http
+    # end
+    # con.get
   end
 
 end
