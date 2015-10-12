@@ -4,7 +4,18 @@ ActiveAdmin.register Brand do
 
   config.sort_order = 'name_asc'
 
-  before_filter :brand_index, only: [:index]
+  filter :name
+  filter :synonyms
+  filter :in_use
+
+  controller do
+    def scoped_collection
+      Brand.includes(:sources)
+    end
+  end
+
+  scope :in_use, default: true
+  scope :all
 
   form do |f|
     f.inputs do
@@ -22,18 +33,14 @@ ActiveAdmin.register Brand do
       brand.synonyms_text
     end
     column :in_use
-    # column :products do |brand|
+    column :products do |brand|
     #   Product.where(brand_id: brand.id).size
-    # end
+    end
     column 'Sources' do |brand|
-      size = ProductSource.where(brand_id: brand.id).size
+      size = brand.sources.size
       link_to_if size > 0, size, admin_product_sources_path(q: { brand_id_wq: brand.id })
     end
     actions
-  end
-
-  def brand_index
-    binding.pry
   end
 
 end

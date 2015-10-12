@@ -136,11 +136,13 @@ class Import::Toryburch < Import::Demandware
 
     # binding.pry
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: 'Tory Burch').first
-      brand.synonyms.push brand_name
-      brand.save
+    if brand_name.present?
+      brand = Brand.get_by_name(brand_name)
+      unless brand
+        brand = Brand.where(name: 'Tory Burch').first
+        brand.synonyms.push brand_name
+        brand.save if brand.changed?
+      end
     end
     source = 'toryburch.com'
 
