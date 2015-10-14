@@ -83,7 +83,16 @@ class Import::Dkny < Import::Demandware
     data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
     data_resp = get_request(data_url)
 
-    colors = html.css('.attribute .Color li a').inject({}){|obj, a| obj[a.attr('href').match(/_color=([^&]+)/)[1]] = JSON.parse(a.attr('data-lgimg'))['url']; obj}
+    colors = html.css('.attribute .Color li a').inject({}) do |obj, a|
+      color_id = a.attr('href').match(/_color=([^&]+)/)[1]
+      begin
+        obj[color_id] = JSON.parse(a.attr('data-lgimg'))['url']
+      rescue JSON::ParserError => e
+        imgurl = a.to_html.match(/"url":"([^"]+)"/)
+        obj[color_id] = imgurl[1] if imgurl
+      end
+      obj
+    end
     data = JSON.parse(data_resp.body.strip)
 
     data.each do |k, v|
