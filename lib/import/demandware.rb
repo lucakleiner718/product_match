@@ -1,5 +1,11 @@
 class Import::Demandware < Import::Base
 
+  def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
+
+  def source
+    URI(baseurl).host.sub(/^www\./,'')
+  end
+
   # def self.perform website_url
   #   instance = self.new
   #   instance.perform website_url

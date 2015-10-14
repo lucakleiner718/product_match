@@ -43,7 +43,13 @@ class Import::Base
     items
   end
 
+  def build_url url
+    url = "#{baseurl}#{url}" if url !~ /^#{baseurl}/
+    url
+  end
+
   def get_request url
+    url = build_url(url)
     Curl.get(url) do |http|
       http.follow_location = true
     end

@@ -1,11 +1,9 @@
 class Import::Theory < Import::Demandware
 
-  BASEURL = 'https://www.theory.com'
-  SUBDIR =  'Sites-theory_US-Site'
-  NAME =    'theory'
-  PRODUCT_ID_PATTERN = /\/([^\.\/]+)\.html/
-  BRAND_NAME = 'Theory'
-  SOURCE = 'theory.com'
+  def baseurl; 'https://www.theory.com'; end
+  def subdir;  'Sites-theory_US-Site'; end
+  def product_id_pattern; /\/([^\.\/]+)\.html/; end
+  def brand_name_default; 'Theory'; end
 
   def self.perform
     instance = self.new
@@ -20,7 +18,7 @@ class Import::Theory < Import::Demandware
     ].each do |url_part|
       puts url_part
       urls = []
-      url = "#{BASEURL}/#{url_part}"
+      url = "/#{url_part}"
       resp = get_request(url)
       html = Nokogiri::HTML(resp.body)
 
@@ -28,7 +26,7 @@ class Import::Theory < Import::Demandware
 
       urls += products.map do |item|
         url = item.css('.productimage a').first.attr('href').sub(/\?.*/, '')
-        url = "#{BASEURL}#{url}" if url !~ /^http/
+        url = build_url(url)
         url
       end
 
@@ -46,7 +44,7 @@ class Import::Theory < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
+    product_id = original_url.match(product_id_pattern)[1].split(',').first
     original_id = product_id
 
     resp = get_request original_url
@@ -60,8 +58,8 @@ class Import::Theory < Import::Demandware
     # in case we have link with upc instead of inner uuid of product
     if html.css('link[rel="canonical"]').size == 1
       url = html.css('link[rel="canonical"]').first.attr('href').sub(/\?.*/, '')
-      # product_id = url.match(PRODUCT_ID_PATTERN)[1].split(',').first
-      url = "#{BASEURL}#{url}" if url !~ /^http/
+      # product_id = url.match(product_id_pattern)[1].split(',').first
+      url = "#{baseurl}#{url}" if url !~ /^http/
     end
 
     if page.match(/styleID: "([A-Z0-9]+)"/)
@@ -70,7 +68,7 @@ class Import::Theory < Import::Demandware
     # product_id_param = product_id
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = BRAND_NAME# if brand_name.downcase == 'n/a'
+    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -80,7 +78,7 @@ class Import::Theory < Import::Demandware
     images = html.css("#s7container img").map{|img| img.attr('src')}
     image_url = images.shift
 
-    data_url = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id}&format=json"
+    data_url = "#{baseurl}/on/demandware.store/#{subdir}/default/Product-GetVariants?pid=#{product_id}&format=json"
     data_resp = get_request(data_url)
     data_resp = data_resp.body.strip.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
     begin
@@ -115,14 +113,14 @@ class Import::Theory < Import::Demandware
     if brand_name.present?
       brand = Brand.get_by_name(brand_name)
       unless brand
-        brand = Brand.where(name: BRAND_NAME).first
+        brand = Brand.where(name: brand_name_default).first
         brand.synonyms.push brand_name
         brand.save if brand.changed?
       end
     end
 
     results.each do |row|
-      product = Product.where(source: SOURCE, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id
       product.save
@@ -130,5 +128,7 @@ class Import::Theory < Import::Demandware
 
     results
   end
+
+
 
 end

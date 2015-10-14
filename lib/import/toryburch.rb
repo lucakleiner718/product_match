@@ -2,8 +2,7 @@ class Import::Toryburch < Import::Demandware
 
   BASEURL = 'https://www.toryburch.com'
   SUBDIR =  'Sites-ToryBurch_US-Site'
-  NAME =    'toryburch'
-  PRODUCT_ID_PATTERN = /\/([a-z0-9\-\.\+]+)\.html/i
+  BRAND_NAME = 'Tory Burch'
 
   def self.perform
     instance = self.new
@@ -139,7 +138,7 @@ class Import::Toryburch < Import::Demandware
     if brand_name.present?
       brand = Brand.get_by_name(brand_name)
       unless brand
-        brand = Brand.where(name: 'Tory Burch').first
+        brand = Brand.where(name: BRAND_NAME).first
         brand.synonyms.push brand_name
         brand.save if brand.changed?
       end
