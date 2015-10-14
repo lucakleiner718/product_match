@@ -47,6 +47,7 @@ class Import::Theory < Import::Demandware
   def process_url original_url
     puts "Processing url: #{original_url}"
     product_id = original_url.match(PRODUCT_ID_PATTERN)[1].split(',').first
+    original_id = product_id
 
     resp = get_request original_url
     return false if resp.response_code != 200
@@ -62,8 +63,6 @@ class Import::Theory < Import::Demandware
       # product_id = url.match(PRODUCT_ID_PATTERN)[1].split(',').first
       url = "#{BASEURL}#{url}" if url !~ /^http/
     end
-
-    binding.pry
 
     if page.match(/styleID: "([A-Z0-9]+)"/)
       product_id = page.match(/styleID: "([A-Z0-9]+)"/)[1]
@@ -84,7 +83,11 @@ class Import::Theory < Import::Demandware
     data_url = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id}&format=json"
     data_resp = get_request(data_url)
     data_resp = data_resp.body.strip.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
-    data = JSON.parse(data_resp)
+    begin
+      data = JSON.parse(data_resp)
+    rescue JSON::ParserError => e
+      return false
+    end
 
     data['variations']['variants'].each do |v|
       upc = v['id']
