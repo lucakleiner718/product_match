@@ -35,7 +35,7 @@
         </button>
         <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1">
           <% @brands_choose.each do |brand| %>
-            <li><%= link_to brand.name, match_path(brand: brand.name) %></li>
+            <li><%= link_to brand.name, match_path(brand_id: brand.id) %></li>
           <% end %>
         </ul>
       </div>
@@ -93,7 +93,7 @@
         </button>
         <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1">
           <% @brands_choose.each do |brand| %>
-            <li><%= link_to brand.name, match_path(brand: brand.name) %></li>
+            <li><%= link_to brand.name, match_path(brand_id: brand.id) %></li>
           <% end %>
         </ul>
       </div>
