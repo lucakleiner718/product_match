@@ -72,7 +72,13 @@ class ProductsController < ApplicationController
       if product_suggestion
         ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
       end
-    elsif params[:decision].in?(['nothing', 'no-size', 'no-color'])
+    elsif params[:decision] == 'nothing'
+      product = Product.find(params[:product_id])
+      same_products_options = Product.where(source: product.source, style_code: product.style_code).pluck(:id)
+      same_products_options.each do |product_id|
+        ProductSelect.create(user_id: current_user.id, product_id: product_id, decision: params[:decision])
+      end
+    elsif params[:decision].in?(['no-size', 'no-color'])
       ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], decision: params[:decision])
     end
 

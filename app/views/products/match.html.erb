@@ -64,7 +64,7 @@
             <em>Size:</em> <%= product.size %></br>
             <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
             <!--<em>Category:</em> <%= product.category %></br>-->
-            <em>Source:</em> <%= product.source %></br>
+            <em>Source:</em> <%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></br>
             <em>UPC:</em> <%= product.upc %></br>
 
             <div style="margin: 5px 0;">
