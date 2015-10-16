@@ -1,8 +1,9 @@
 class Import::Toryburch < Import::Demandware
 
-  BASEURL = 'https://www.toryburch.com'
-  SUBDIR =  'Sites-ToryBurch_US-Site'
-  BRAND_NAME = 'Tory Burch'
+  def baseurl; 'http://www.toryburch.com'; end
+  def subdir; 'ToryBurch_US'; end
+  def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
+  def brand_name_default; 'Tory Burch'; end
 
   def self.perform
     instance = self.new
@@ -30,11 +31,9 @@ class Import::Toryburch < Import::Demandware
       start = 0
       size = 99
       urls = []
-      # binding.pry
       while true
-        url = "#{BASEURL}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
         resp = get_request(url)
-        # resp = Curl.get(url)
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('div.productresultarea div.product.producttile:not(.bannertile)')
@@ -62,9 +61,9 @@ class Import::Toryburch < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = Curl.get("#{BASEURL}/#{product_id}.html") do |http|
+    resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
       http.follow_location = true
     end
     return false if resp.response_code != 200
@@ -78,9 +77,9 @@ class Import::Toryburch < Import::Demandware
 
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = url.match(product_id_pattern)[1]
     product_id_param = product_id.gsub('+', '%20').gsub('.', '%2e')
-    url = "#{BASEURL}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{url}" if url !~ /^http/
 
     brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
     brand_name = 'Tory Burch' if brand_name.downcase == 'n/a'
@@ -91,62 +90,56 @@ class Import::Toryburch < Import::Demandware
 
     category = html.css('#breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
-    colors = html.css('.variationattribute.color ul.swatchesdisplay li')
-    colors.each do |color|
-      color_link = color.css('a').first
-      color_name = color_link.css('.swatchDispName').text
-      color_param = "dwvar_#{product_id_param}_color"
-      color_id = color.attr('data-value')
-
-      color_url = "#{url}?#{color_param}=#{color_id}"
-
-      image_url = "http://s7d5.scene7.com/is/image/ToryBurchLLC/TB_#{product_id}_#{color_id}_B?fit=constrain,1&wid=500&hei=700&fmt=jpg"
-
-      color_link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id_param}&#{color_param}=#{color_id}&format=json"
-      detail_color_page = Curl.get(color_link) do |http|
-        http.headers['Referer'] = url
-        http.headers['X-Requested-With'] = 'XMLHttpRequest'
-        http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-      end
-      color_json = JSON.parse(detail_color_page.body.strip)
-
-      color_json['variations']['variants'].each do |variant|
-
-        price = variant['pricing']['standard']
-        price_sale = variant['pricing']['sale']
-        price_sale = nil if price == price_sale
-        size = variant['attributes']['size']
-        upc = variant['id']
-
-        results << {
-          title: product_name,
-          category: category,
-          price: price,
-          price_sale: price_sale,
-          color: color_name,
-          size: size,
-          upc: upc,
-          url: color_url,
-          image: image_url,
-          source_id: product_id,
-        }
-      end
+    colors = html.css('.variationattributes .color li').inject({}) do |obj, li|
+      color_id = li.attr('data-value')
+      color_name = li.css('a').text.strip
+      obj[color_id] = color_name
+      obj
     end
 
-    # binding.pry
+    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
+    data_resp = get_request(data_url)
+    data = JSON.parse(data_resp.body.strip)
+
+    data['variations']['variants'].each do |v|
+      upc = v['id']
+      price = v['pricing']['standard']
+      price_sale = v['pricing']['sale']
+      if price == 0 && price_sale.present? && price_sale > 0
+        price = price_sale
+        price_sale = nil
+      end
+      color_id = v['attributes']['color']
+      color = colors[color_id]
+      size = v['attributes']['size']
+      color_url = "#{url}?dwvar_#{product_id}_color=#{color_id}"
+      image_url = "http://s7d5.scene7.com/is/image/ToryBurchLLC/TB_#{product_id}_#{color_id}_A?fit=constrain,1&wid=500&hei=700&fmt=jpg"
+
+      results << {
+        title: product_name,
+        category: category,
+        price: price,
+        price_sale: price_sale,
+        color: color,
+        size: size,
+        upc: upc,
+        url: color_url,
+        image: image_url,
+        style_code: product_id,
+      }
+    end
 
     if brand_name.present?
       brand = Brand.get_by_name(brand_name)
       unless brand
-        brand = Brand.where(name: BRAND_NAME).first
+        brand = Brand.where(name: brand_name_default).first
         brand.synonyms.push brand_name
         brand.save if brand.changed?
       end
     end
-    source = 'toryburch.com'
 
     results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id
       product.save
