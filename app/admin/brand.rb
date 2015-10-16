@@ -30,7 +30,7 @@ ActiveAdmin.register Brand do
     selectable_column
     column :name
     column :synonyms do |brand|
-      brand.synonyms_text
+      brand.synonyms.join(', ')
     end
     column :in_use
     column :products do |brand|

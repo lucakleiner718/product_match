@@ -21,7 +21,7 @@ class Brand < ActiveRecord::Base
   end
 
   def synonyms_text=synonyms_text
-    self.synonyms = synonyms_text.split(',')
+    self.synonyms = synonyms_text.split(',').map(&:strip)
   end
 
   def names
