@@ -71,8 +71,8 @@ class Brand < ActiveRecord::Base
 
   def merge_with! brands_ids
     # protect from delete main brand
-    brands_ids = brands_ids.map(&:to_i) - self.id
-    
+    brands_ids = brands_ids.map(&:to_i) - [self.id]
+
     # first update products with new brand
     Product.where(brand_id: brands_ids).update_all(brand_id: self.id)
 
