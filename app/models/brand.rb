@@ -2,7 +2,7 @@ class Brand < ActiveRecord::Base
 
   has_many :sources, class_name: 'ProductSource'
   has_one :brand_stat
-  # has_many :products
+  has_many :products
 
   scope :in_use, -> { where in_use: true }
 
@@ -29,7 +29,7 @@ class Brand < ActiveRecord::Base
   end
 
   def self.get_by_name name
-    self.where("name = ? OR synonyms @> ?", name, "{#{name}}").first
+    self.where("lower(name) = lower(?) OR synonyms @> ? OR synonyms @> ?", name, "{#{name}}", "{#{name.downcase}}").first
   end
 
   def stat
@@ -76,14 +76,14 @@ class Brand < ActiveRecord::Base
     # update product sources with new brand
     ProductSource.where(brand_id: brands_ids).update_all(brand_id: self.id)
 
-    # remove old brands
-    Brand.where(id: brands_ids).destroy_all
-
     # find all names for brands and add them as synonyms
     names = Brand.where(id: brands_ids).pluck(:name, :synonyms).flatten
     self.synonyms += names
     self.synonyms = self.synonyms.uniq - [self.name]
     self.save
+
+    # remove old brands
+    Brand.where(id: brands_ids).destroy_all
   end
 
 end
