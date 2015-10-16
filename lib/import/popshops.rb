@@ -204,7 +204,7 @@ class Import::Popshops < Import::Base
     @affected_brands.each do |brand_name|
       brand = Brand.get_by_name(brand_name)
       if brand
-        ProductSuggestionsGeneratorWorker.perform_async brand_id: brand.id
+        ProductSuggestionsGeneratorWorker.perform_async brand.id
       end
     end
   end
