@@ -1,4 +1,5 @@
-require 'faraday_middleware'
+# require 'faraday_middleware'
+# require 'open-uri'
 
 class Import::Base
 
@@ -50,9 +51,13 @@ class Import::Base
 
   def get_request url
     url = build_url(url)
+
     Curl.get(url) do |http|
       http.follow_location = true
     end
+
+    # open(url)
+
     # con = Faraday.new(url) do |b|
     #   b.use FaradayMiddleware::FollowRedirects
     #   b.adapter :net_http

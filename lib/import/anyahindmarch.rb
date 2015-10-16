@@ -13,7 +13,11 @@ class Import::Anyahindmarch < Import::Demandware
     shop_page = get_request("#{baseurl}/Shop")
     shop_page_html = Nokogiri::HTML(shop_page.body)
     categories = shop_page_html.css('#leftcolumn a.refineLink').map{|a| a.attr('href')}
-    categories.each do |category_url|
+    categories += [
+      'Wedding/For-The-Bride-and-Groom', 'Wedding/Honeymoon-and-Travel', 'Wedding/Gifts-for-the-Bridal-Party',
+      'Wedding/Planning-and-Organising', 'Clutches'
+    ].map{|el| "http://www.anyahindmarch.com/#{el}/"}
+    categories.uniq.each do |category_url|
       puts category_url
       start = 0
       size = 20
@@ -23,8 +27,8 @@ class Import::Anyahindmarch < Import::Demandware
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
-        products = html.css('a').map{|a| a.attr('href').sub(/\?.*/, '')}.uniq
-        break if products.size == 0
+        products = html.css('.producttile a').map{|a| a.attr('href').sub(/\?.*/, '')}.uniq
+        break if products.size == 0 || urls.join('') == products.join('')
 
         urls += products
         start += products.size
@@ -32,7 +36,7 @@ class Import::Anyahindmarch < Import::Demandware
 
       urls.uniq!
 
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+      # urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       puts "spawned #{urls.size} urls"
       # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
