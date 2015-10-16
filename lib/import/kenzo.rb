@@ -2,12 +2,10 @@ require 'open-uri'
 
 class Import::Kenzo < Import::Demandware
 
-  BASEURL = 'https://www.kenzo.com'
-  SUBDIR =  'Sites-Kenzo-Site'
-  NAME =    'kenzo'
-  PRODUCT_ID_PATTERN = /([a-z0-9]+)\.html/i
-  BRAND_NAME = 'Kenzo'
-  SOURCE = 'kenzo.com'
+  def baseurl; 'https://www.kenzo.com'; end
+  def subdir; 'Kenzo'; end
+  def product_id_pattern; /\/([^\.\/]+)\.html/; end
+  def brand_name_default; 'Diane von Furstenberg'; end
 
   def self.perform
     instance = self.new
@@ -16,12 +14,13 @@ class Import::Kenzo < Import::Demandware
 
   def perform
     [
-      'women', 'men', 'kids', 'outlet'
+      'merry-k',
+      'women', 'men', 'kids'
     ].each do |url_part|
       puts url_part
       urls = []
 
-      url = "#{BASEURL}/en/#{url_part}"
+      url = "#{baseurl}/en/#{url_part}"
       resp = open(url)
       html = Nokogiri::HTML(resp)
 
@@ -37,7 +36,7 @@ class Import::Kenzo < Import::Demandware
 
       urls.uniq!
 
-      # urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       puts "spawned #{urls.size} urls"
       # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
@@ -50,9 +49,9 @@ class Import::Kenzo < Import::Demandware
   def process_url original_url
     binding.pry
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = open("#{BASEURL}/en/#{product_id}.html")
+    resp = open("#{baseurl}/en/#{product_id}.html")
     return false if resp.status.first.to_i != 200
 
     url = original_url
@@ -61,13 +60,17 @@ class Import::Kenzo < Import::Demandware
     html = Nokogiri::HTML(page)
 
     # in case we have link with upc instead of inner uuid of product
-    url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    # product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    canonical_url = baseurl + html.css('link[rel="canonical"]').first.attr('href')
+    if canonical_url != url
+      url = canonical_url
+      product_id = url.match(product_id_pattern)[1]
+      url = "#{baseurl}#{url}" if url !~ /^http/
+    end
+
     product_id_param = product_id
-    # url = "#{BASEURL}#{url}" if url !~ /^http/
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = BRAND_NAME# if brand_name.downcase == 'n/a'
+    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -77,7 +80,7 @@ class Import::Kenzo < Import::Demandware
 
     color_param = "dwvar_#{product_id_param}_color"
 
-    data_url = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id}&format=json"
+    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
     data_resp = open(data_url)
     data = JSON.parse(data_resp.read.strip)
 
@@ -108,14 +111,14 @@ class Import::Kenzo < Import::Demandware
     if brand_name.present?
       brand = Brand.get_by_name(brand_name)
       unless brand
-        brand = Brand.where(name: BRAND_NAME).first
+        brand = Brand.where(name: brand_name_default).first
         brand.synonyms.push brand_name
         brand.save if brand.changed?
       end
     end
 
     results.each do |row|
-      product = Product.where(source: SOURCE, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id
       product.save
