@@ -36,7 +36,7 @@ class Import::Anyahindmarch < Import::Demandware
 
       urls.uniq!
 
-      # urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       puts "spawned #{urls.size} urls"
       # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
