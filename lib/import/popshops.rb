@@ -80,7 +80,7 @@ class Import::Popshops < Import::Base
 
       process_to_create to_create
       process_to_update to_update
-      process_brands_suggestions
+      # process_brands_suggestions
 
       page += 1
     end
