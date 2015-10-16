@@ -1,11 +1,9 @@
 class Import::Dvf < Import::Demandware
 
-  BASEURL = 'https://www.dvf.com'
-  SUBDIR =  'Sites-DvF_US-Site'
-  NAME =    'dvf'
-  PRODUCT_ID_PATTERN = /\/([^\.\/]+)\.html/
-  BRAND_NAME = 'Diane von Furstenberg'
-  SOURCE = 'dvf.com'
+  def baseurl; 'https://www.dvf.com'; end
+  def subdir; 'DvF_US'; end
+  def product_id_pattern; /\/([^\.\/]+)\.html/; end
+  def brand_name_default; 'Diane von Furstenberg'; end
 
   def self.perform
     instance = self.new
@@ -22,7 +20,7 @@ class Import::Dvf < Import::Demandware
       urls = []
       binding.pry
       while true
-        url = "#{BASEURL}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -31,7 +29,7 @@ class Import::Dvf < Import::Demandware
 
         urls += products.map do |item|
           url = item.css('.product-image a').first.attr('href').sub(/\?.*/, '')
-          url = "#{BASEURL}#{url}" if url !~ /^http/
+          url = "#{baseurl}#{url}" if url !~ /^http/
           url
         end
 
@@ -52,9 +50,9 @@ class Import::Dvf < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = get_request("#{BASEURL}/#{product_id}.html")
+    resp = get_request("#{baseurl}/#{product_id}.html")
     return false if resp.response_code != 200
 
     url = resp.last_effective_url
@@ -64,12 +62,12 @@ class Import::Dvf < Import::Demandware
 
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = url.match(product_id_pattern)[1]
     product_id_param = product_id.gsub('_', '__').gsub('%2b', '%2B').gsub('+', '%2B')
-    url = "#{BASEURL}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{url}" if url !~ /^http/
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = BRAND_NAME# if brand_name.downcase == 'n/a'
+    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -78,7 +76,7 @@ class Import::Dvf < Import::Demandware
     color_param = "dwvar_#{product_id_param}_color"
     image_url = html.css("#pdp-pinterest-container img").first.attr('src')
 
-    data_url = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id}&format=json"
+    data_url = "#{baseurl}/on/demandware.store/#{baseurl}/default/Product-GetVariants?pid=#{product_id}&format=json"
     data_resp = get_request(data_url)
     data = JSON.parse(data_resp.body.strip)
 
@@ -108,14 +106,14 @@ class Import::Dvf < Import::Demandware
     if brand_name.present?
       brand = Brand.get_by_name(brand_name)
       unless brand
-        brand = Brand.where(name: BRAND_NAME).first
+        brand = Brand.where(name: brand_name_default).first
         brand.synonyms.push brand_name
         brand.save if brand.changed?
       end
     end
 
     results.each do |row|
-      product = Product.where(source: SOURCE, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id
       product.save
