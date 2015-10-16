@@ -16,3 +16,4 @@
 /.env
 
 /config/database.yml
+/public/downloads

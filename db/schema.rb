@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151014172228) do
+ActiveRecord::Schema.define(version: 20151015071152) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 20151014172228) do
     t.string   "category"
     t.string   "url"
     t.string   "image"
-    t.text     "additional_images", default: [],              array: true
+    t.text     "additional_images", default: [],                array: true
     t.string   "price"
     t.string   "price_sale"
     t.string   "color"
@@ -127,15 +127,17 @@ ActiveRecord::Schema.define(version: 20151014172228) do
     t.string   "item_group_id"
     t.string   "google_category"
     t.text     "description"
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
     t.integer  "brand_id"
+    t.boolean  "match",             default: true
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree
   add_index "products", ["brand_name"], name: "index_products_on_brand_name", using: :btree
   add_index "products", ["color"], name: "index_products_on_color", using: :btree
   add_index "products", ["ean"], name: "index_products_on_ean", using: :btree
+  add_index "products", ["match"], name: "index_products_on_match", using: :btree
   add_index "products", ["mpn"], name: "index_products_on_mpn", using: :btree
   add_index "products", ["size"], name: "index_products_on_size", using: :btree
   add_index "products", ["sku"], name: "index_products_on_sku", using: :btree
