@@ -88,6 +88,10 @@ class ProductsController < ApplicationController
   def statistic
     brands = Brand.in_use.joins(:brand_stat)
 
+    if params[:brand]
+      brands = brands.where('name ILIKE ?', "%#{params[:brand]}%")
+    end
+
     if params[:sort] =~ /^stats\./
       col = params[:sort].match(/^stats\.(.*)$/)[1]
       brands = brands.order("brand_stats.#{col} #{sort_direction}")
