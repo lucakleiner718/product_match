@@ -69,4 +69,21 @@ class Brand < ActiveRecord::Base
     }
   end
 
+  def merge_with! brands_ids
+    # first update products with new brand
+    Product.where(brand_id: brands_ids).update_all(brand_id: self.id)
+
+    # update product sources with new brand
+    ProductSource.where(brand_id: brands_ids).update_all(brand_id: self.id)
+
+    # remove old brands
+    Brand.where(id: brands_ids).destroy_all
+
+    # find all names for brands and add them as synonyms
+    names = Brand.where(id: brands_ids).pluck(:name, :synonyms).flatten
+    self.synonyms += names
+    self.synonyms = self.synonyms.uniq - [self.name]
+    self.save
+  end
+
 end
