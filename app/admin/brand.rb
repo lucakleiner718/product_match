@@ -53,6 +53,7 @@ ActiveAdmin.register Brand do
     brand.synonyms = brand.synonyms.uniq
     brand.save
     Brand.where(id: ids).destroy_all
+    ProductSource.where(brand_id: ids).update_all(brand_id: brand.id)
     redirect_to :back
   end
 
