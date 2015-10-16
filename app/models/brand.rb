@@ -29,6 +29,7 @@ class Brand < ActiveRecord::Base
   end
 
   def self.get_by_name name
+    return false if !name || name.blank?
     self.where("lower(name) = lower(?) OR synonyms @> ? OR synonyms @> ?", name, "{#{name}}", "{#{name.downcase}}").first
   end
 
