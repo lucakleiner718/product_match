@@ -46,7 +46,13 @@ class Import::Dogeared < Import::Demandware
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(product_id_pattern)[1]
+    if original_url =~ product_id_pattern
+      product_id = original_url.match(product_id_pattern)[1]
+      product_id_gtin = true
+    else
+      product_id = original_url.match(/\/([a-z0-9]+)\.html/i)[1]
+      product_id_gtin = false
+    end
 
     resp = get_request("#{baseurl}/#{product_id}.html")
     return false if resp.response_code != 200
@@ -70,18 +76,44 @@ class Import::Dogeared < Import::Demandware
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip.sub(/^DKNY\s/, '')
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
-    upc = product_id
-    price = html.css('.price-sales').first.attr('data-price')
     image_url = html.css('.product-image').first.attr('href')
 
-    results << {
-      title: product_name,
-      category: category,
-      price: price,
-      upc: upc,
-      url: url,
-      image: image_url,
-    }
+    if product_id_gtin
+      upc = product_id
+      price = html.css('.price-sales').first.attr('data-price')
+
+      results << {
+        title: product_name,
+        category: category,
+        price: price,
+        upc: upc,
+        url: url,
+        image: image_url,
+      }
+    else
+      variants_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/en_GB/Product-GetVariants?pid=#{product_id}&format=json"
+      variants = JSON.parse(get_request(variants_url).body)
+      variants.each do |k, v|
+        upc = v['id']
+        size = v['attributes']['size']
+        price = v['pricing']['standard']
+        price_sale = v['pricing']['sale']
+
+        results << {
+          title: product_name,
+          category: category,
+          price: price,
+          price_sale: price_sale,
+          color: color,
+          size: size,
+          upc: upc,
+          url: url,
+          image: image_url,
+          style_code: product_id
+        }
+      end
+    end
+
 
     brand = Brand.get_by_name(brand_name)
     unless brand
