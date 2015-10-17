@@ -151,6 +151,22 @@ class Import::Popshops < Import::Base
         item[:retailer] = @merchants[offer.attr('merchant')] if offer.attr('merchant')
       end
 
+      if item[:sku].present? && item[:sku] =~ /\A\d{8,14}\z/
+        if item[:sku] =~ /^\d{12}$/ && item[:upc].blank?
+          item[:upc] = item[:sku]
+        elsif item[:sku] =~ /^\d{13}$/ && item[:ean].blank?
+          item[:ean] = item[:sku]
+        end
+      end
+
+      if item[:mpn].present? && item[:mpn] =~ /\A\d{8,14}\z/
+        if item[:mpn] =~ /^\d{12}$/ && item[:upc].blank?
+          item[:upc] = item[:mpn]
+        elsif item[:mpn] =~ /^\d{13}$/ && item[:ean].blank?
+          item[:ean] = item[:mpn]
+        end
+      end
+
       if item[:size].blank? && item[:color].blank? && item[:sku] && item[:mpn] && item[:sku].gsub('_', ' ') == item[:mpn] && item[:brand] == 'Joie'
         mpn = item[:mpn].split(' ')
         item[:size] = mpn[2]
