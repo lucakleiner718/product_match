@@ -62,6 +62,8 @@ class Import::Dogeared < Import::Demandware
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if html.css('#custom-card-greeting').size == 1
+
     # in case we have link with upc instead of inner uuid of product
     canonical_url = html.css('link[rel="canonical"]').first.attr('href')
     canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
