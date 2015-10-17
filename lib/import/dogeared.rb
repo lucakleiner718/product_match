@@ -92,7 +92,9 @@ class Import::Dogeared < Import::Demandware
       }
     else
       variants_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/en_GB/Product-GetVariants?pid=#{product_id}&format=json"
-      variants = JSON.parse(get_request(variants_url).body)
+      body = get_request(variants_url).body
+      return false if body.blank?
+      variants = JSON.parse(body)
       variants.each do |k, v|
         upc = v['id']
         size = v['attributes']['size']
@@ -104,7 +106,6 @@ class Import::Dogeared < Import::Demandware
           category: category,
           price: price,
           price_sale: price_sale,
-          color: color,
           size: size,
           upc: upc,
           url: url,
