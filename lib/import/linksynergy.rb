@@ -57,7 +57,7 @@ class Import::Linksynergy < Import::Base
 
     columns = %w(
       id title part_number category_primary category_secondary url image emtp1 description_short description_full empt2
-      discount_type price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock upc numb2 currency id3
+      discount_type price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock gtin numb2 currency id3
       url2 empt6 category3 size empt7 color sex empt8 empt9 empt10 empt11 char
     ).map(&:to_sym)
 
@@ -92,7 +92,7 @@ class Import::Linksynergy < Import::Base
   end
 
   def process_rows rows
-    rows.select!{|r| r[:id] != 'HDR' && r[:id] != 'TRL'}
+    rows.select!{|r| r[:gtin] != 'HDR' && r[:gtin] != 'TRL'}
 
     items = prepare_data(rows)
 
@@ -118,7 +118,7 @@ class Import::Linksynergy < Import::Base
         image: r[:image],
         brand: normalize_brand(r[:brand]),
         style_code: r[:style_code],
-        upc: r[:upc],
+        upc: r[:gtin],
         size: r[:size],
         color: r[:color],
         retailer: @retailer,

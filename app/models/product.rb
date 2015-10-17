@@ -13,6 +13,9 @@ class Product < ActiveRecord::Base
   scope :without_upc, -> { where("upc is null OR upc = ''") }
   scope :with_upc, -> { where("upc is not null AND upc != ''") }
 
+  # validates :upc, length: { minimum: 12, maximum: 12 }, format: { with: /\A\d+\z/ }
+  # validates :ean, length: { minimum: 13, maximum: 13 }, format: { with: /\A\d+\z/ }
+
   def self.export_to_csv source: 'popshops', brand_id: nil, category: nil
     products = Product.where(source: source, brand_id: brand_id)
     products = products.where(category: category) if category
@@ -33,7 +36,7 @@ class Product < ActiveRecord::Base
       FROM (
         SELECT *
         FROM products
-        WHERE brand_id=#{Brand.sanitize brand_id} AND source != 'shopbop' AND upc IS NOT NULL AND upc != ''
+        WHERE brand_id=#{Brand.sanitize brand_id} AND source != 'shopbop' AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
       ) AS products
       GROUP BY source
     "
