@@ -45,7 +45,7 @@ class Import::Base
   end
 
   def build_url url
-    url = "#{baseurl}#{url}" if url !~ /^#{baseurl}/
+    url = "#{baseurl}#{url}" if url !~ /^http/
     url
   end
 
