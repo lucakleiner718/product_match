@@ -88,7 +88,7 @@ class Import::Sorel < Import::Demandware
     end
     # http://s7d5.scene7.com/is/image/ColumbiaSportswear2/1554681_010_m
     image = images.shift
-    default_color_id = image.match(/\/#{product_id}_([^\_]+)_/)[1]
+    default_color_id = image.match(/\/#{product_id}_([^\_]+)_/)[1] if image
 
     data.each do |k, v|
       upc = v['id']
@@ -103,7 +103,8 @@ class Import::Sorel < Import::Demandware
       color_id = k.split('|').inject({}){|obj, el| a = el.split('-'); obj[a[0]] = a[1]; obj}['variationColor']
       color_url = "#{url}?#{color_param}=#{color_id}"
 
-      image_url = image.sub(/\/#{product_id}_#{default_color_id}_/, "/#{product_id}_#{color_id}_")
+      image_url = nil
+      image_url = image.sub(/\/#{product_id}_#{default_color_id}_/, "/#{product_id}_#{color_id}_") if image
 
       results << {
         title: product_name,
