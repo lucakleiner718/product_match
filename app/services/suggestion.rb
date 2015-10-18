@@ -76,24 +76,35 @@ class Suggestion
     title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * TITLE_WEIGHT
 
     params_count << title_similarity
-    # return 0 if title_similarity < 2
 
-    if suggested.color.present? && product.color.present?
-      if suggested.color.gsub(/\s/, '').downcase == product.color.gsub(/\s/, '').downcase
-        params_count << COLOR_WEIGHT
+    color_s = suggested.color
+    color_p = product.color
+    if color_s.present? && color_p.present?
+      exact_color = false
+      if color_s.gsub(/[^a-z]/i, '').downcase == color_p.gsub(/[^a-z]/i, '').downcase
+        exact_color = true
       else
-        color_s = suggested.color.gsub(/\s/, '').downcase.split(/[\/,]/)
-        color_p = product.color.gsub(/\s/, '').downcase.split(/[\/,]/)
+        color_s_ar = color_s.gsub(/\s/, '').downcase.split(/[\/,]/).map{|el| el.strip}
+        color_p_ar = color_p.gsub(/\s/, '').downcase.split(/[\/,]/).map{|el| el.strip}
 
-        if color_s.size == 2 && color_p.size == 1
-          if color_s.first == color_p.first || color_s.last == color_p.first
-            params_count << COLOR_WEIGHT
+        if color_s_ar.size == 2 && color_p_ar.size == 1
+          if color_s_ar.first == color_p_ar.first || color_s_ar.last == color_p_ar.first
+            exact_color = true
           end
-        elsif color_s.size == 2 && color_p.size == 2
-          if color_s.sort.join == color_p.sort.join
-            params_count << COLOR_WEIGHT
+        elsif color_s_ar.size > 2 && color_s_ar.size == color_p_ar.size
+          if color_s_ar.sort.join == color_p_ar.sort.join
+            exact_color = true
           end
         end
+      end
+
+      if exact_color
+        params_count << COLOR_WEIGHT
+      else
+        color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+        color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+
+        params_count << (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f * COLOR_WEIGHT
       end
     end
 
