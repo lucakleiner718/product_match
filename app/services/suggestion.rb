@@ -71,7 +71,7 @@ class Suggestion
     params_count = []
 
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}.select{|el| el.size > 2}
-    title_parts -= ['the', '&', 'and', 'womens']
+    title_parts -= ['the', '&', 'and', 'womens', 'women’s']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * TITLE_WEIGHT
 
@@ -82,8 +82,8 @@ class Suggestion
       if suggested.color.gsub(/\s/, '').downcase == product.color.gsub(/\s/, '').downcase
         params_count << COLOR_WEIGHT
       else
-        color_s = suggested.color.gsub(/\s/, '').downcase.split('/')
-        color_p = product.color.gsub(/\s/, '').downcase.split('/')
+        color_s = suggested.color.gsub(/\s/, '').downcase.split(/[\/,]/)
+        color_p = product.color.gsub(/\s/, '').downcase.split(/[\/,]/)
 
         if color_s.size == 2 && color_p.size == 1
           if color_s.first == color_p.first || color_s.last == color_p.first
