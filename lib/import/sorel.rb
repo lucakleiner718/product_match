@@ -4,7 +4,7 @@ class Import::Sorel < Import::Demandware
   def subdir; 'Sorel_US'; end
   def lang; 'en_US'; end
   def product_id_pattern; /-([A-Z0-9]+)\.html/; end
-  def brand_name_default; 'True Religion'; end
+  def brand_name_default; 'Sorel'; end
 
   def self.perform
     instance = self.new
