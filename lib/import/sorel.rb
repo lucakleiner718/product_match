@@ -80,10 +80,12 @@ class Import::Sorel < Import::Demandware
     images = html.css('.thumbnail-link').map{|img| img.attr('href')}#.sub(/\/#{product_id}_\d{1,3}_m/)}
     if images.size == 0
       ppi = html.css('.product-primary-image').first
-      if ppi.css('a').size > 0
-        images = [html.css('.product-primary-image a').first.attr('href')]
-      else
-        images = [html.css('.product-primary-image').first.attr('data-defaultasset')]
+      if ppi
+        if ppi.css('a').size > 0
+          images = [html.css('.product-primary-image a').first.attr('href')]
+        else
+          images = [html.css('.product-primary-image').first.attr('data-defaultasset')]
+        end
       end
     end
     # http://s7d5.scene7.com/is/image/ColumbiaSportswear2/1554681_010_m
