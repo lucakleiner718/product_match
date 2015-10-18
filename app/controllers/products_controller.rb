@@ -35,15 +35,15 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = ProductSuggestion.where('percentage > 50').select('distinct(product_id)', 'products.title').joins(:product).order('products.title')
+      products_ids = Product.shopbop.joins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
       if params[:brand]
         @brand = Brand.get_by_name(params[:brand]).first
-        products_ids = products_ids.where(products: { brand_id: @brand.id }) if @brand
+        products_ids = products_ids.where(brand_id: @brand.id ) if @brand
       elsif params[:brand_id]
         @brand = Brand.find(params[:brand_id])
-        products_ids = products_ids.where(products: { brand_id: @brand.id}) if @brand
+        products_ids = products_ids.where(brand_id: @brand.id) if @brand
       else
-        products_ids = products_ids.where(products: { brand_id: Brand.in_use.pluck(:id) })
+        products_ids = products_ids.where(brand_id: Brand.in_use.pluck(:id) )
       end
 
       selected_products_found = ProductSelect.where(user_id: current_user.id).where(decision: 'found').pluck(:product_id)
@@ -51,14 +51,14 @@ class ProductsController < ApplicationController
       selected_products = (selected_products_found + selected_products_nothing).uniq
 
       if selected_products.size > 0
-        products_ids = products_ids.where.not(product_id: selected_products)
+        products_ids = products_ids.where.not(id: selected_products)
       end
 
       if params[:has_color] == 'green' && @brand
-        products_ids = products_ids.where(product_id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq)
+        products_ids = products_ids.where(id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq)
       end
 
-      product_id = products_ids.first.try(:product_id)
+      product_id = products_ids.first.try(:id)
     end
     if product_id
       @product = Product.find(product_id)
