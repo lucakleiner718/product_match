@@ -3,7 +3,7 @@ class Import::Sorel < Import::Demandware
   def baseurl; 'http://www.sorel.com'; end
   def subdir; 'Sorel_US'; end
   def lang; 'en_US'; end
-  def product_id_pattern; /-([0-9]+)\.html/; end
+  def product_id_pattern; /-([A-Z0-9]+)\.html/; end
   def brand_name_default; 'True Religion'; end
 
   def self.perform
