@@ -6,7 +6,7 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-User.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password', is_admin: true) if User.count == 0
+User.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password', role: 'admin') if User.count == 0
 
 if Brand.count == 0
   ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'].each do |brand_name|

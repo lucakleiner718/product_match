@@ -1,5 +1,7 @@
 class ProductsController < ApplicationController
 
+  before_filter :authorize, only: [:index, :statistic, :statistic_export, :selected, :selected_export, :selected_products ]
+
   def root
     redirect_to products_path
   end
@@ -241,6 +243,10 @@ ORDER BY t.found_count desc, avg_similarity desc
 
   def sort_direction
     %w[asc desc].include?(params[:direction]) ? params[:direction] : (sort_column == 'name' ? "asc" : 'desc')
+  end
+
+  def authorize
+    redirect_to(match_path) unless current_user.is_admin?
   end
 
 end

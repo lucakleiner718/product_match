@@ -27,11 +27,11 @@
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <li><%= link_to 'Products', products_path %></li>
         <li><%= link_to 'Match', match_path %></li>
-        <li><%= link_to 'Statistic', products_statistic_path %></li>
-        <li><%= link_to 'Bop products with UPC', products_selected_path %></li>
         <% if current_user.is_admin? %>
+          <li><%= link_to 'Products', products_path %></li>
+          <li><%= link_to 'Statistic', products_statistic_path %></li>
+          <li><%= link_to 'Bop products with UPC', products_selected_path %></li>
           <li><%= link_to 'Admin', admin_root_path %></li>
         <% end %>
       </ul>

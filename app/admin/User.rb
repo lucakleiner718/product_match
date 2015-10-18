@@ -7,7 +7,7 @@ ActiveAdmin.register User do
     column :current_sign_in_at
     column :sign_in_count
     column :created_at
-    column :is_admin
+    column :role
     actions
   end
 
@@ -21,7 +21,7 @@ ActiveAdmin.register User do
       f.input :email
       f.input :password
       f.input :password_confirmation
-      t.input :is_admin
+      t.input :role
     end
     f.actions
   end
