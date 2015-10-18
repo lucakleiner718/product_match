@@ -78,7 +78,9 @@ class Import::Sorel < Import::Demandware
     data = JSON.parse(data_resp.body.strip)
 
     images = html.css('.thumbnail-link').map{|img| img.attr('href')}#.sub(/\/#{product_id}_\d{1,3}_m/)}
-    # http://s7d5.scene7.com/is/image/ColumbiaSportswear2/1554681_010_m
+    if images.size == 0
+      images = [html.css('meta[property="og:image"]').first.attr('content')]
+    end
     image = images.shift
     default_color_id = image.match(/\/#{product_id}_([^\_]+)_/)[1]
 
