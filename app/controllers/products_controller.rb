@@ -62,7 +62,7 @@ class ProductsController < ApplicationController
     end
     if product_id
       @product = Product.find(product_id)
-      @suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc, products.title asc, products.color asc, products.size asc').where('percentage is not null AND percentage > 0').limit(30).includes(:suggested)
+      @suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc').where('percentage is not null AND percentage > 0').limit(30).includes(:suggested)
     end
   end
 
