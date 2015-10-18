@@ -102,7 +102,7 @@ class Suggestion
       size_p = product.size.gsub(/\s/, '').downcase
 
       if size_s == size_p || (size_s == 'small' && size_p == 's') || (size_s == 'large' && size_p == 'l') ||
-        (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs')
+      (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs') || (size_s == 'petite' && size_p == 'p')
         params_count << SIZE_WEIGHT
       elsif size_s =~ /us/ && size_s =~ /eu/
         eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)
