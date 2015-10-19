@@ -3,7 +3,7 @@ class Import::Bymalenebirger < Import::Demandware
   def baseurl; 'http://www.bymalenebirger.com'; end
   def subdir; 'BMB-DK'; end
   def lang; 'da_DK'; end
-  def product_id_pattern; /-([A-Z0-9]+)\.html/; end
+  def product_id_pattern; /-([a-z0-9]+)\.html/i; end
   def brand_name_default; 'By Malene Birger'; end
   def url_prefix_country; 'dk'; end
   def url_prefix_lang; 'da'; end
