@@ -2,6 +2,8 @@ class Import::Demandware < Import::Base
 
   def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
   def lang; 'default'; end
+  def url_prefix_country; nil; end
+  def url_prefix_lang; nil; end
 
   def source
     URI(baseurl).host.sub(/^www\./,'')

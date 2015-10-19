@@ -53,7 +53,11 @@ class Import::Base
     url = build_url(url)
 
     Curl.get(url) do |http|
+      http.enable_cookies = true
       http.follow_location = true
+      http.max_redirects = 6
+      http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
+      # http.verbose = true
     end
 
     # open(url)
