@@ -6,4 +6,6 @@ class ProductSelect < ActiveRecord::Base
 
   validates :user, presence: true
 
+  scope :found, -> { where decision: :found }
+
 end
