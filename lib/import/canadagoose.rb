@@ -77,6 +77,8 @@ class Import::Canadagoose < Import::Demandware
 
     images = html.css('.attribute .Color a').inject({}){|obj, a| obj[a.attr('color')] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1] ; obj}
 
+    gender = process_title_for_gender(product_name)
+
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -102,6 +104,7 @@ class Import::Canadagoose < Import::Demandware
         url: color_url,
         image: image_url,
         style_code: product_id,
+        gender: gender
       }
     end
 
