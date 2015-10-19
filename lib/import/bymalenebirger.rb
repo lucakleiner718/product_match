@@ -56,6 +56,13 @@ class Import::Bymalenebirger < Import::Demandware
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    if html.css('.product-set-item').size > 0
+      html.css('.product-set-item a.item-name').each do |a|
+        ProcessImportUrlWorker.perform_async self.class.name, 'process_url', "#{baseurl}#{a.attr('href')}"
+      end
+      return false
+    end
+
     # canonical_url = html.css('link[rel="canonical"]').first.attr('href')
     # canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
     # if canonical_url != url
