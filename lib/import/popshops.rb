@@ -107,9 +107,9 @@ class Import::Popshops < Import::Base
     items = []
     brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = normalize_brand(el.attr('name')); obj}
     products.each do |r|
+      brand = brands[r.attr('brand')]
       title = normalize_title(r.attr('name'), brand)
       gender = process_title_for_gender(title)
-      brand = brands[r.attr('brand')]
 
       item = {
         source: source,
