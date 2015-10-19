@@ -1,9 +1,12 @@
 class Suggestion
 
-  COLOR_WEIGHT = 5
-  SIZE_WEIGHT = 2
-  TITLE_WEIGHT = 5
-  PRICE_WEIGHT = 2
+  WEIGHTS = {
+    color: 5,
+    size: 2,
+    title: 5,
+    price: 2
+  }
+  GENDER_WEIGHT = 5
 
   def self.build product_id
     instance = self.new
@@ -67,13 +70,13 @@ class Suggestion
   end
 
   def similarity_to product, suggested
-    params_amount = TITLE_WEIGHT + COLOR_WEIGHT + SIZE_WEIGHT + PRICE_WEIGHT
+    params_amount = WEIGHTS.values.sum
     params_count = []
 
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}.select{|el| el.size > 2}
     title_parts -= ['the', '&', 'and', 'womens', 'women’s']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * TITLE_WEIGHT
+    title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * WEIGHTS[:title]
 
     params_count << title_similarity
 
@@ -99,12 +102,12 @@ class Suggestion
       end
 
       if exact_color
-        params_count << COLOR_WEIGHT
+        params_count << WEIGHTS[:color]
       else
         color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
         color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
 
-        params_count << (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f * COLOR_WEIGHT
+        params_count << (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f * WEIGHTS[:color]
       end
     end
 
@@ -131,16 +134,16 @@ class Suggestion
       end
 
       if exact
-        params_count << SIZE_WEIGHT
+        params_count << WEIGHTS[:size]
       elsif size_s =~ /us/ && size_s =~ /eu/
         eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)
         if eu_size && size_p == eu_size[1]
-          params_count << SIZE_WEIGHT
+          params_count << WEIGHTS[:size]
         end
       end
     else
       if suggested.size.blank? && product.size.present? && product.size.downcase == 'one size'
-        params_count << SIZE_WEIGHT
+        params_count << WEIGHTS[:size]
       end
     end
 
@@ -149,7 +152,14 @@ class Suggestion
       dif = 1 if dif > 1
       dif = 1 - dif
 
-      params_count << (dif * PRICE_WEIGHT).round(2)
+      params_count << (dif * WEIGHTS[:price]).round(2)
+    end
+
+    if suggested.gender.present?
+      params_amount += GENDER_WEIGHT
+      if suggested.gender == product.gender
+        params_count << GENDER_WEIGHT
+      end
     end
 
     (params_count.sum/params_amount.to_f * 100).to_i
