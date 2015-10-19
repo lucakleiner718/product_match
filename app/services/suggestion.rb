@@ -112,8 +112,25 @@ class Suggestion
       size_s = suggested.size.gsub(/\s/, '').downcase
       size_p = product.size.gsub(/\s/, '').downcase
 
-      if size_s == size_p || (size_s == 'small' && size_p == 's') || (size_s == 'large' && size_p == 'l') ||
-      (size_s == 'medium' && size_p == 'm') || (size_s == 'x-small' && size_p == 'xs') || (size_s == 'petite' && size_p == 'p')
+      basic_sizes = [
+        ['2xs', 'xxs'], ['xs', 'xsmall'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
+        ['xlarge', 'xl'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
+        ['5xlarge', 'xxxxxl', 'xxxxxlarge']
+      ]
+
+      exact = false
+      exact = true if size_s == size_p
+      unless exact
+        basic_sizes.each do |options|
+          if size_s.gsub('-', '').in?(options) && size_p.gsub('-', '').in?(options)
+            puts options
+            exact = true
+            break
+          end
+        end
+      end
+
+      if exact
         params_count << SIZE_WEIGHT
       elsif size_s =~ /us/ && size_s =~ /eu/
         eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)
