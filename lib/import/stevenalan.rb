@@ -3,7 +3,7 @@ class Import::Stevenalan < Import::Demandware
   def baseurl; 'http://www.stevenalan.com'; end
   def subdir; 'stevenalan'; end
   def lang; 'default'; end
-  def product_id_pattern; /\/([A-Z0-9_\-]+)\.html/; end
+  def product_id_pattern; /\/([A-Z0-9_\-\.]+)\.html/; end
   def brand_name_default; 'Steven Alan'; end
 
   def self.perform
@@ -60,7 +60,7 @@ class Import::Stevenalan < Import::Demandware
     #   product_id = canonical_url.match(product_id_pattern)[1]
     # end
 
-    product_id_param = product_id.gsub('_', '__')
+    product_id_param = product_id.gsub('_', '__').gsub('.', '%2e')
 
     # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
     brand_name = brand_name_default# if brand_name.downcase == 'n/a'
