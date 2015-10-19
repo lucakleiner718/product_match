@@ -75,7 +75,7 @@ class Import::Canadagoose < Import::Demandware
     data_resp = get_request(data_url)
     data = JSON.parse(data_resp.body.strip)
 
-    images = html.css('.attribute .Color a').inject({}){|obj, a| obj[a.attr('color')] = JSON.parse(a.attr('data-lgimg'))['url'] ; obj}
+    images = html.css('.attribute .Color a').inject({}){|obj, a| obj[a.attr('color')] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1] ; obj}
 
     data.each do |k, v|
       upc = v['id']
