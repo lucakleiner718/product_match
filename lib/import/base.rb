@@ -69,4 +69,12 @@ class Import::Base
     # con.get
   end
 
+  def process_title_for_gender product_name
+    if product_name.downcase =~ /^women's\s/
+      'Female'
+    elsif product_name.downcase =~ /^men's\s/
+      'Male'
+    end
+  end
+
 end
