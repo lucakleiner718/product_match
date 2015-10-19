@@ -1,13 +1,13 @@
 class ProductsController < ApplicationController
 
-  before_filter :authorize, only: [:index, :statistic, :statistic_export, :selected, :selected_export, :selected_products ]
+  before_filter :authorize
 
   def root
     redirect_to products_path
   end
 
   def index
-    @products = Product.all
+    @products = Product.all.includes(:brand)
 
     if params[:filter]
       f = params[:filter]
@@ -30,6 +30,45 @@ class ProductsController < ApplicationController
     @products = @products.order(:title).page(params[:page]).per(50)
 
     @filter_brands = Brand.in_use.order(:name)
+  end
+
+  def index_export
+    @products = Product.all.includes(:brand)
+    brand = nil
+
+    if params[:filter]
+      f = params[:filter]
+      @search = true
+
+      @products = @products.where(brand: f[:brand]) if f[:brand]
+
+      if f[:brand_id].present?
+        brand = Brand.where(id: f[:brand_id]).first
+        @products = @products.where(brand_id: brand.id) if brand
+      end
+
+      @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]
+      @products = @products.where(source: f[:source]) if f[:source].present?
+      @products = @products.where(upc: f[:upc]) if f[:upc]
+      @products = @products.where(retailer: f[:retailer]) if f[:retailer]
+      @products = @products.without_upc if f[:no_upc]
+    end
+
+    @products = @products.order(:title)
+
+    csv_string = CSV.generate do |csv|
+      csv << [
+        'Title', 'Brand', 'Source', 'Size', 'Color', 'Style Code', 'UPC', 'Retailer', 'Category'
+      ]
+      @products.each do |pr|
+        csv << [
+          pr.title, pr.brand.try(:name), pr.source, pr.size, pr.color, pr.style_code, (pr.upc || pr.ean), pr.retailer, pr.category
+        ]
+      end
+    end
+
+    filename = "upc-products#{"-#{brand.try(:name)}" if brand}-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
   def match

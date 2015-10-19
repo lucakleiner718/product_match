@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
   root to: 'products#root'
   get 'products' => 'products#index', as: :products
+  get 'products/export' => 'products#index_export', as: :products_export
   get 'match' => 'products#match', as: :match
   post 'match/:product_id' => 'products#match_select', as: :select
   get 'products/statistic' => 'products#statistic', as: :products_statistic
