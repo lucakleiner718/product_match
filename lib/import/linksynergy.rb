@@ -109,9 +109,9 @@ class Import::Linksynergy < Import::Base
 
   def prepare_data rows
     items = []
-    title = normalize_title(r[:title], r[:brand])
-    gender = process_title_for_gender(title)
     rows.each do |r|
+      title = normalize_title(r[:title], r[:brand])
+      gender = process_title_for_gender(title)
       item = {
         source: source,
         source_id: r[:id],
