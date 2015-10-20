@@ -76,7 +76,7 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = Product.shopbop.joins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
+      products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
       if params[:brand]
         @brand = Brand.get_by_name(params[:brand]).first
         products_ids = products_ids.where(brand_id: @brand.id ) if @brand

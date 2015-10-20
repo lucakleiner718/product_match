@@ -1,11 +1,11 @@
 class Import::Shopbop < Import::Base
 
-  def self.perform rewrite: false, update_file: false, url: nil
+  def self.perform rewrite: false, update_file: true, url: nil
     instance = self.new
     instance.perform rewrite: rewrite, update_file: update_file, url: url
   end
 
-  def get_file update_file=false, url=nil
+  def get_file update_file=true, url=nil
     filename = "tmp/sources/shopbop.csv"
 
     url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
@@ -26,33 +26,50 @@ class Import::Shopbop < Import::Base
 
     filename = get_file update_file, url
 
-    SmarterCSV.process(filename, chunk_size: 1_000) do |rows|
+    created_ids = []
+    updated_ids = []
+
+    SmarterCSV.process(filename, chunk_size: 5_000) do |rows|
       items = prepare_data rows
 
-      products = Product.where(source: source, source_id: items.map{|r| r[:source_id]})
+      products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
       to_update = []
       to_create = []
 
+      source_ids = products.keys
+
       items.each do |r|
-        (r[:source_id].in?(products.map(&:source_id)) ? to_update : to_create) << r
+        (r[:source_id].in?(source_ids) ? to_update : to_create) << r
       end
 
       if to_create.size > 0
         keys = to_create.first.keys
-        keys += [:created_at, :updated_at]
+        keys += [:match, :created_at, :updated_at]
         tn = Time.now.strftime('%Y-%m-%d %H:%M:%S')
         sql = "INSERT INTO products
                 (#{keys.join(',')})
-                VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}"
-        Product.connection.execute sql
+                VALUES #{to_create.map{|r| "(#{r.values.concat([true, tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
+                RETURNING id"
+        resp = Product.connection.execute sql
+        created_ids.concat resp.map{|r| r['id'].to_i}
       end
 
       to_update.each do |row|
-        product = products.select{|pr| pr.source_id == row[:source_id]}.first
+        product = products[row[:source_id]]
         product.attributes = row
         product.save if product.changed?
+
+        updated_ids << product.id
       end
     end
+
+    processed_ids = created_ids + updated_ids
+
+    active_ids = Product.shopbop.where(match: true).pluck(:id)
+    non_active = active_ids - processed_ids
+
+    Product.shopbop.where(id: non_active).update_all(match: false)
+    Product.shopbop.where(id: updated_ids).where(match: false).update_all(match: true)
   end
 
   def prepare_data rows
