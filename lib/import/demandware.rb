@@ -5,10 +5,6 @@ class Import::Demandware < Import::Base
   def url_prefix_country; nil; end
   def url_prefix_lang; nil; end
 
-  def source
-    URI(baseurl).host.sub(/^www\./,'')
-  end
-
   # def self.perform website_url
   #   instance = self.new
   #   instance.perform website_url

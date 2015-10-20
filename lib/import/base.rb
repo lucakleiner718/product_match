@@ -19,8 +19,16 @@ class Import::Base
     retailer
   end
 
+  def baseurl
+    nil
+  end
+
   def source
-    self.class.name.match(/\:\:(.*)/)[1].downcase
+    if baseurl
+      URI(baseurl).host.sub(/^www\./,'')
+    else
+      self.class.name.match(/\:\:(.*)/)[1].downcase
+    end
   end
 
   def csv_chunk_size
@@ -75,6 +83,10 @@ class Import::Base
     elsif product_name.downcase =~ /^men's\s/
       'Male'
     end
+  end
+
+  def self.process_url url
+    self.new.process_url url
   end
 
 end
