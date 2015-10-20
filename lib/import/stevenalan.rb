@@ -52,6 +52,7 @@ class Import::Stevenalan < Import::Demandware
     url = resp.last_effective_url
 
     page = resp.body
+    return false if page =~ /PAGE NOT FOUND/i
     html = Nokogiri::HTML(page)
 
     # canonical_url = html.css('link[rel="canonical"]').first.attr('href')
