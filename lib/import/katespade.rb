@@ -4,6 +4,7 @@ class Import::Katespade < Import::Demandware
   def subdir; 'Shop'; end
   def product_id_pattern; /\/([a-z0-9\-]+)\.html/i; end
   def brand_name_default; 'Kate Spade'; end
+  def lang; 'en_US'; end
 
   def self.perform
     [
@@ -61,7 +62,6 @@ class Import::Katespade < Import::Demandware
     results = []
 
     product_name = html.css('.product-name').text.strip
-
     category = html.css('.breadcrumb li a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
     colors = html.css('.product-variations .attribute .Color li:not(.visually-hidden)')

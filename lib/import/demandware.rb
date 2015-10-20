@@ -31,6 +31,7 @@ class Import::Demandware < Import::Base
     brand = Brand.get_by_name(brand_name)
     if !brand && brand_name_default
       brand = Brand.where(name: brand_name_default).first
+      brand = Brand.create(name: brand_name_default) unless brand
       brand.synonyms.push brand_name if brand_name
       brand.save if brand.changed?
     end
