@@ -6,18 +6,23 @@ class BrandCollectDataWorker
   def perform product_source_id
     product_source = ProductSource.find(product_source_id)
 
-    if product_source.source_name == 'popshops'
-      Import::Popshops.perform brand_id: product_source.source_id
-    elsif product_source.source_name == 'linksynergy'
-      Import::Linksynergy.perform mid: product_source.source_id, daily: true, last_update: product_source.collected_at
-    elsif product_source.source_name == 'shopbop'
-      Import::Shopbop.perform url: product_source.source_id, update_file: true
-    else
-      return
+    case product_source.source_name
+      when 'popshops'
+        Import::Popshops.perform brand_id: product_source.source_id
+      when 'linksynergy'
+        Import::Linksynergy.perform mid: product_source.source_id, daily: true, last_update: product_source.collected_at
+      when 'shopbop'
+        Import::Shopbop.perform url: product_source.source_id, update_file: true
+      when 'website'
+        begin
+          Module.const_get("Import::#{product_source.source_id.titleize}").perform
+        rescue => e
+          Rails.logger.info "Wrong import file name"
+        end
+      else
     end
 
     product_source.update_column :collected_at, Time.now
-
   end
 
   def self.spawn

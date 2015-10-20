@@ -19,7 +19,9 @@ class Import::Anyahindmarch < Import::Demandware
       size = 20
       urls = []
       while true
-        url = "#{baseurl}/#{category_url}?sz=#{size}&start=#{start}&format=ajaxscroll"
+        category_url = "#{baseurl}/#{category_url}" if category_url !~ /^http/
+        url = "#{category_url}?sz=#{size}&start=#{start}&format=ajaxscroll"
+
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
