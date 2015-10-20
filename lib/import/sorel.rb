@@ -34,12 +34,7 @@ class Import::Sorel < Import::Demandware
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
-  end
-
-  def self.process_url url
-    self.new.process_url url
   end
 
   def process_url original_url

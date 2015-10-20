@@ -37,12 +37,7 @@ class Import::Marcjacobs < Import::Demandware
       urls.uniq!
 
       urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Marcjacobs', 'process_url', u }
-      # urls.each {|u| ProcessImportUrlWorker.new.perform 'Import::Katespade', 'process_url', u }
     end
-  end
-
-  def self.process_url url
-    self.new.process_url url
   end
 
   def process_url original_url
