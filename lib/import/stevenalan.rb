@@ -3,7 +3,7 @@ class Import::Stevenalan < Import::Demandware
   def baseurl; 'http://www.stevenalan.com'; end
   def subdir; 'stevenalan'; end
   def lang; 'default'; end
-  def product_id_pattern; /\/([A-Z0-9_\-\.]+)\.html/; end
+  def product_id_pattern; /\/([a-zA-Z0-9_\-\.]+)\.html/; end
   def brand_name_default; 'Steven Alan'; end
 
   def self.perform
