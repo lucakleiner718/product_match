@@ -23,6 +23,8 @@ ActiveAdmin.register ProductSource do
           link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id), target: :_blank
         when 'website'
           link_to 'Link', Module.const_get("Import::#{item.source_id.titleize}").new.baseurl, target: :_blank rescue nil
+        when 'shopbop'
+          link_to 'Link', item.source_id, target: :_blank
       end
     end
   end

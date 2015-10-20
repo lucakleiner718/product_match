@@ -47,6 +47,8 @@ class Import::Herroom < Import::Base
 
     results = []
 
+    return false if html.css('#nla-details').size > 0
+
     product_name = html.css('#product-name h1').text
     style_code = html.css('#hdnStyleNumber').first.attr('value')
     category = html.css('.crumbtrail a').inject([]){|ar, el| el.text == 'home' ? '' : ar << el.text; ar}.join(' > ')
