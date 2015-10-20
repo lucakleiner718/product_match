@@ -89,4 +89,8 @@ class Import::Base
     self.new.process_url url
   end
 
+  def log str
+    Rails.logger.debug str
+  end
+
 end

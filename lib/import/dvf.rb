@@ -5,16 +5,11 @@ class Import::Dvf < Import::Demandware
   def product_id_pattern; /\/([^\.\/]+)\.html/; end
   def brand_name_default; 'Diane von Furstenberg'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'new-arrivals', 'dresses', 'designer-clothing', 'designer-handbags', 'shoes', 'accessories', 'sale'
     ].each do |url_part|
-      puts url_part
+      log url_part
       start = 0
       size = 99
       urls = []
@@ -39,17 +34,12 @@ class Import::Dvf < Import::Demandware
       urls.uniq!
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")
@@ -65,9 +55,6 @@ class Import::Dvf < Import::Demandware
     product_id = url.match(product_id_pattern)[1]
     product_id_param = product_id.gsub('_', '__').gsub('%2b', '%2B').gsub('+', '%2B')
     url = "#{baseurl}#{url}" if url !~ /^http/
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -103,23 +90,7 @@ class Import::Dvf < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

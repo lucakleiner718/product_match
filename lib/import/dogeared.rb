@@ -5,18 +5,13 @@ class Import::Dogeared < Import::Demandware
   def product_id_pattern; /([0-9]{12})\.html/i; end
   def brand_name_default; 'Dogeared'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'new', 'must-have', 'necklaces', 'bracelets', 'earrings', 'rings',
       'gifts-wife', 'gifts-mom', 'gifts-daughter', 'gifts-sister', 'gifts-friend', 'gifts-teacher', 'gifts-bridal',
       'gifts-custom', 'gifts-pide-un-deseo', 'gifts-sympathy',
     ].each do |url_part|
-      puts url_part
+      log url_part
       start = 0
       size = 60
       urls = []
@@ -35,8 +30,7 @@ class Import::Dogeared < Import::Demandware
       urls.uniq!
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
@@ -45,7 +39,7 @@ class Import::Dogeared < Import::Demandware
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]
       product_id_gtin = true
@@ -70,9 +64,6 @@ class Import::Dogeared < Import::Demandware
     if canonical_url != url
       product_id = canonical_url.match(product_id_pattern)[1]
     end
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip.sub(/^DKNY\s/, '')
@@ -117,22 +108,23 @@ class Import::Dogeared < Import::Demandware
       end
     end
 
+    process_results results
+  end
 
+  def process_results results, brand_name=nil
     brand = Brand.get_by_name(brand_name)
-    unless brand
+    if !brand && brand_name_default
       brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
+      brand.synonyms.push brand_name if brand_name
       brand.save if brand.changed?
     end
 
     results.each do |row|
       product = Product.where(source: source, upc: row[:upc]).first_or_initialize
       product.attributes = row
-      product.brand_id = brand.id
+      product.brand_id = brand.id if brand
       product.save
     end
-
-    results
   end
 
 end

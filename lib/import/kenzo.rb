@@ -42,10 +42,6 @@ class Import::Kenzo < Import::Demandware
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
     binding.pry
     puts "Processing url: #{original_url}"

@@ -5,11 +5,6 @@ class Import::Herveleger < Import::Demandware
   def product_id_pattern; /([A-Z0-9\-]+)\.html/i; end
   def brand_name_default; 'Herve Leger'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'NEW-ARRIVALS/just-in-new-arrivals,default,sc.html', 'THE-PRE-SPRING-COLLECTION/runway-resort,default,sc.html',
@@ -20,7 +15,7 @@ class Import::Herveleger < Import::Demandware
       'SUMMER-2015/runway-summer,default,sc.html', 'THE-PRE-SPRING-COLLECTION/runway-resort,default,sc.html',
       'SALE/sale,default,sc.html'
     ].each do |url_part|
-      puts url_part
+      log url_part
       start = 0
       size = 50
       urls = []
@@ -39,17 +34,12 @@ class Import::Herveleger < Import::Demandware
       urls.uniq!
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
 
     # format like: http://www.herveleger.com/Carmen-Woodgrain-Foil-Bandage-Dress/HUN6W073-F6K,default,pd.html"
     if original_url =~ /\/[a-z0-9\-]+,[a-z\,]+\.html$/i
@@ -77,9 +67,6 @@ class Import::Herveleger < Import::Demandware
 
     product_id_param = product_id
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
     # product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip.sub(/^DKNY\s/, '')
     product_name = page.match(/app\.page\.setContext\(\{"title":"([^"]+)"/)[1]
@@ -101,10 +88,7 @@ class Import::Herveleger < Import::Demandware
       obj
     end
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -133,23 +117,7 @@ class Import::Herveleger < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
 
 end

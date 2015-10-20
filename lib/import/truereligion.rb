@@ -14,7 +14,7 @@ class Import::Truereligion < Import::Demandware
     [
       'mens', 'womens', 'kids',
     ].each do |url_part|
-      puts url_part
+      log url_part
       size = 60
       urls = []
       while true
@@ -31,7 +31,7 @@ class Import::Truereligion < Import::Demandware
       urls = urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
+      log "spawned #{urls.size} urls"
       # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
   end
@@ -41,7 +41,7 @@ class Import::Truereligion < Import::Demandware
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")
@@ -60,24 +60,15 @@ class Import::Truereligion < Import::Demandware
 
     product_id_param = product_id
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
-
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
-
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
-
     color_param = "dwvar_#{product_id_param}_color"
-
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
 
     images = html.css('.product-primary-image img').map{|img| img.attr('src')}
     image = images.shift
 
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -105,21 +96,7 @@ class Import::Truereligion < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
 
 end

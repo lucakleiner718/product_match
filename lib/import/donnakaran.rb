@@ -5,11 +5,6 @@ class Import::Donnakaran < Import::Demandware
   def product_id_pattern; /([A-Z0-9]+)\.html/; end
   def brand_name_default; 'Donna Karan'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'collection/shop-by-collection/runway', 'collection/shop-by-collection/modern-icons',
@@ -23,7 +18,7 @@ class Import::Donnakaran < Import::Demandware
       'accessories/fragrance/view-all-fragrance', 'accessories/fragrance/cashmere-mist',
       'accessories/fragrance/collection-fragrances', 'accessories/fragrance/gift-sets'
     ].each do |url_part|
-      puts url_part
+      log url_part
       size = 60
       urls = []
       while true
@@ -53,17 +48,12 @@ class Import::Donnakaran < Import::Demandware
       urls = urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")
@@ -82,23 +72,14 @@ class Import::Donnakaran < Import::Demandware
 
     product_id_param = product_id
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
-
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
-
     category = html.css('.breadcrumbs a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
-
     color_param = "dwvar_#{product_id_param}_color"
-
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
 
     image = html.css('.product-image.main-image').first.attr('href')
 
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -126,21 +107,7 @@ class Import::Donnakaran < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

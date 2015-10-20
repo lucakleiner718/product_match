@@ -63,18 +63,11 @@ class Import::Stevenalan < Import::Demandware
 
     product_id_param = product_id.gsub('_', '__').gsub('.', '%2e')
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
 
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
 
     category = nil
-
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
 
     images = html.css('.attribute .color a').inject({}) do |obj, a|
       color_id = a.attr('href').match(/_color=([^&]*)&/)
@@ -90,6 +83,7 @@ class Import::Stevenalan < Import::Demandware
     color_param = "dwvar_#{product_id_param}_color"
     gender = process_title_for_gender(product_name)
 
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -119,22 +113,7 @@ class Import::Stevenalan < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand = Brand.create(name: brand_name_default) unless brand
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
 
 end

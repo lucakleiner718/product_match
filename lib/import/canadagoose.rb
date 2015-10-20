@@ -38,10 +38,6 @@ class Import::Canadagoose < Import::Demandware
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
     puts "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
@@ -61,9 +57,6 @@ class Import::Canadagoose < Import::Demandware
     # end
 
     product_id_param = product_id
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -108,21 +101,7 @@ class Import::Canadagoose < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
 
 end

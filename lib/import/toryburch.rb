@@ -5,11 +5,6 @@ class Import::Toryburch < Import::Demandware
   def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
   def brand_name_default; 'Tory Burch'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'clothing/new-arrivals', 'clothing/dresses', 'clothing/jackets-outerwear', 'clothing/pants-shorts',
@@ -27,7 +22,7 @@ class Import::Toryburch < Import::Demandware
       'accessories/robinson', 'accessories/york', 'accessories/797',
       'watches', 'home/view-all'
     ].each do |url_part|
-      puts url_part
+      log url_part
       start = 0
       size = 99
       urls = []
@@ -50,17 +45,12 @@ class Import::Toryburch < Import::Demandware
       urls.uniq!
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
@@ -78,11 +68,8 @@ class Import::Toryburch < Import::Demandware
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
     product_id = url.match(product_id_pattern)[1]
-    product_id_param = product_id.gsub('+', '%20').gsub('.', '%2e')
+    # product_id_param = product_id.gsub('+', '%20').gsub('.', '%2e')
     url = "#{baseurl}#{url}" if url !~ /^http/
-
-    brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = 'Tory Burch' if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -97,10 +84,7 @@ class Import::Toryburch < Import::Demandware
       obj
     end
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
+    data = get_json product_id
     data['variations']['variants'].each do |v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -129,23 +113,10 @@ class Import::Toryburch < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
+    brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
+    brand_name = nil if brand_name.downcase == 'n/a'
 
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results, brand_name
   end
 
 end
