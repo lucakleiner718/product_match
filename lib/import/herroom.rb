@@ -50,10 +50,11 @@ class Import::Herroom < Import::Base
     product_name = html.css('#product-name h1').text
     style_code = html.css('#hdnStyleNumber').first.attr('value')
     category = html.css('.crumbtrail a').inject([]){|ar, el| el.text == 'home' ? '' : ar << el.text; ar}.join(' > ')
-    price = html.css('.itemPrice').text
+    # price = html.css('.itemPrice').text.
+    price = page.match(/'price'\s?:\s?'([^']+)'/)[1]
     brand = page.match(/'brand'\s?:\s?'([^']+)'/)[1]
     images = html.css('.product-thumbs-wrapper a.product-thumbnail').map{|a| a.attr('rel').match(/largeimage:\s?\'([^\']+)\'/)[1]}
-    id = page.match(/\'id\' \: \'[^-]+\-(.+)'/)[1]
+    id = page.match(/'id'\s?:\s?\'[^-]+\-(.+)'/)[1]
 
     main_image = html.css('.product-main-image').first.attr('src')
     main_image_base = main_image.match(/\/([^\/]+)-[^-]+\./)[1]
