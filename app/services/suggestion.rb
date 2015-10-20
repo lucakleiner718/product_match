@@ -73,7 +73,7 @@ class Suggestion
     params_amount = WEIGHTS.values.sum
     params_count = []
 
-    title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}.select{|el| el.size > 2}
+    title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
     title_parts -= ['the', '&', 'and', 'womens', 'women’s']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
     title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * WEIGHTS[:title]

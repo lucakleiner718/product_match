@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
 
-  before_filter :authorize
+  before_filter :authorize, except: [:match, :match_select]
 
   def root
     redirect_to products_path
