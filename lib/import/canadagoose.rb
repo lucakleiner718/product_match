@@ -61,17 +61,11 @@ class Import::Canadagoose < Import::Demandware
     results = []
 
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
-
     category = nil
-
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
     images = html.css('.attribute .Color a').inject({}){|obj, a| obj[a.attr('color')] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1] ; obj}
-
     gender = process_title_for_gender(product_name)
 
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

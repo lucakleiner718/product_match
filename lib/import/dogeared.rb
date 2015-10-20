@@ -4,6 +4,7 @@ class Import::Dogeared < Import::Demandware
   def subdir; 'Dogeared'; end
   def product_id_pattern; /([0-9]{12})\.html/i; end
   def brand_name_default; 'Dogeared'; end
+  def lang; 'en_GB'; end
 
   def perform
     [
@@ -84,11 +85,9 @@ class Import::Dogeared < Import::Demandware
         image: image_url,
       }
     else
-      variants_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/en_GB/Product-GetVariants?pid=#{product_id}&format=json"
-      body = get_request(variants_url).body
-      return false if body.blank?
-      variants = JSON.parse(body)
-      variants.each do |k, v|
+      data = get_json product_id
+      return false unless data
+      data.each do |k, v|
         upc = v['id']
         size = v['attributes']['size']
         price = v['pricing']['standard']

@@ -63,10 +63,7 @@ class Import::Dvf < Import::Demandware
     color_param = "dwvar_#{product_id_param}_color"
     image_url = html.css("#pdp-pinterest-container img").first.attr('src')
 
-    data_url = "#{baseurl}/on/demandware.store/#{baseurl}/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

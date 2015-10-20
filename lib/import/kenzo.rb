@@ -65,21 +65,12 @@ class Import::Kenzo < Import::Demandware
 
     product_id_param = product_id
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
-
     product_name = html.css('#content .title h1').first.text.strip
-
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
-
     color_param = "dwvar_#{product_id_param}_color"
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = open(data_url)
-    data = JSON.parse(data_resp.read.strip)
-
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -104,23 +95,7 @@ class Import::Kenzo < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

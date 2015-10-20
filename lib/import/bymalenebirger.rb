@@ -77,14 +77,11 @@ class Import::Bymalenebirger < Import::Demandware
 
     category = nil
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
     images = html.css('.attribute .color a').inject({}){|obj, a| img = a.attr('data-img'); color_id = img.match(/_([^_]+)_main\.jpg/)[1]; obj[color_id] = img ; obj}
     gender = process_title_for_gender(product_name)
     color_param = "dwvar_#{product_id_param}_color"
 
+    data = get_json product_id
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

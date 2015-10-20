@@ -59,15 +59,7 @@ class Import::Helmutlang < Import::Demandware
     images = html.css(".productimages img").map{|img| img.attr('src')}
     image_url = images.shift
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data_resp = data_resp.body.strip.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
-    begin
-      data = JSON.parse(data_resp)
-    rescue JSON::ParserError => e
-      return false
-    end
-
+    data = get_json product_id
     data['variations']['variants'].each do |v|
       upc = v['id']
       price = v['pricing']['standard']
