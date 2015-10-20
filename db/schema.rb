@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151020055647) do
+ActiveRecord::Schema.define(version: 20151020140620) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -81,10 +81,11 @@ ActiveRecord::Schema.define(version: 20151020055647) do
     t.string   "source_name"
     t.string   "source_id"
     t.datetime "collected_at"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
     t.integer  "brand_id"
     t.json     "data"
+    t.integer  "period",       default: 0, null: false
   end
 
   add_index "product_sources", ["brand_id"], name: "index_product_sources_on_brand_id", using: :btree
@@ -101,6 +102,17 @@ ActiveRecord::Schema.define(version: 20151020055647) do
 
   add_index "product_suggestions", ["product_id", "suggested_id"], name: "index_product_suggestions_on_product_id_and_suggested_id", unique: true, using: :btree
   add_index "product_suggestions", ["product_id"], name: "index_product_suggestions_on_product_id", using: :btree
+
+  create_table "product_upcs", force: :cascade do |t|
+    t.integer  "product_id"
+    t.integer  "selected_id"
+    t.integer  "product_select_id"
+    t.string   "upc"
+    t.datetime "created_at",        null: false
+  end
+
+  add_index "product_upcs", ["product_id"], name: "index_product_upcs_on_product_id", unique: true, using: :btree
+  add_index "product_upcs", ["product_select_id"], name: "index_product_upcs_on_product_select_id", unique: true, using: :btree
 
   create_table "products", force: :cascade do |t|
     t.string   "brand_name"

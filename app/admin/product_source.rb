@@ -1,6 +1,6 @@
 ActiveAdmin.register ProductSource do
 
-  permit_params :name, :source_name, :source_id, :brand_id
+  permit_params :name, :source_name, :source_id, :brand_id, :period
 
   index do
     selectable_column
@@ -8,10 +8,22 @@ ActiveAdmin.register ProductSource do
     column :source_name
     column :source_id
     column :brand
+    column 'Regular update' do |it|
+      if it.period && it.period > 0
+        "#{it.period} day(s)"
+      else
+        'Manual'
+      end
+    end
     column :collected_at
     actions
     column 'Source' do |item|
-      link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id), target: :_blank if item.source_name == 'popshops'
+      case item.source_name
+        when 'popshops'
+          link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id), target: :_blank
+        when 'website'
+          link_to 'Link', Module.const_get("Import::#{item.source_id.titleize}").new.baseurl, target: :_blank rescue nil
+      end
     end
   end
 
@@ -21,6 +33,7 @@ ActiveAdmin.register ProductSource do
       f.input :source_name, collection: [['Popshops', 'popshops'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Website', 'website']]
       f.input :source_id, label: 'Source ID'
       f.input :brand, collection: Brand.in_use.order(:name)
+      f.input :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]], prompt: false
     end
     f.actions
   end
@@ -28,5 +41,6 @@ ActiveAdmin.register ProductSource do
   filter :name
   filter :source_name
   filter :source_id, label: 'Source ID'
+  filter :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]]
 
 end
