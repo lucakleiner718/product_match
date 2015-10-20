@@ -3,7 +3,7 @@ class Import::Stevenalan < Import::Demandware
   def baseurl; 'http://www.stevenalan.com'; end
   def subdir; 'stevenalan'; end
   def lang; 'default'; end
-  def product_id_pattern; /\/([a-zA-Z0-9_\-\.]+)\.html/; end
+  def product_id_pattern; /\/([^\/]+)\.html/; end
   def brand_name_default; 'Steven Alan'; end
 
   def self.perform
@@ -81,7 +81,7 @@ class Import::Stevenalan < Import::Demandware
       if color_id && color_id[1] && color_id[1].present?
         color_id = color_id[1]
       else
-        color_id = html.css('.product-primary-image img').first.attr('src').match(/#{product_id.gsub('.', '')}_([^_]+)_/)[1]
+        color_id = html.css('.product-primary-image img').first.attr('src').match(/#{product_id.gsub('.', '').gsub('%2F', '')}_([^_]+)_/)[1]
       end
       obj[color_id] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1]
       obj
