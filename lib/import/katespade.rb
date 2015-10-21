@@ -34,7 +34,7 @@ class Import::Katespade < Import::Demandware
         urls.concat html2.css('.product-set-list .product-set-item').map{|e| e.css('a.item-name').first.attr('href')}
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Katespade', 'process_url', u }
       log "spawned #{urls.size} urls"

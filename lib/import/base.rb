@@ -93,4 +93,8 @@ class Import::Base
     Rails.logger.debug str
   end
 
+  def process_products_urls urls
+    urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+  end
+
 end

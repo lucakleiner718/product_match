@@ -23,11 +23,10 @@ class Import::Toryburch < Import::Demandware
       'watches', 'home/view-all'
     ].each do |url_part|
       log url_part
-      start = 0
       size = 99
       urls = []
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -38,11 +37,10 @@ class Import::Toryburch < Import::Demandware
           item.css('.productimage a').first.attr('href').sub(/\?.*/, '')
         end
 
-        start += products.size
         break if url_part.in? ['accessories/the-wallet-guide', 'watches']
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"

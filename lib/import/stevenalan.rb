@@ -15,7 +15,7 @@ class Import::Stevenalan < Import::Demandware
     [
       'New-Arrivals', 'Women%27s-2', 'Men%27s-2', 'Jewelry', 'Kid%27s', 'Home-Store', 'Sale-1'
     ].each do |url_part|
-      puts url_part
+      log url_part
       urls = []
       size = 50
 
@@ -30,11 +30,10 @@ class Import::Stevenalan < Import::Demandware
         urls.concat products
       end
 
-      urls = urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
@@ -43,7 +42,7 @@ class Import::Stevenalan < Import::Demandware
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")

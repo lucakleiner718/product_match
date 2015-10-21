@@ -14,7 +14,7 @@ class Import::Herroom < Import::Base
     brands_links = html.css(".brands a").map{|link| link.attr('href')}
 
     brands_links.each do |url_part|
-      Rails.logger.debug url_part
+      log url_part
       urls = []
 
       brand_page = get_request("#{baseurl}#{url_part}").body
@@ -28,17 +28,16 @@ class Import::Herroom < Import::Base
         urls.concat brand_page_html.css('table tr td.borderz .img-holder a').map{|l| l.attr('href')}
       end
 
-      urls = urls.uniq.map{|u| "#{baseurl}/#{u}"}
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      Rails.logger.debug "spawned #{urls.size} urls #{url_part}"
+      log "spawned #{urls.size} urls #{url_part}"
     end
 
   end
 
   def process_url original_url
-    # binding.pry
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200
 

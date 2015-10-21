@@ -17,7 +17,7 @@ class Import::Kenzo < Import::Demandware
       'merry-k',
       'women', 'men', 'kids'
     ].each do |url_part|
-      puts url_part
+      log url_part
       urls = []
 
       url = "#{baseurl}/en/#{url_part}"
@@ -34,17 +34,16 @@ class Import::Kenzo < Import::Demandware
         urls += intro_html.css('a.product').map{|link| link.attr('href')}
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
   def process_url original_url
     binding.pry
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = open("#{baseurl}/en/#{product_id}.html")

@@ -10,12 +10,10 @@ class Import::Dvf < Import::Demandware
       'new-arrivals', 'dresses', 'designer-clothing', 'designer-handbags', 'shoes', 'accessories', 'sale'
     ].each do |url_part|
       log url_part
-      start = 0
       size = 99
       urls = []
-      binding.pry
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -27,11 +25,9 @@ class Import::Dvf < Import::Demandware
           url = "#{baseurl}#{url}" if url !~ /^http/
           url
         end
-
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"

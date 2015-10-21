@@ -20,21 +20,17 @@ class Import::Canadagoose < Import::Demandware
       'kids/youth', 'kids/kids', 'kids/baby-%26-toddler'
     ].each do |url_part|
       puts url_part
-      urls = []
 
       url = "#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{url_part}/"
       resp = get_request(url)
       html = Nokogiri::HTML(resp.body)
 
-      products = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
+      urls = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
 
-      urls.concat products
-
-      urls = urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
     end
   end
 

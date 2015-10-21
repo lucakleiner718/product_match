@@ -25,7 +25,7 @@ class Import::Theory < Import::Demandware
         url
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"

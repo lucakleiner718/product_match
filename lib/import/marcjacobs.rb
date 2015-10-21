@@ -16,11 +16,11 @@ class Import::Marcjacobs < Import::Demandware
       'men/sunglasses',
       'sale'
     ].each do |url_part|
-      start = 0
+      log url_part
       size = 60
       urls = []
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=page-element"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
         resp = Curl.get(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -30,13 +30,12 @@ class Import::Marcjacobs < Import::Demandware
         urls += products.map do |item|
           item.css('.product-image a').first.attr('href')
         end
-
-        start += size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Marcjacobs', 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 

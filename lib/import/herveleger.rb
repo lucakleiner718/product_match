@@ -16,11 +16,10 @@ class Import::Herveleger < Import::Demandware
       'SALE/sale,default,sc.html'
     ].each do |url_part|
       log url_part
-      start = 0
       size = 50
       urls = []
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -28,10 +27,9 @@ class Import::Herveleger < Import::Demandware
         break if products.size == 0
 
         urls += products
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"

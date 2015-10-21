@@ -21,7 +21,8 @@ class Import::Helmutlang < Import::Demandware
       html = Nokogiri::HTML(resp.read)
 
       urls = html.css('#search a').map{|a| a.attr('href').sub(/\?.*/, '')}.select{|a| a =~ /[A-Z0-9]+,default,pd\.html$/}
-      urls.uniq!
+
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"

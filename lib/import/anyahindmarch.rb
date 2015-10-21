@@ -14,13 +14,12 @@ class Import::Anyahindmarch < Import::Demandware
       'Wedding/Planning-and-Organising', 'Clutches'
     ]
     categories.uniq.each do |category_url|
-      puts category_url
-      start = 0
+      log category_url
       size = 20
       urls = []
       while true
         category_url = "#{baseurl}/#{category_url}" if category_url !~ /^http/
-        url = "#{category_url}?sz=#{size}&start=#{start}&format=ajaxscroll"
+        url = "#{category_url}?sz=#{size}&start=#{urls.size}&format=ajaxscroll"
 
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
@@ -29,18 +28,17 @@ class Import::Anyahindmarch < Import::Demandware
         break if products.size == 0 || urls.join('') == products.join('')
 
         urls += products
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
+      log "spawned #{urls.size} urls"
     end
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]
       product_id_ean = true
