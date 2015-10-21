@@ -14,6 +14,10 @@ class Brand < ActiveRecord::Base
     end
   end
 
+  before_save do
+    self.synonyms = self.synonyms.select{|t| t.present?}.uniq
+  end
+
   validates :name, uniqueness: true
 
   def synonyms_text
