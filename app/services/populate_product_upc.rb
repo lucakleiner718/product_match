@@ -1,18 +1,18 @@
 class PopulateProductUpc
 
-  def self.perform product_select_id
+  def self.perform product_id
     instance = self.new
-    instance.perform product_select_id
+    instance.perform product_id
   end
 
-  def perform product_select_id
-    return false if ProductUpc.where(product_select_id: product_select_id).size > 0
+  def perform product_id
+    return false if ProductUpc.where(product_id: product_id).size > 0 || !available_for_populate?(product_id)
 
-    product_select = ProductSelect.find(product_select_id)
+    product = Product.find(product_id)
 
-    return false unless available_for_populate?(product_select)
+    return false if product.upc.present?
 
-    product = product_select.product
+    product_select = ProductSelect.where(product_id: product.id, decision: :found).first
     selected = product_select.selected
 
     gtin = nil
@@ -22,7 +22,7 @@ class PopulateProductUpc
 
     ActiveRecord::Base.transaction do
       # update product with new upc
-      product.update_column :upc, gtin
+      product.update_columns upc: gtin, match: false
 
       # create new record about upc update
       ProductUpc.create product_id: product.id, selected_id: selected.id, product_select_id: product_select.id, upc: gtin
@@ -34,8 +34,8 @@ class PopulateProductUpc
     true
   end
 
-  def available_for_populate? product_select
-    product_decisions = ProductSelect.where(product_id: product_select.product_id).pluck(:decision)
+  def available_for_populate? product_id
+    product_decisions = ProductSelect.where(product_id: product_id).pluck(:decision)
     results = product_decisions.inject({}){|obj, dec| obj[dec] ||= 0; obj[dec] += 1; obj}
     product_can_be_populated? results
   end
@@ -44,12 +44,14 @@ class PopulateProductUpc
     self.new.for_populate
   end
 
+  # Return ids, which can be populated with upc, using selects from match page (found)
+  # @return [array] of Product ids
   def for_populate
     products = {}
-    ProductSelect.joins('LEFT JOIN product_upcs ON product_upcs.product_select_id=product_selects.id').where('product_upcs.id is null').pluck(:id, :decision).each do |id, decision|
-      products[id] ||= {}
-      products[id][decision] ||= 0
-      products[id][decision] += 1
+    ProductSelect.joins('LEFT JOIN product_upcs ON product_upcs.product_select_id=product_selects.id').where('product_upcs.id is null').pluck(:product_id, :decision).each do |product_id, decision|
+      products[product_id] ||= {}
+      products[product_id][decision] ||= 0
+      products[product_id][decision] += 1
     end
 
     ids_to_populate = []
@@ -61,7 +63,7 @@ class PopulateProductUpc
   end
 
   def product_can_be_populated? results
-    results.size == 1 && results['found']
+    results['found'] && results['found'] > 0
   end
 
 end
