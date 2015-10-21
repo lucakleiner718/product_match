@@ -104,7 +104,7 @@ class Import::Katespade < Import::Demandware
           price = size_html.css('.price-sales').first.text.strip.sub(/^\$/, '').sub(',', '')
 
           upc = size_html.css('#pid').first.attr('value')
-          binding.pry if upc !~ /^\d+$/
+          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ /^\d+$/
 
           results << {
             title: product_name,

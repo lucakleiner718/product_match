@@ -117,7 +117,7 @@ class Import::Marcjacobs < Import::Demandware
           end
 
           upc = size_html.css('#pid').first.attr('value')
-          binding.pry if upc !~ /^\d+$/
+          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ /^\d+$/
 
           results << {
             title: product_name,

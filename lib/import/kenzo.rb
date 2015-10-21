@@ -42,7 +42,6 @@ class Import::Kenzo < Import::Demandware
   end
 
   def process_url original_url
-    binding.pry
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
