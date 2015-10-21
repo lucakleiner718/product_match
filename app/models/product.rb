@@ -1,6 +1,6 @@
 class Product < ActiveRecord::Base
 
-  has_many :suggestions, class_name: ProductSuggestion
+  has_many :suggestions, class_name: ProductSuggestion, dependent: :destroy
   belongs_to :brand
 
   CLOTH_KIND = %w(

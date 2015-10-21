@@ -20,7 +20,7 @@
       <div class="col-sm-3">
         <div class="form-group">
           <label for="filter_source">Source</label>
-          <%= select_tag 'filter[source]', options_for_select([['All', ''], ['Shopbop', 'shopbop'], ['Popshops', 'popshops'], ['Linksynergy', 'linksynergy']], (params[:filter] && params[:filter][:source])), class: "form-control" %>
+          <%= select_tag 'filter[source]', options_for_select(@sources, (params[:filter] && params[:filter][:source])), class: "form-control" %>
         </div>
       </div>
     </div>

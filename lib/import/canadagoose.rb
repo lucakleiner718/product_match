@@ -13,29 +13,29 @@ class Import::Canadagoose < Import::Demandware
     instance.perform
   end
 
-  def perform
+  def get_products_urls
+    urls = []
     [
       'men/parkas', 'men/lightweight', 'men/shells', 'men/accessories',
       'women/parkas', 'women/lightweight', 'women/shells', 'women/accessories',
       'kids/youth', 'kids/kids', 'kids/baby-%26-toddler'
     ].each do |url_part|
-      puts url_part
+      log "Process: #{url_part}"
 
       url = "#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{url_part}/"
       resp = get_request(url)
       html = Nokogiri::HTML(resp.body)
 
-      urls = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
+      links = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
+      urls += process_products_urls links
     end
+
+    urls
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{product_id}.html")

@@ -34,6 +34,7 @@ class Import::Demandware < Import::Base
     end
 
     results.each do |row|
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/)
       product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id if brand
@@ -51,6 +52,7 @@ class Import::Demandware < Import::Base
     end
 
     results.each do |row|
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/)
       product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id if brand

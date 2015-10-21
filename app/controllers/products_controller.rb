@@ -30,6 +30,8 @@ class ProductsController < ApplicationController
     @products = @products.order(:title).page(params[:page]).per(50)
 
     @filter_brands = Brand.in_use.order(:name)
+    @sources = [['All', ''], ['Shopbop', 'shopbop'], ['Popshops', 'popshops'], ['Linksynergy', 'linksynergy']] +
+      ProductSource.where(source_name: :website).pluck(:source_id).map{|cn| URI(Module.const_get("Import::#{cn}").new.baseurl).host.sub(/^www\./, '')}.map{|host| [host, host]}
   end
 
   def index_export
@@ -76,7 +78,7 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
+      products_ids = Product.shopbop.wherejoins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
       if params[:brand]
         @brand = Brand.get_by_name(params[:brand]).first
         products_ids = products_ids.where(brand_id: @brand.id ) if @brand
