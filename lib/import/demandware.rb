@@ -11,6 +11,20 @@ class Import::Demandware < Import::Base
     instance.perform
   end
 
+  def perform
+    urls = get_products_urls
+    spawn_products_urls urls
+  end
+
+  def get_products_urls
+    []
+  end
+
+  def spawn_products_urls urls
+    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+    log "spawned #{urls.size} urls"
+  end
+
   def process_results results, brand_name=nil
     brand = Brand.get_by_name(brand_name)
     if !brand && brand_name_default

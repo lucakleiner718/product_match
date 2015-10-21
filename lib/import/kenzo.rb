@@ -4,22 +4,16 @@ class Import::Kenzo < Import::Demandware
 
   def baseurl; 'https://www.kenzo.com'; end
   def subdir; 'Kenzo'; end
-  def product_id_pattern; /\/([^\.\/]+)\.html/; end
+  def product_id_pattern; /-?([A-Z0-9]+)\.[^\/]+$/; end
   def brand_name_default; 'Diane von Furstenberg'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
-  def perform
+  def get_products_urls
+    urls = []
     [
       'merry-k',
       'women', 'men', 'kids'
     ].each do |url_part|
       log url_part
-      urls = []
-
       url = "#{baseurl}/en/#{url_part}"
       resp = open(url)
       html = Nokogiri::HTML(resp)
@@ -34,11 +28,10 @@ class Import::Kenzo < Import::Demandware
         urls += intro_html.css('a.product').map{|link| link.attr('href')}
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      urls.concat process_products_urls urls
     end
+
+    urls
   end
 
   def process_url original_url
