@@ -115,6 +115,7 @@ class ProductsController < ApplicationController
       product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
       if product_suggestion
         ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
+        PopulateProductUpc.perform params[:product_id]
       end
     elsif params[:decision] == 'nothing'
       product = Product.find(params[:product_id])

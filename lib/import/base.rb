@@ -40,8 +40,11 @@ class Import::Base
     exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e}.join(',')}}")
     brands = brands_names.map do |brand_name|
       brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
-      # brand = Brand.get_by_name(brand_name)
+      begin
       brand = Brand.create(name: brand_name) unless brand
+      rescue ActiveRecord::RecordNotUnique => e
+        brand = Brand.get_by_name(brand_name)
+      end
       brand
     end
     items.map do |item|
@@ -94,7 +97,7 @@ class Import::Base
   end
 
   def process_products_urls urls
-    urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+    urls.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
   end
 
   def self.perform
