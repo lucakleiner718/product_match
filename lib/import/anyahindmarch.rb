@@ -97,6 +97,7 @@ class Import::Anyahindmarch < Import::Demandware
       }
     else
       data = get_json product_id
+      return false unless data
       data['variations']['variants'].each do |variant|
         ean = variant['id']
         size = variant['attributes']['size']

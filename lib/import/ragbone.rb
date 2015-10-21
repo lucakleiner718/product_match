@@ -60,7 +60,8 @@ class Import::Ragbone < Import::Demandware
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
     color_param = "dwvar_#{product_id_param}_color"
 
-    data = get_json(product_id)
+    data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

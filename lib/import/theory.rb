@@ -64,6 +64,7 @@ class Import::Theory < Import::Demandware
     image_url = images.shift
 
     data = get_json product_id
+    return false unless data
     data['variations']['variants'].each do |v|
       upc = v['id']
       price = v['pricing']['standard']

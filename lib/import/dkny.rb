@@ -72,6 +72,7 @@ class Import::Dkny < Import::Demandware
     end
 
     data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

@@ -80,6 +80,7 @@ class Import::Donnakaran < Import::Demandware
     image = html.css('.product-image.main-image').first.attr('href')
 
     data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']

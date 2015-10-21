@@ -69,6 +69,7 @@ class Import::Truereligion < Import::Demandware
     image = images.shift
 
     data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
