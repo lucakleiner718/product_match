@@ -89,16 +89,15 @@ class ProductsController < ApplicationController
         products_ids = products_ids.where(brand_id: Brand.in_use.pluck(:id) )
       end
 
-      # selected_products_found = ProductSelect.where(user_id: current_user.id).where(decision: 'found').pluck(:product_id)
-      products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND product_selects.decision='found'").where('product_selects.id is null')
-      products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id AND product_selects2.decision!='found' AND product_selects2.user_id=#{current_user.id} AND product_selects2.created_at > '#{1.day.ago}'").where('product_selects.id is null')
-      # selected_products_found = ProductSelect.where(decision: 'found').pluck(:product_id)
-      # selected_products_nothing = ProductSelect.where(user_id: current_user.id).where.not(decision: 'found').where('created_at > ?', 1.day.ago).pluck(:product_id)
-      # selected_products = (selected_products_found + selected_products_nothing).uniq
+      # products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND product_selects.decision='found'").where('product_selects.id is null')
+      # products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id AND product_selects2.decision!='found' AND product_selects2.user_id=#{current_user.id} AND product_selects2.created_at > '#{1.day.ago}'").where('product_selects.id is null')
+      selected_products_found = ProductSelect.where(user_id: current_user.id).where(decision: 'found').pluck(:product_id)
+      selected_products_nothing = ProductSelect.where(user_id: current_user.id).where.not(decision: 'found').where('created_at > ?', 1.day.ago).pluck(:product_id)
+      selected_products = (selected_products_found + selected_products_nothing).uniq
 
-      # if selected_products.size > 0
-      #   products_ids = products_ids.where.not(id: selected_products)
-      # end
+      if selected_products.size > 0
+        products_ids = products_ids.where.not(id: selected_products)
+      end
 
       if params[:has_color] == 'green' && @brand
         products_ids = products_ids.where(id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq)
