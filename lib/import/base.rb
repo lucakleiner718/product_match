@@ -1,6 +1,3 @@
-# require 'faraday_middleware'
-# require 'open-uri'
-
 class Import::Base
 
   def normalize_brand brand_name
