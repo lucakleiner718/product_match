@@ -53,7 +53,7 @@ class Import::Base
   end
 
   def build_url url
-    url = "#{baseurl}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{'/' if url !~ /^\//}#{url}" if url !~ /^http/
     url
   end
 
@@ -95,6 +95,25 @@ class Import::Base
 
   def process_products_urls urls
     urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+  end
+
+  def self.perform
+    instance = self.new
+    instance.perform
+  end
+
+  def perform
+    urls = get_products_urls
+    spawn_products_urls urls
+  end
+
+  def get_products_urls
+    []
+  end
+
+  def spawn_products_urls urls
+    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+    log "spawned #{urls.size} urls"
   end
 
 end
