@@ -15,27 +15,22 @@ class Import::Helmutlang < Import::Demandware
     [
       'womens-all/all-items,default,sc.html', 'mens-all/mens-all,default,sc.html', 'fragrance/fragrance,default,pg.html',
     ].each do |url_part|
-      puts url_part
+      log url_part
       url = "#{baseurl}/#{url_part}"
       resp = open(url)
       html = Nokogiri::HTML(resp.read)
 
       urls = html.css('#search a').map{|a| a.attr('href').sub(/\?.*/, '')}.select{|a| a =~ /[A-Z0-9]+,default,pd\.html$/}
-      urls.uniq!
+
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    binding.pry
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1].split(',').first
 
     resp = get_request original_url
@@ -58,28 +53,15 @@ class Import::Helmutlang < Import::Demandware
     if page.match(/styleID: "([A-Z0-9]+)"/)
       product_id = page.match(/styleID: "([A-Z0-9]+)"/)[1]
     end
-    # product_id_param = product_id
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
     product_name = html.css('#pdpMain .product-name').first.text.strip
-    # category = html.css('#breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
-    # color_param = "dwvar_#{product_id_param}_color"
     images = html.css(".productimages img").map{|img| img.attr('src')}
     image_url = images.shift
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data_resp = data_resp.body.strip.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
-    begin
-      data = JSON.parse(data_resp)
-    rescue JSON::ParserError => e
-      return false
-    end
-
+    data = get_json product_id
+    return false unless data
     data['variations']['variants'].each do |v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -100,23 +82,7 @@ class Import::Helmutlang < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
-
-
 
 end

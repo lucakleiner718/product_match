@@ -5,11 +5,6 @@ class Import::Anyahindmarch < Import::Demandware
   def product_id_pattern; /(\d{13})\.html/i; end
   def brand_name_default; 'Anya Hindmarch'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     shop_page = get_request("#{baseurl}/Shop")
     shop_page_html = Nokogiri::HTML(shop_page.body)
@@ -17,14 +12,15 @@ class Import::Anyahindmarch < Import::Demandware
     categories += [
       'Wedding/For-The-Bride-and-Groom', 'Wedding/Honeymoon-and-Travel', 'Wedding/Gifts-for-the-Bridal-Party',
       'Wedding/Planning-and-Organising', 'Clutches'
-    ].map{|el| "http://www.anyahindmarch.com/#{el}/"}
+    ]
     categories.uniq.each do |category_url|
-      puts category_url
-      start = 0
+      log category_url
       size = 20
       urls = []
       while true
-        url = "#{category_url}?sz=#{size}&start=#{start}&format=ajaxscroll"
+        category_url = "#{baseurl}/#{category_url}" if category_url !~ /^http/
+        url = "#{category_url}?sz=#{size}&start=#{urls.size}&format=ajaxscroll"
+
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -32,23 +28,17 @@ class Import::Anyahindmarch < Import::Demandware
         break if products.size == 0 || urls.join('') == products.join('')
 
         urls += products
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]
       product_id_ean = true
@@ -74,9 +64,6 @@ class Import::Anyahindmarch < Import::Demandware
     #   url = "#{baseurl}#{url}" if url !~ /^http/
     # end
     # product_id_param = product_id
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
     product_name = html.css('#pdpMain .productinfo .productname').first.text.strip
@@ -107,9 +94,9 @@ class Import::Anyahindmarch < Import::Demandware
         image: image_url,
       }
     else
-      variants_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/en_GB/Product-GetVariants?pid=#{product_id}&format=json"
-      variants = JSON.parse(get_request(variants_url).body)
-      variants['variations']['variants'].each do |variant|
+      data = get_json product_id
+      return false unless data
+      data['variations']['variants'].each do |variant|
         ean = variant['id']
         size = variant['attributes']['size']
         price = variant['pricing']['standard']
@@ -129,23 +116,23 @@ class Import::Anyahindmarch < Import::Demandware
       end
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
+    process_results results
+  end
+
+  def process_results results, brand_name=nil
+    brand = Brand.get_by_name(brand_name)
+    if !brand && brand_name_default
+      brand = Brand.where(name: brand_name_default).first
+      brand.synonyms.push brand_name if brand_name
+      brand.save if brand.changed?
     end
 
     results.each do |row|
       product = Product.where(source: source, ean: row[:ean]).first_or_initialize
       product.attributes = row
-      product.brand_id = brand.id
+      product.brand_id = brand.id if brand
       product.save
     end
-
-    results
   end
 
 end

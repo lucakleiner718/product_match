@@ -4,164 +4,59 @@ class Import::Demandware < Import::Base
   def lang; 'default'; end
   def url_prefix_country; nil; end
   def url_prefix_lang; nil; end
+  def brand_name_default; nil; end
 
-  def source
-    URI(baseurl).host.sub(/^www\./,'')
+  def process_results results, brand_name=nil
+    brand = Brand.get_by_name(brand_name)
+    if !brand && brand_name_default
+      brand = Brand.where(name: brand_name_default).first
+      brand.synonyms.push brand_name if brand_name
+      brand.save if brand.changed?
+    end
+
+    results.each do |row|
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/)
+      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
+      product.attributes = row
+      product.brand_id = brand.id if brand
+      product.save
+    end
   end
 
-  # def self.perform website_url
-  #   instance = self.new
-  #   instance.perform website_url
-  # end
-  #
-  # def perform website_url
-  #
-  # end
-  #
-  # def process_url url
-  #   resp = Curl.get(url)
-  #   return false if resp.response_code != 200
-  #
-  #   page = resp.body
-  #   html = Nokogiri::HTML(page)
-  #
-  #   results = []
-  #
-  #   binding.pry
-  #
-  #   product_name = html.css('.product-name').text.strip
-  #   product_id = html.css('#container').attr('data-pid').text
-  #   param_product_id = product_id.gsub('_', '__').gsub('%2b', '%2B').gsub('+', '%2B')
-  #
-  #   category = html.css('.product-breadcrumbs li a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
-  #
-  #
-  #
-  #   colors = html.css('.product-variations .attribute .Color li.available a')
-  #   colors.each do |color|
-  #     color_name = color.text.strip
-  #     color_id = color.attr('data-color')
-  #
-  #     color_link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id.sub('+', '%2B')}&dwvar_#{param_product_id}_color=#{color_id}&format=ajax"
-  #     detail_color_page = Curl.get(color_link) do |http|
-  #       http.headers['Referer'] = url
-  #       http.headers['X-Requested-With'] = 'XMLHttpRequest'
-  #       http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-  #     end
-  #     color_html = Nokogiri::HTML(detail_color_page.body)
-  #     sizes = color_html.css('#va-size option').select{|r| r.attr('value') != ''}
-  #
-  #     if sizes.size > 0
-  #       sizes.each do |item|
-  #         size_name = item.text.strip
-  #         next if size_name =~ / - Out of Stock$/i
-  #
-  #         # begin
-  #         size_value = item.attr('value').match(/dwvar_#{param_product_id}_size=([^&]+)/i)[1]
-  #
-  #         # rescue => e
-  #         # 	binding.pry
-  #         # end
-  #
-  #         link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id.sub('+', '%2B')}&dwvar_#{param_product_id}_size=#{size_value}&dwvar_#{param_product_id}_color=#{color_id}&format=ajax"
-  #         puts link
-  #
-  #         # link = item.attr('value')
-  #         size_page = Curl.get(link) do |http|
-  #           http.headers['Referer'] = url
-  #           http.headers['X-Requested-With'] = 'XMLHttpRequest'
-  #           http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-  #         end
-  #
-  #         next if size_page.response_code != 200
-  #
-  #         size_page_body = size_page.body
-  #         # File.write "tmp/html-response-#{Time.now.to_i}.html", size_page_body
-  #         size_html = Nokogiri::HTML(size_page_body)
-  #
-  #         # begin
-  #         price = size_html.css('.price-sales').first.text.strip
-  #         # rescue => e
-  #         # 	binding.pry
-  #         # end
-  #
-  #         upc = size_html.css('#pid').first.attr('value')
-  #         binding.pry if upc !~ /^\d+$/
-  #
-  #         results << {
-  #           product_name: product_name,
-  #           category: category,
-  #           price: price,
-  #           color: color_name,
-  #           size_name: size_name,
-  #           size_value: URI.decode(size_value),
-  #           style_id: product_id,
-  #           upc: upc,
-  #           original_url: url
-  #         }
-  #       end
-  #     else
-  #       size = nil
-  #       upc = html.css('#pid').first.attr('value')
-  #       price = html.css('.price-sales').first.text.strip
-  #
-  #       results << {
-  #         product_name: product_name,
-  #         category: category,
-  #         price: price,
-  #         color: color_name,
-  #         size_name: size,
-  #         size_value: '',
-  #         style_id: product_id,
-  #         upc: upc,
-  #         original_url: url
-  #       }
-  #     end
-  #   end
-  #
-  #   results
-  # end
-  #
-  # # @example:
-  # #   Parser::Dvf.perform_urls File.read('tmp/source2.csv').split("\n")
-  # def self.perform_urls urls
-  #   instance = self.new
-  #   results = []
-  #   skipped = 0
-  #   # progress = ProgressBar.new
-  #
-  #   urls.each do |url|
-  #     data = instance.process url
-  #     if data
-  #       results.concat data
-  #     else
-  #       skipped += 1
-  #     end
-  #     # progress.increment!
-  #   end
-  #   puts "Skipped: #{skipped}"
-  #   instance.save_data results
-  # end
-  #
-  # def out_of_stock
-  #   @out_of_stock
-  # end
-  #
-  # def out_of_stock=out_of_stock
-  #   @out_of_stock = out_of_stock
-  # end
-  #
-  # def save_data data
-  #   header = data.first.keys.map(&:to_s).map(&:titleize)
-  #   csv_string = CSV.generate do |csv|
-  #     csv << header
-  #     data.each do |row|
-  #       csv << row.values
-  #     end
-  #   end
-  #   filename = "tmp/demandware-#{NAME}-#{Time.now.to_i}.csv"
-  #   File.write filename, csv_string
-  #
-  #   filename
-  # end
+  def process_results_source_id results, brand_name=nil
+    brand = Brand.get_by_name(brand_name)
+    if !brand && brand_name_default
+      brand = Brand.where(name: brand_name_default).first
+      brand = Brand.create(name: brand_name_default) unless brand
+      brand.synonyms.push brand_name if brand_name
+      brand.save if brand.changed?
+    end
+
+    results.each do |row|
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/)
+      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product.attributes = row
+      product.brand_id = brand.id if brand
+      product.save
+    end
+  end
+
+  def get_json product_id
+    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
+    data_resp = get_request(data_url)
+    body = data_resp.body.strip
+    return false if body.blank?
+
+    if body !~ /\A\{\s?"/
+      body = body.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
+    end
+
+    begin
+      json = JSON.parse(body)
+    rescue JSON::ParserError => e
+      return false
+    end
+    json
+  end
+
 end

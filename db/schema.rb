@@ -81,10 +81,11 @@ ActiveRecord::Schema.define(version: 20151019114259) do
     t.string   "source_name"
     t.string   "source_id"
     t.datetime "collected_at"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
     t.integer  "brand_id"
     t.json     "data"
+    t.integer  "period",       default: 0, null: false
   end
 
   add_index "product_sources", ["brand_id"], name: "index_product_sources_on_brand_id", using: :btree
@@ -123,7 +124,7 @@ ActiveRecord::Schema.define(version: 20151019114259) do
     t.string   "category"
     t.string   "url"
     t.string   "image"
-    t.text     "additional_images", default: [],                array: true
+    t.text     "additional_images", default: [],                 array: true
     t.string   "price"
     t.string   "price_sale"
     t.string   "color"
@@ -138,10 +139,10 @@ ActiveRecord::Schema.define(version: 20151019114259) do
     t.string   "item_group_id"
     t.string   "google_category"
     t.text     "description"
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
     t.integer  "brand_id"
-    t.boolean  "match",             default: true
+    t.boolean  "match",             default: false
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree

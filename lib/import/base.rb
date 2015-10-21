@@ -19,8 +19,16 @@ class Import::Base
     retailer
   end
 
+  def baseurl
+    nil
+  end
+
   def source
-    self.class.name.match(/\:\:(.*)/)[1].downcase
+    if baseurl
+      URI(baseurl).host.sub(/^www\./,'')
+    else
+      self.class.name.match(/\:\:(.*)/)[1].downcase
+    end
   end
 
   def csv_chunk_size
@@ -45,7 +53,7 @@ class Import::Base
   end
 
   def build_url url
-    url = "#{baseurl}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{'/' if url !~ /^\//}#{url}" if url !~ /^http/
     url
   end
 
@@ -75,6 +83,37 @@ class Import::Base
     elsif product_name.downcase =~ /^men's\s/
       'Male'
     end
+  end
+
+  def self.process_url url
+    self.new.process_url url
+  end
+
+  def log str
+    Rails.logger.debug str
+  end
+
+  def process_products_urls urls
+    urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+  end
+
+  def self.perform
+    instance = self.new
+    instance.perform
+  end
+
+  def perform
+    urls = get_products_urls
+    spawn_products_urls urls
+  end
+
+  def get_products_urls
+    []
+  end
+
+  def spawn_products_urls urls
+    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+    log "spawned #{urls.size} urls"
   end
 
 end

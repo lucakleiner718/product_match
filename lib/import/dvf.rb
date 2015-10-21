@@ -5,22 +5,15 @@ class Import::Dvf < Import::Demandware
   def product_id_pattern; /\/([^\.\/]+)\.html/; end
   def brand_name_default; 'Diane von Furstenberg'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'new-arrivals', 'dresses', 'designer-clothing', 'designer-handbags', 'shoes', 'accessories', 'sale'
     ].each do |url_part|
-      puts url_part
-      start = 0
+      log url_part
       size = 99
       urls = []
-      binding.pry
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{start}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -32,24 +25,17 @@ class Import::Dvf < Import::Demandware
           url = "#{baseurl}#{url}" if url !~ /^http/
           url
         end
-
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")
@@ -66,9 +52,6 @@ class Import::Dvf < Import::Demandware
     product_id_param = product_id.gsub('_', '__').gsub('%2b', '%2B').gsub('+', '%2B')
     url = "#{baseurl}#{url}" if url !~ /^http/
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
 
     product_name = html.css('#product-content .product-name').first.text.sub(/^dvf/i, '').strip
@@ -76,10 +59,8 @@ class Import::Dvf < Import::Demandware
     color_param = "dwvar_#{product_id_param}_color"
     image_url = html.css("#pdp-pinterest-container img").first.attr('src')
 
-    data_url = "#{baseurl}/on/demandware.store/#{baseurl}/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
+    data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -103,23 +84,7 @@ class Import::Dvf < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

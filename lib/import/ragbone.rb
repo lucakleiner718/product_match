@@ -1,27 +1,19 @@
 class Import::Ragbone < Import::Demandware
 
-  BASEURL = 'https://www.rag-bone.com'
-  SUBDIR =  'Sites-ragandbone-Site'
-  NAME =    'ragbone'
-  PRODUCT_ID_PATTERN = /([a-z0-9]+)\.html/i
-  BRAND_NAME = 'Rag & Bone'
-  SOURCE = 'rag-bone.com'
-
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
+  def baseurl; 'https://www.rag-bone.com'; end
+  def subdir; 'ragandbone'; end
+  def product_id_pattern; /([a-z0-9]+)\.html/i; end
+  def brand_name_default; 'Rag & Bone'; end
 
   def perform
     [
       'womens', 'mens', 'sale'
     ].each do |url_part|
-      puts url_part
-      start = 0
+      log url_part
       size = 60
       urls = []
       while true
-        url = "#{BASEURL}/#{url_part}/?sz=#{size}&start=#{start}&format=page-element"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -30,30 +22,23 @@ class Import::Ragbone < Import::Demandware
 
         urls += products.map do |item|
           url = item.css('.product-image a').first.attr('href').sub(/\?.*/, '')
-          url = "#{BASEURL}#{url}" if url !~ /^http/
+          url = "#{baseurl}#{url}" if url !~ /^http/
           url
         end
-
-        start += products.size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    log "Processing url: #{original_url}"
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = get_request("#{BASEURL}/#{product_id}.html")
+    resp = get_request("#{baseurl}/#{product_id}.html")
     return false if resp.response_code != 200
 
     url = resp.last_effective_url
@@ -63,25 +48,17 @@ class Import::Ragbone < Import::Demandware
 
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = url.match(product_id_pattern)[1]
     product_id_param = product_id
-    url = "#{BASEURL}#{url}" if url !~ /^http/
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = BRAND_NAME# if brand_name.downcase == 'n/a'
+    url = "#{baseurl}#{url}" if url !~ /^http/
 
     results = []
-
     product_name = html.css('#product-content .product-name').first.text.strip
-
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
-
     color_param = "dwvar_#{product_id_param}_color"
 
-    data_url = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
+    data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -106,23 +83,7 @@ class Import::Ragbone < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: BRAND_NAME).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: SOURCE, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

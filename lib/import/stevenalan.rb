@@ -1,9 +1,10 @@
-class Import::Truereligion < Import::Demandware
+class Import::Stevenalan < Import::Demandware
 
-  def baseurl; 'http://www.truereligion.com'; end
-  def subdir; 'TrueReligion'; end
-  def product_id_pattern; /([A-Z0-9]+)\.html/; end
-  def brand_name_default; 'True Religion'; end
+  def baseurl; 'http://www.stevenalan.com'; end
+  def subdir; 'stevenalan'; end
+  def lang; 'default'; end
+  def product_id_pattern; /\/([^\/]+)\.html/; end
+  def brand_name_default; 'Steven Alan'; end
 
   def self.perform
     instance = self.new
@@ -12,11 +13,12 @@ class Import::Truereligion < Import::Demandware
 
   def perform
     [
-      'mens', 'womens', 'kids',
+      'New-Arrivals', 'Women%27s-2', 'Men%27s-2', 'Jewelry', 'Kid%27s', 'Home-Store', 'Sale-1'
     ].each do |url_part|
       log url_part
-      size = 60
       urls = []
+      size = 50
+
       while true
         url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
         resp = get_request(url)
@@ -49,23 +51,36 @@ class Import::Truereligion < Import::Demandware
     url = resp.last_effective_url
 
     page = resp.body
+    return false if page =~ /PAGE NOT FOUND/i
     html = Nokogiri::HTML(page)
 
-    canonical_url = html.css('link[rel="canonical"]').first.attr('href')
-    canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
-    if canonical_url != url
-      product_id = canonical_url.match(product_id_pattern)[1]
-    end
+    # canonical_url = html.css('link[rel="canonical"]').first.attr('href')
+    # canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
+    # if canonical_url != url
+    #   product_id = canonical_url.match(product_id_pattern)[1]
+    # end
 
-    product_id_param = product_id
+    product_id_param = product_id.gsub('_', '__').gsub('.', '%2e')
 
     results = []
-    product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
-    category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
-    color_param = "dwvar_#{product_id_param}_color"
 
-    images = html.css('.product-primary-image img').map{|img| img.attr('src')}
-    image = images.shift
+    product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
+
+    category = nil
+
+    images = html.css('.attribute .color a').inject({}) do |obj, a|
+      color_id = a.attr('href').match(/_color=([^&]*)&/)
+      if color_id && color_id[1] && color_id[1].present?
+        color_id = color_id[1]
+      else
+        color_id = html.css('.product-primary-image img').first.attr('src').match(/#{product_id.gsub('.', '').gsub('%2F', '')}_([^_]+)_/)[1]
+      end
+      obj[color_id] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1]
+      obj
+    end
+
+    color_param = "dwvar_#{product_id_param}_color"
+    gender = process_title_for_gender(product_name)
 
     data = get_json product_id
     return false unless data
@@ -81,6 +96,7 @@ class Import::Truereligion < Import::Demandware
       size = v['attributes']['size']
       color_id = k.split('|').inject({}){|obj, el| a = el.split('-'); obj[a[0]] = a[1]; obj}['color']
       color_url = "#{url}?#{color_param}=#{color_id}"
+      image_url = images[color_id]
 
       results << {
         title: product_name,
@@ -91,8 +107,9 @@ class Import::Truereligion < Import::Demandware
         size: size,
         upc: upc,
         url: color_url,
-        image: image,
+        image: image_url,
         style_code: product_id,
+        gender: gender
       }
     end
 

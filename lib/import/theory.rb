@@ -5,18 +5,13 @@ class Import::Theory < Import::Demandware
   def product_id_pattern; /\/([^\.\/]+)\.html/; end
   def brand_name_default; 'Theory'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'women-shop-all/womens-shop-all,default,sc.html', 'mens-shop-all/mens-shop-all,default,sc.html',
       'accessories-womens-shopall1/accessories-womens-shopall1,default,sc.html',
       'accessories-mens-shopall/accessories-mens-shopall,default,sc.html'
     ].each do |url_part|
-      puts url_part
+      log url_part
       urls = []
       url = "/#{url_part}"
       resp = get_request(url)
@@ -30,22 +25,16 @@ class Import::Theory < Import::Demandware
         url
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1].split(',').first
-    original_id = product_id
 
     resp = get_request original_url
     return false if resp.response_code != 200
@@ -65,10 +54,6 @@ class Import::Theory < Import::Demandware
     if page.match(/styleID: "([A-Z0-9]+)"/)
       product_id = page.match(/styleID: "([A-Z0-9]+)"/)[1]
     end
-    # product_id_param = product_id
-
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
 
     results = []
 
@@ -78,15 +63,8 @@ class Import::Theory < Import::Demandware
     images = html.css("#s7container img").map{|img| img.attr('src')}
     image_url = images.shift
 
-    data_url = "#{baseurl}/on/demandware.store/#{subdir}/default/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data_resp = data_resp.body.strip.gsub(/inStockDate\:\s\"[^"]+\",/, '').gsub(/(['"])?([a-zA-Z0-9_]+)(['"])?:/, '"\2":')
-    begin
-      data = JSON.parse(data_resp)
-    rescue JSON::ParserError => e
-      return false
-    end
-
+    data = get_json product_id
+    return false unless data
     data['variations']['variants'].each do |v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -110,25 +88,7 @@ class Import::Theory < Import::Demandware
       }
     end
 
-    if brand_name.present?
-      brand = Brand.get_by_name(brand_name)
-      unless brand
-        brand = Brand.where(name: brand_name_default).first
-        brand.synonyms.push brand_name
-        brand.save if brand.changed?
-      end
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
-
-
 
 end

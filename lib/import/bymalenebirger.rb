@@ -17,7 +17,7 @@ class Import::Bymalenebirger < Import::Demandware
     [
       'nyheder', 'inspiration', 'shop-by-look', 'accessories-1', 'sko-1', 'tasker-2'
     ].each do |url_part|
-      puts url_part
+      log url_part
       urls = []
       size = 50
 
@@ -32,11 +32,10 @@ class Import::Bymalenebirger < Import::Demandware
         urls.concat products
       end
 
-      urls = urls.map{|url| url =~ /^http/ ? url : "#{baseurl}#{url}"}.map{|url| url.sub(/\?.*/, '') }.uniq
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      puts "spawned #{urls.size} urls"
-      # urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
@@ -45,7 +44,7 @@ class Import::Bymalenebirger < Import::Demandware
   end
 
   def process_url original_url
-    puts "Processing url: #{original_url}"
+    log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{product_id}.html")
@@ -71,23 +70,18 @@ class Import::Bymalenebirger < Import::Demandware
 
     product_id_param = product_id
 
-    # brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
-    brand_name = brand_name_default# if brand_name.downcase == 'n/a'
-
     results = []
 
     product_name = html.css('#product-content .product-name').first.text.strip
 
     category = nil
 
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
-    data_resp = get_request(data_url)
-    data = JSON.parse(data_resp.body.strip)
-
     images = html.css('.attribute .color a').inject({}){|obj, a| img = a.attr('data-img'); color_id = img.match(/_([^_]+)_main\.jpg/)[1]; obj[color_id] = img ; obj}
     gender = process_title_for_gender(product_name)
     color_param = "dwvar_#{product_id_param}_color"
 
+    data = get_json product_id
+    return false unless data
     data.each do |k, v|
       upc = v['id']
       price = v['pricing']['standard']
@@ -117,21 +111,7 @@ class Import::Bymalenebirger < Import::Demandware
       }
     end
 
-    brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results results
   end
 
 end

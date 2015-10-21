@@ -1,9 +1,10 @@
 class Import::Katespade < Import::Demandware
 
-  BASEURL = 'https://www.katespade.com'
-  SUBDIR =  'Sites-Shop-Site'
-  NAME =    'katespade'
-  PRODUCT_ID_PATTERN = /\/([a-z0-9\-]+)\.html/i
+  def baseurl; 'https://www.katespade.com'; end
+  def subdir; 'Shop'; end
+  def product_id_pattern; /\/([a-z0-9\-]+)\.html/i; end
+  def brand_name_default; 'Kate Spade'; end
+  def lang; 'en_US'; end
 
   def self.perform
     [
@@ -14,7 +15,8 @@ class Import::Katespade < Import::Demandware
       'kids/girls-7-14/', 'kids/toddlers-2-6/', 'babies-layettes-3m-24m/', 'kids/kids-accessories/',
       'home/dining/view-all/', 'home/bedding/', 'home/home-accents-decor/', 'home/desk-stationery/'
     ].each do |url_part|
-      url = "#{BASEURL}/#{url_part}"
+      log url_part
+      url = "#{baseurl}/#{url_part}"
       resp = Curl.get(url)
       html = Nokogiri::HTML(resp.body)
       elements = html.css('#search-result-items li.grid-tile:not(.oas-tile) .product-tile:not(.product-set-tile)')
@@ -32,22 +34,18 @@ class Import::Katespade < Import::Demandware
         urls.concat html2.css('.product-set-list .product-set-item').map{|e| e.css('a.item-name').first.attr('href')}
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Katespade', 'process_url', u }
-      # urls.each {|u| ProcessImportUrlWorker.new.perform 'Import::Katespade', 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
-    puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    log "Processing url: #{original_url}"
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = Curl.get("#{BASEURL}/#{product_id}.html") do |http|
+    resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
       http.follow_location = true
     end
     return false if resp.response_code != 200
@@ -59,14 +57,11 @@ class Import::Katespade < Import::Demandware
 
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = url.match(product_id_pattern)[1]
 
     results = []
 
     product_name = html.css('.product-name').text.strip
-
-    # param_product_id = product_id.gsub('_', '__').gsub('%2b', '%2B').gsub('+', '%2B')
-
     category = html.css('.breadcrumb li a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
     colors = html.css('.product-variations .attribute .Color li:not(.visually-hidden)')
@@ -79,7 +74,7 @@ class Import::Katespade < Import::Demandware
 
       image_url = color.attr('data-pimage')
 
-      color_link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id}&#{color_param}=#{color_id}&format=ajax"
+      color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&#{color_param}=#{color_id}&format=ajax"
       detail_color_page = Curl.get(color_link) do |http|
         http.headers['Referer'] = url
         http.headers['X-Requested-With'] = 'XMLHttpRequest'
@@ -93,7 +88,7 @@ class Import::Katespade < Import::Demandware
           size_name = item.text.strip
           size_value = item.attr('href').match(/dwvar_#{product_id}_size=([^&]+)/i)[1]
 
-          link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id}&dwvar_#{product_id}_size=#{size_value}&#{color_param}=#{color_id}&format=ajax"
+          link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&dwvar_#{product_id}_size=#{size_value}&#{color_param}=#{color_id}&format=ajax"
           puts link
 
           size_page = Curl.get(link) do |http|
@@ -109,7 +104,7 @@ class Import::Katespade < Import::Demandware
           price = size_html.css('.price-sales').first.text.strip.sub(/^\$/, '').sub(',', '')
 
           upc = size_html.css('#pid').first.attr('value')
-          binding.pry if upc !~ /^\d+$/
+          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ /^\d+$/
 
           results << {
             title: product_name,
@@ -140,17 +135,7 @@ class Import::Katespade < Import::Demandware
       end
     end
 
-    brand = Brand.get_by_name('Kate Spade')
-    source = 'katespade.com'
-
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id
-      product.save
-    end
-
-    results
+    process_results_source_id results
   end
 
 end

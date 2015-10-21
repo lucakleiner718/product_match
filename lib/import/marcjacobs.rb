@@ -1,9 +1,9 @@
 class Import::Marcjacobs < Import::Demandware
 
-  BASEURL = 'https://www.marcjacobs.com'
-  SUBDIR =  'Sites-marcjacobs-Site'
-  NAME =    'marcjacobs'
-  PRODUCT_ID_PATTERN = /\/([a-z0-9\-\.\+]+)\.html/i
+  def baseurl; 'https://www.marcjacobs.com'; end
+  def subdir; 'marcjacobs'; end
+  def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
+  def brand_name_default; 'Marc Jacobs'; end
 
   def self.perform
     [
@@ -16,11 +16,11 @@ class Import::Marcjacobs < Import::Demandware
       'men/sunglasses',
       'sale'
     ].each do |url_part|
-      start = 0
+      log url_part
       size = 60
       urls = []
       while true
-        url = "#{BASEURL}/#{url_part}/?sz=#{size}&start=#{start}&format=page-element"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
         resp = Curl.get(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -30,26 +30,20 @@ class Import::Marcjacobs < Import::Demandware
         urls += products.map do |item|
           item.css('.product-image a').first.attr('href')
         end
-
-        start += size
       end
 
-      urls.uniq!
+      urls = process_products_urls urls
 
       urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Marcjacobs', 'process_url', u }
-      # urls.each {|u| ProcessImportUrlWorker.new.perform 'Import::Katespade', 'process_url', u }
+      log "spawned #{urls.size} urls"
     end
-  end
-
-  def self.process_url url
-    self.new.process_url url
   end
 
   def process_url original_url
     puts "Processing url: #{original_url}"
-    product_id = original_url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = original_url.match(product_id_pattern)[1]
 
-    resp = Curl.get("#{BASEURL}/#{product_id}.html") do |http|
+    resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
       http.follow_location = true
     end
     return false if resp.response_code != 200
@@ -61,9 +55,9 @@ class Import::Marcjacobs < Import::Demandware
 
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    product_id = url.match(PRODUCT_ID_PATTERN)[1]
+    product_id = url.match(product_id_pattern)[1]
     product_id_param = product_id.gsub('+', '%20').gsub('.', '%2e')
-    url = "#{BASEURL}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{url}" if url !~ /^http/
 
     brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
     brand_name = 'Marc Jacobs' if brand_name.downcase == 'n/a'
@@ -86,7 +80,7 @@ class Import::Marcjacobs < Import::Demandware
 
       image_url = "http://i1.adis.ws/i/Marc_Jacobs/#{product_id_param}_#{color_id}_MAIN?w=340&h=510"
 
-      color_link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id_param}&#{color_param}=#{color_id}&format=ajax"
+      color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{color_param}=#{color_id}&format=ajax"
       detail_color_page = Curl.get(color_link) do |http|
         http.headers['Referer'] = url
         http.headers['X-Requested-With'] = 'XMLHttpRequest'
@@ -101,7 +95,7 @@ class Import::Marcjacobs < Import::Demandware
           size_param = "dwvar_#{product_id_param}_size"
           size_value = item.attr('value').match(/#{size_param}=([^&]+)/i)[1]
 
-          link = "#{BASEURL}/on/demandware.store/#{SUBDIR}/default/Product-Variation?pid=#{product_id_param}&#{size_param}=#{size_value}&#{color_param}=#{color_id}&format=ajax"
+          link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{size_param}=#{size_value}&#{color_param}=#{color_id}&format=ajax"
           puts link
 
           size_page = Curl.get(link) do |http|
@@ -123,7 +117,7 @@ class Import::Marcjacobs < Import::Demandware
           end
 
           upc = size_html.css('#pid').first.attr('value')
-          binding.pry if upc !~ /^\d+$/
+          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ /^\d+$/
 
           results << {
             title: product_name,
@@ -155,22 +149,23 @@ class Import::Marcjacobs < Import::Demandware
       end
     end
 
+    process_results results
+  end
+
+  def process_results results, brand_name=nil
     brand = Brand.get_by_name(brand_name)
-    unless brand
-      brand = Brand.where(name: 'Marc Jacobs').first
-      brand.synonyms.push brand_name
-      brand.save
+    if !brand && brand_name_default
+      brand = Brand.where(name: brand_name_default).first
+      brand.synonyms.push brand_name if brand_name
+      brand.save if brand.changed?
     end
-    source = 'marcjacobs.com'
 
     results.each do |row|
       product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
-      product.brand_id = brand.id
+      product.brand_id = brand.id if brand
       product.save
     end
-
-    results
   end
 
 end
