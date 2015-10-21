@@ -18,7 +18,7 @@ class Import::Saksfifthavenue < Import::Base
 
         brand_urls.concat products
       end
-      log "added brand urls #{brand_urls}"
+      log "added brand urls #{brand_urls.size}"
       urls.concat brand_urls
     end
     urls
