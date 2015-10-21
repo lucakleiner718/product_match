@@ -18,8 +18,10 @@ class Import::Saksfifthavenue < Import::Base
 
         brand_urls.concat products
       end
+      log "added brand urls #{brand_urls}"
       urls.concat brand_urls
     end
+    urls
   end
 
   def process_url original_url
