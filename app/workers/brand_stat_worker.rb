@@ -1,7 +1,7 @@
 class BrandStatWorker
 
   include Sidekiq::Worker
-  sidekiq_options unqiue: :until_executed
+  sidekiq_options unqiue: :until_executed, unique_args: ->(args) { [ args.first ] }
 
   def perform brand_id
     brand = Brand.find(brand_id)

@@ -78,12 +78,8 @@ class ProductsController < ApplicationController
 
     product_id = params[:product_id]
     unless product_id
-      products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50).order('title, color, size')
-      if params[:brand_id]
-        @brand = Brand.find(params[:brand_id])
-      else
-        @brand = Brand.in_use.first
-      end
+      products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50)
+      @brand = params[:brand_id] ? Brand.find(params[:brand_id]) : Brand.in_use.first
       products_ids = products_ids.where(brand_id: @brand.id)
 
       products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND product_selects.decision='found'").where('product_selects.id is null')
@@ -99,6 +95,7 @@ class ProductsController < ApplicationController
         products_ids = products_ids.where(id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq)
       end
 
+      products_ids = products_ids.order('title, color')
       product_id = products_ids.first.try(:id)
     end
     if product_id
