@@ -139,6 +139,9 @@ class ProductsController < ApplicationController
     if params[:brand]
       brands = brands.where('name ILIKE ?', "%#{params[:brand]}%")
     end
+    if params[:brand_id]
+      brands = brands.where(id: params[:brand_id])
+    end
 
     if params[:sort] =~ /^stats\./
       col = params[:sort].match(/^stats\.(.*)$/)[1]
