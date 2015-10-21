@@ -2,11 +2,6 @@ class Import::Herroom < Import::Base
 
   def baseurl; 'http://www.herroom.com'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     resp = get_request("#{baseurl}/brands.aspx")
     html = Nokogiri::HTML(resp.body)

@@ -8,11 +8,6 @@ class Import::Canadagoose < Import::Demandware
   def url_prefix_country; 'ca'; end
   def url_prefix_lang; 'en'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def get_products_urls
     urls = []
     [
