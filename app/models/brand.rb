@@ -60,16 +60,16 @@ class Brand < ActiveRecord::Base
       WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
-    sql = "
-      SELECT count(id), source
+    amounts = Product.connection.execute("
+      SELECT count(distinct(upc)), source
       FROM (
-        SELECT *
+        SELECT upc, source
         FROM products
-        WHERE brand_id=#{Brand.sanitize self.id} AND source != 'shopbop' AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+        WHERE brand_id=#{Brand.sanitize self.id} AND source != 'shopbop' AND
+          ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
       ) AS products
       GROUP BY source
-    "
-    amounts = Product.connection.execute(sql).to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
+    ").to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
 
     shopbop_nothing_size = ProductSelect.connection.execute("
       SELECT count(distinct(product_id)) AS amount
