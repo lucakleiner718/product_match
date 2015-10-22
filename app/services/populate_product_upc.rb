@@ -21,7 +21,10 @@ class PopulateProductUpc
     gtin = nil
     gtin = selected.upc if !gtin && selected.upc.present?
     gtin = selected.ean if !gtin && selected.ean.present?
-    return false unless gtin
+    unless gtin
+      product_select.delete
+      return false
+    end
 
     ActiveRecord::Base.transaction do
       # update product with new upc
@@ -50,8 +53,19 @@ class PopulateProductUpc
   # Return ids, which can be populated with upc, using selects from match page (found)
   # @return [array] of Product ids
   def for_populate
+    decision = 'found'
     products = {}
-    ProductSelect.joins('LEFT JOIN product_upcs ON product_upcs.product_select_id=product_selects.id').where("product_upcs.id is null and decision='found'").pluck(:product_id, :decision).each do |product_id, decision|
+    products_ids = ProductSelect.connection.execute("
+      SELECT product_selects.product_id
+      FROM (
+        SELECT distinct(product_id)
+        FROM product_selects
+        WHERE decision='#{decision}'
+      ) as product_selects
+      LEFT JOIN product_upcs ON product_upcs.product_id=product_selects.product_id
+      WHERE product_selects.product_id is not null and product_upcs.id is null
+    ").to_a.map{|r| r['product_id']}
+    products_ids.each do |product_id|
       products[product_id] ||= {}
       products[product_id][decision] ||= 0
       products[product_id][decision] += 1
