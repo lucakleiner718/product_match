@@ -67,7 +67,7 @@ class Import::Herroom < Import::Base
         title: title,
         brand: brand,
         category: category,
-        price: (row['SalePrice'] == '$0.00' ? price : row['SalePrice']),
+        price: (row['SalePrice'] == '$0.00' ? price : row['SalePrice']).sub(/^\$/, ''),
         color: row['ColorName'],
         size: row['Size'],
         upc: row['SKU'],
