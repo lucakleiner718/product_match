@@ -1,7 +1,7 @@
 class ImportHerroomWorker
 
   include Sidekiq::Worker
-  sidekiq_options unqiue: :until_executed, retry: true
+  sidekiq_options unqiue: true, retry: true
 
   def perform url
     resp = Curl.get(url)

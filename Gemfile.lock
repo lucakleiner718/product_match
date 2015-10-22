@@ -291,7 +291,7 @@ GEM
       sidekiq (>= 2.16.0)
     sidekiq-statistic (1.1.0)
       sidekiq (~> 3.3, >= 3.3.4)
-    sidekiq-unique-jobs (4.0.4)
+    sidekiq-unique-jobs (3.0.15)
       sidekiq (>= 2.6)
     simple_form (3.2.0)
       actionpack (~> 4.0)
@@ -381,7 +381,7 @@ DEPENDENCIES
   sidekiq (~> 3.5.0)
   sidekiq-failures (~> 0.4.5)
   sidekiq-statistic
-  sidekiq-unique-jobs (~> 4.0)
+  sidekiq-unique-jobs (~> 3.0)
   simple_form
   sinatra
   smarter_csv

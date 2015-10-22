@@ -1,7 +1,7 @@
 class CollectShopbopDataWorker
 
   include Sidekiq::Worker
-  sidekiq_options unqiue: :until_executed
+  sidekiq_options unqiue: true
 
   def perform
     Import::Shopbop.perform
