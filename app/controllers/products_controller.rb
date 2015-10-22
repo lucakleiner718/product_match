@@ -73,6 +73,15 @@ class ProductsController < ApplicationController
     send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
+  def get_for_match brand_id
+    products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50)
+    products_ids = products_ids.where(brand_id: brand_id)
+    products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND product_selects.decision='found'").where('product_selects.id is null')
+    products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id AND product_selects2.decision!='found' AND product_selects2.user_id=#{User.first.id} AND product_selects2.created_at > '#{1.day.ago}'").where('product_selects2.id is null')
+    products_ids = products_ids.order('title, color')
+    product_id = products_ids.first.try(:id)
+  end
+
   def match
     @brands_choose = Brand.in_use.order(:name)
 
