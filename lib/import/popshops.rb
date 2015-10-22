@@ -141,7 +141,7 @@ class Import::Popshops < Import::Base
       r.search('attributes attribute').each do |attribute|
         attr_name = attribute.attr('name')
         if attr_name.in?(['upc', 'mpn', 'ean'])
-          item[attr_name.to_sym] = attribute.attr('value')
+          item[attr_name.to_sym] = attribute.attr('value') if attribute.attr('value').present?
         end
       end
 

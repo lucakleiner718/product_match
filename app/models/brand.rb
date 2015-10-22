@@ -60,6 +60,13 @@ class Brand < ActiveRecord::Base
       WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
+    shopbop_nothing_size = ProductSelect.connection.execute("
+      SELECT count(distinct(product_id)) AS amount
+      FROM product_selects AS ps
+      LEFT JOIN products AS pr ON pr.id=ps.product_id
+      WHERE ps.decision IN ('nothing', 'no-size', 'no-color') AND pr.brand_id=#{Brand.sanitize self.id}
+      ").to_a.first['amount'].to_i
+
     amounts_uniq = Product.connection.execute("
       SELECT count(total)
       FROM (
@@ -81,13 +88,6 @@ class Brand < ActiveRecord::Base
       ) AS products
       GROUP BY source
     ").to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
-
-    shopbop_nothing_size = ProductSelect.connection.execute("
-      SELECT count(distinct(product_id)) AS amount
-      FROM product_selects AS ps
-      LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision IN ('found', 'no-size', 'no-color') AND pr.brand_id=#{Brand.sanitize self.id}
-    ").to_a.first['amount'].to_i
 
     {
       shopbop_size: Product.where(brand_id: self.id).shopbop.size,

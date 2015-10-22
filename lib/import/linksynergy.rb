@@ -120,7 +120,6 @@ class Import::Linksynergy < Import::Base
         image: r[:image],
         brand: brand,
         style_code: r[:style_code],
-        upc: r[:gtin],
         size: r[:size],
         color: r[:color],
         retailer: @retailer,
@@ -129,6 +128,8 @@ class Import::Linksynergy < Import::Base
         description: r[:description_full],
         gender: gender
       }
+
+      item[:upc] = r[:gtin] if r[:gtin].present?
 
       items << item
     end
