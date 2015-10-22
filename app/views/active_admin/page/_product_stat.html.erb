@@ -1,0 +1,24 @@
+<table class="index_table">
+<thead>
+<tr>
+  <th>User</th>
+  <th>Items Matched</th>
+  <th>Items Nothing</th>
+  <th>Items No Color</th>
+  <th>Items No Size</th>
+</tr>
+</thead>
+<tbody>
+<% rows.each do |user_id, selects| %>
+<tr>
+  <td><%= users[user_id] || 'N/A' %></td>
+  <td><%= selects['found'] || 0 %></td>
+  <td><%= selects['nothing'] || 0 %></td>
+  <td><%= selects['no-color'] || 0 %></td>
+  <td><%= selects['no-size'] || 0 %></td>
+</tr>
+<% end %>
+</tbody>
+</table>
+<br>
+<div id="stat-chart" style="width: 600px;height: 400px;" data-matched="<%= chart[:matched].to_json %>"></div>
