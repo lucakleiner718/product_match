@@ -57,7 +57,7 @@ class Brand < ActiveRecord::Base
       SELECT count(distinct(product_id)) as amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision='found' AND pr.brand_id=#{49}
+      WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
     # shopbop_matched_size
