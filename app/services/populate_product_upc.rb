@@ -10,7 +10,10 @@ class PopulateProductUpc
 
     product = Product.find(product_id)
 
-    return false if product.upc.present?
+    if product.upc.present?
+      ProductSelect.where(product_id: product.id).delete_all
+      return false
+    end
 
     product_select = ProductSelect.where(product_id: product.id, decision: :found).first
     selected = product_select.selected
@@ -48,7 +51,7 @@ class PopulateProductUpc
   # @return [array] of Product ids
   def for_populate
     products = {}
-    ProductSelect.joins('LEFT JOIN product_upcs ON product_upcs.product_select_id=product_selects.id').where('product_upcs.id is null').pluck(:product_id, :decision).each do |product_id, decision|
+    ProductSelect.joins('LEFT JOIN product_upcs ON product_upcs.product_select_id=product_selects.id').where("product_upcs.id is null and decision='found'").pluck(:product_id, :decision).each do |product_id, decision|
       products[product_id] ||= {}
       products[product_id][decision] ||= 0
       products[product_id][decision] += 1
