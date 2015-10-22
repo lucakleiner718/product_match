@@ -60,12 +60,29 @@ class Brand < ActiveRecord::Base
       WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
-    # shopbop_matched_size
-    amounts = Product.amount_by_brand_and_source(self.id)
+    sql = "
+      SELECT count(id), source
+      FROM (
+        SELECT *
+        FROM products
+        WHERE brand_id=#{Brand.sanitize self.id} AND source != 'shopbop' AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+      ) AS products
+      GROUP BY source
+    "
+    amounts = Product.connection.execute(sql).to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
+
+    shopbop_nothing_size = ProductSelect.connection.execute("
+      SELECT count(distinct(product_id)) AS amount
+      FROM product_selects AS ps
+      LEFT JOIN products AS pr ON pr.id=ps.product_id
+      WHERE ps.decision IN ('found', 'no-size', 'no-color') AND pr.brand_id=#{Brand.sanitize self.id}
+    ").to_a.first['amount'].to_i
+
     {
       shopbop_size: Product.where(brand_id: self.id).shopbop.size,
       shopbop_noupc_size: Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size,
       shopbop_matched_size: shopbop_matched_size,
+      shopbop_nothing_size: shopbop_nothing_size,
       amounts_content: amounts.to_a.map{|el| el.join(': ')}.join("<br>"),
       amounts_values: amounts.values.sum,
       suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).pluck(:product_id).uniq.size,

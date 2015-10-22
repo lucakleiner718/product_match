@@ -30,17 +30,4 @@ class Product < ActiveRecord::Base
     File.write "tmp/#{source}-#{brand_id}#{"-#{category.gsub(/\'/, '').gsub(/\s/, '-')}" if category}-#{Time.now.to_i}.csv", csv_string
   end
 
-  def self.amount_by_brand_and_source brand_id
-    sql = "
-      SELECT count(id), source
-      FROM (
-        SELECT *
-        FROM products
-        WHERE brand_id=#{Brand.sanitize brand_id} AND source != 'shopbop' AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
-      ) AS products
-      GROUP BY source
-    "
-    Product.connection.execute(sql).to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
-  end
-
 end

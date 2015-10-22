@@ -5,6 +5,7 @@
     <th><%= sortable 'stats.shopbop_size', 'Shopbop Products' %></th>
     <th><%= sortable 'stats.shopbop_noupc_size', 'Shopbop Products without UPC' %></th>
     <th><%= sortable 'stats.shopbop_matched_size', 'Shopbop Products Matched' %></th>
+    <th><%= sortable 'stats.shopbop_nothing_size', 'Shopbop Products Nothing' %></th>
     <th><%= sortable 'stats.amounts_values', 'Other sources Products with UPC' %></th>
     <th><%= sortable 'stats.suggestions', 'Products with Suggestions' %></th>
     <th><%= sortable 'stats.suggestions_green', 'Green Suggestions Products' %></th>
@@ -18,6 +19,7 @@
       <td><%= brand.stat.shopbop_size %></td>
       <td><%= brand.stat.shopbop_noupc_size %></td>
       <td><%= brand.stat.shopbop_matched_size %></td>
+      <td><%= brand.stat.shopbop_nothing_size %></td>
       <td>
         <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= brand.stat.amounts_content %>"><%= brand.stat.amounts_values %></span>
       </td>
