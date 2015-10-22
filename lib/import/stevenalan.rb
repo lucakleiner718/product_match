@@ -92,7 +92,7 @@ class Import::Stevenalan < Import::Demandware
         price = price_sale
         price_sale = nil
       end
-      color = v['attributes']['color'].strip
+      color = v['attributes']['color'].try(:strip)
       size = v['attributes']['size']
       color_id = k.split('|').inject({}){|obj, el| a = el.split('-'); obj[a[0]] = a[1]; obj}['color']
       color_url = "#{url}?#{color_param}=#{color_id}"
