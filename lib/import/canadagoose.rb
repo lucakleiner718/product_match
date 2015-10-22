@@ -54,7 +54,14 @@ class Import::Canadagoose < Import::Demandware
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
     category = nil
     images = html.css('.attribute .Color a').inject({}){|obj, a| obj[a.attr('color')] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1] ; obj}
-    gender = process_title_for_gender(product_name)
+
+    gender = nil
+    gender_text = html.css('.product-number .gender').text.try(:downcase).try(:strip)
+    if gender_text.present?
+      gender = 'Male' if gender_text == "men's"
+      gender = 'Female' if gender_text == "women's"
+    end
+    gender = process_title_for_gender(product_name) unless gender
 
     data = get_json product_id
     return false unless data
