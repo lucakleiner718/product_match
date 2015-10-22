@@ -4,8 +4,9 @@ jQuery ($) ->
 
   values = chart_box.data('values')
   series = [
-    {name: 'Total', data: values.total}
-    {name: 'Without UPC', data: values.empty}
+    {name: 'Total products', data: values.total_products}
+    {name: 'Total without UPC', data: values.total_without_upc}
+    {name: 'Added without UPC', data: values.added_without_upc}
     {name: 'Managed', data: values.matched}
   ]
 
@@ -22,3 +23,7 @@ jQuery ($) ->
     title:
       text: 'Stat Chart'
     series: series
+    tooltip:
+      shared: true
+      headerFormat: '<b>{series.name} {point.x:%Y-%m-%d}</b><br/>'
+      crosshairs: true
