@@ -15,6 +15,12 @@ class Suggestion
 
   def build_suggestions product_id
     product = Product.find(product_id)
+
+    # do not generate suggestions if upc already detected
+    if product.upc.present? || ProductUpc.where(product_id: product.id).first.try(:upc)
+      return false
+    end
+
     brand_name = product.brand.try(:name)
     return false unless brand_name
     brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
@@ -74,9 +80,17 @@ class Suggestion
     params_count = []
 
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
+    title_parts_size = title_parts.size
+    multiplier = ['panty']
+    title_parts.each do |el|
+      index = multiplier.index(el)
+      index ? title_parts << multiplier[index].pluralize : ''
+
+      index = multiplier.index(el)
+    end
     title_parts -= ['the', '&', 'and', 'womens', 'women’s']
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_similarity = (title_parts.size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts.size.to_f : 1) * WEIGHTS[:title]
+    title_similarity = (title_parts_size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts_size.to_f : 1) * WEIGHTS[:title]
 
     params_count << title_similarity
 
