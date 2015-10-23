@@ -53,21 +53,23 @@ class Brand < ActiveRecord::Base
   end
 
   def build_stat
-    shopbop_matched_size = ProductSelect.connection.execute("
+    con = Product.connection
+
+    shopbop_matched_size = con.execute("
       SELECT count(distinct(product_id)) as amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
       WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
     ").to_a.first['amount'].to_i
 
-    shopbop_nothing_size = ProductSelect.connection.execute("
+    shopbop_nothing_size = con.execute("
       SELECT count(distinct(product_id)) AS amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
       WHERE ps.decision IN ('nothing', 'no-size', 'no-color') AND pr.brand_id=#{Brand.sanitize self.id}
       ").to_a.first['amount'].to_i
 
-    amounts_uniq = Product.connection.execute("
+    amounts_uniq = con.execute("
       SELECT count(total)
       FROM (
         SELECT count(distinct(upc)) as total
@@ -78,7 +80,7 @@ class Brand < ActiveRecord::Base
       ) AS products
     ").to_a.first['count']
 
-    amounts_sources = Product.connection.execute("
+    amounts_sources = con.execute("
       SELECT count(distinct(upc)), source
       FROM (
         SELECT upc, source
@@ -89,6 +91,14 @@ class Brand < ActiveRecord::Base
       GROUP BY source
     ").to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
 
+    suggestions = con.execute("
+      SELECT count(distinct(product_id))
+      FROM product_suggestions
+      LEFT JOIN products on products.id=product_suggestions.product_id
+      WHERE products.brand_id='#{self.id}'
+    ").to_a.first['count']
+    # ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).pluck(:product_id).uniq.size
+
     {
       shopbop_size: Product.where(brand_id: self.id).shopbop.size,
       shopbop_noupc_size: Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size,
@@ -96,7 +106,7 @@ class Brand < ActiveRecord::Base
       shopbop_nothing_size: shopbop_nothing_size,
       amounts_content: amounts_sources.to_a.map{|el| el.join(': ')}.join("<br>"),
       amounts_values: amounts_uniq,
-      suggestions: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).pluck(:product_id).uniq.size,
+      suggestions: suggestions,
       suggestions_green: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size,
       suggestions_yellow: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
     }
