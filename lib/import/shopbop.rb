@@ -56,6 +56,7 @@ class Import::Shopbop < Import::Base
 
       to_update.each do |row|
         product = products[row[:source_id]]
+        row.delete :upc if row[:upc].blank?
         product.attributes = row
         product.save if product.changed?
 
