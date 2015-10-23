@@ -28,7 +28,6 @@ class Import::Saksfifthavenue < Import::Base
     resp = get_request original_url
     html = Nokogiri::HTML(resp.body)
 
-    binding.pry
     script = html.css('script:contains("var mlrs")').text
     json_str = script.strip.sub('var mlrs =', '').strip
     json = JSON.parse(json_str)
