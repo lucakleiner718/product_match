@@ -98,6 +98,8 @@ class Import::Popshops < Import::Base
   def process_to_update to_update
     to_update.each do |row|
       product = @exists_products.select{|pr| pr.source_id == row[:source_id]}.first
+      row.delete :size if row[:size].blank?
+      row.delete :color if row[:color].blank?
       product.attributes = row
       product.save if product.changed?
     end
