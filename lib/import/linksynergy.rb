@@ -126,10 +126,9 @@ class Import::Linksynergy < Import::Base
         price: r[:price_retail],
         price_sale: r[:price_sale],
         description: r[:description_full],
-        gender: gender
+        gender: gender,
+        upc: r[:gtin]
       }
-
-      item[:upc] = r[:gtin] if r[:gtin].present?
 
       items << item
     end
@@ -154,6 +153,9 @@ class Import::Linksynergy < Import::Base
   def process_to_update to_update
     to_update.each do |row|
       product = @exists_products.select{|pr| pr.source_id == row[:source_id]}.first
+      row.delete :upc unless row[:upc].present?
+      row.delete :size unless row[:size].present?
+      row.delete :color unless row[:color].present?
       product.attributes = row
       product.save if product.changed?
     end
