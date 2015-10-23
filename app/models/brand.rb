@@ -94,7 +94,7 @@ class Brand < ActiveRecord::Base
     suggestions = con.execute("
       SELECT count(distinct(product_id))
       FROM product_suggestions
-      JOIN products on products.id=product_suggestions.product_id
+      INNER JOIN products on products.id=product_suggestions.product_id AND source='shopbop'
       WHERE products.brand_id=#{self.id}
     ").to_a.first['count']
 
