@@ -59,22 +59,22 @@ class Brand < ActiveRecord::Base
       SELECT count(distinct(product_id)) as amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision='found' AND pr.brand_id=#{Brand.sanitize self.id}
+      WHERE ps.decision='found' AND pr.brand_id=#{self.id}
     ").to_a.first['amount'].to_i
 
     shopbop_nothing_size = con.execute("
       SELECT count(distinct(product_id)) AS amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision IN ('nothing', 'no-size', 'no-color') AND pr.brand_id=#{Brand.sanitize self.id}
-      ").to_a.first['amount'].to_i
+      WHERE ps.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND pr.brand_id=#{self.id}
+    ").to_a.first['amount'].to_i
 
     amounts_uniq = con.execute("
       SELECT count(total)
       FROM (
         SELECT count(distinct(upc)) as total
         FROM products
-        WHERE brand_id=#{Brand.sanitize self.id} AND source != 'shopbop' AND
+        WHERE brand_id=#{self.id} AND source != 'shopbop' AND
           ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
         GROUP BY upc
       ) AS products
@@ -85,7 +85,7 @@ class Brand < ActiveRecord::Base
       FROM (
         SELECT upc, source
         FROM products
-        WHERE brand_id=#{Brand.sanitize self.id} AND source != 'shopbop' AND
+        WHERE brand_id=#{self.id} AND source != 'shopbop' AND
           ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
       ) AS products
       GROUP BY source
@@ -94,10 +94,9 @@ class Brand < ActiveRecord::Base
     suggestions = con.execute("
       SELECT count(distinct(product_id))
       FROM product_suggestions
-      LEFT JOIN products on products.id=product_suggestions.product_id
-      WHERE products.brand_id='#{self.id}'
+      JOIN products on products.id=product_suggestions.product_id
+      WHERE products.brand_id=#{self.id}
     ").to_a.first['count']
-    # ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id}).pluck(:product_id).uniq.size
 
     {
       shopbop_size: Product.where(brand_id: self.id).shopbop.size,

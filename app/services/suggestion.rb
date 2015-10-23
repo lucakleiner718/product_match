@@ -81,7 +81,7 @@ class Suggestion
 
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
     title_parts_size = title_parts.size
-    multiplier = ['panty']
+    multiplier = ['panty'] #boot-boots-booties
     title_parts.each do |el|
       index = multiplier.index(el)
       index ? title_parts << multiplier[index].pluralize : ''

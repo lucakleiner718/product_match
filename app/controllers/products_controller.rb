@@ -82,7 +82,7 @@ class ProductsController < ApplicationController
 
       products_ids = Product.shopbop.where(match: true).joins(:suggestions).where('product_suggestions.percentage > ?', 50)
       products_ids = products_ids.where(brand_id: @brand.id)
-      products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND (product_selects.decision='found' OR product_selects.decision IN ('nothing', 'no-size', 'no-color') AND product_selects.created_at > '#{1.day.ago}' AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
+      products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND (product_selects.decision='found' OR product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND product_selects.created_at > '#{1.day.ago}' AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
 
       if params[:has_color] == 'green'
         products_ids = products_ids.where(id: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: @brand.id}).where(percentage: 100).pluck(:product_id).uniq)
@@ -119,6 +119,11 @@ class ProductsController < ApplicationController
       end
     elsif params[:decision] == 'no-size'
       ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], decision: params[:decision])
+    elsif params[:decision] == 'similar' && params[:selected_id]
+      product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
+      if product_suggestion
+        ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
+      end
     end
 
     render json: { }
