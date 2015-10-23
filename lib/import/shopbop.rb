@@ -99,6 +99,8 @@ class Import::Shopbop < Import::Base
 
     convert_brand(items)
 
+    Brand.where(id: items.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
+
     items
   end
 
