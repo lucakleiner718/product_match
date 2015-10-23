@@ -4,6 +4,7 @@ class ProductSuggestionsGeneratorWorker
   sidekiq_options queue: :middle, unqiue: true
 
   def perform brand_id, *args
+    brand_id = brand_id.to_i
     options = args.extract_options!
     options.symbolize_keys!
 
@@ -21,7 +22,8 @@ class ProductSuggestionsGeneratorWorker
         exists_ids = []
       end
     else
-      exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
+      # exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
+      exists_ids = ProductSuggestion.select('distinct(product_id)').joins("JOIN products on products.id=product_suggestions.product_id AND products.source='shopbop' AND products.brand_id=#{brand_id}").to_a.map(&:product_id)
     end
 
     products = Product.where.not(id: exists_ids).where(source: :shopbop, match: true).where(upc: nil)
