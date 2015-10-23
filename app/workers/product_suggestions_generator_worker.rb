@@ -12,7 +12,7 @@ class ProductSuggestionsGeneratorWorker
     delete_exists = options[:delete_exists]
 
     if delete_exists && brand
-      if delete_exists.to_sym == :except_green
+      if (delete_exists.is_a?(String) || delete_exists.is_a?(Symbol)) && delete_exists.to_sym == :except_green
         bops_products = Product.shopbop.where(brand_id: brand.id, match: true).pluck(:id)
         exists_ids = ProductSuggestion.where(product_id: bops_products, percentage: 100).pluck(:product_id).uniq
         ProductSuggestion.where(product_id: bops_products - exists_ids).delete_all
