@@ -28,7 +28,6 @@ class Import::Herroom < Import::Base
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls #{url_part}"
     end
-
   end
 
   def process_url original_url
@@ -79,6 +78,10 @@ class Import::Herroom < Import::Base
       }
     end
 
+    process_results results
+  end
+
+  def process_results results
     results = convert_brand(results)
 
     results.each do |row|
@@ -86,7 +89,6 @@ class Import::Herroom < Import::Base
       product.attributes = row
       product.save
     end
-
   end
 
 end
