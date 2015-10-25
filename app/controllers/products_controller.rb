@@ -60,11 +60,11 @@ class ProductsController < ApplicationController
 
     csv_string = CSV.generate do |csv|
       csv << [
-        'Title', 'Brand', 'Source', 'Size', 'Color', 'Style Code', 'UPC', 'Retailer', 'Category'
+        'Title', 'Brand', 'Source', 'Size', 'Color', 'Price', 'Price Sale', 'Style Code', 'UPC', 'Retailer', 'Category'
       ]
       @products.each do |pr|
         csv << [
-          pr.title, pr.brand.try(:name), pr.source, pr.size, pr.color, pr.style_code, (pr.upc || pr.ean), pr.retailer, pr.category
+          pr.title, pr.brand.try(:name), pr.source, pr.size, pr.color, pr.price, pr.price_sale, pr.style_code, (pr.upc || pr.ean), pr.retailer, pr.category
         ]
       end
     end
