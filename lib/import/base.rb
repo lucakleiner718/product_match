@@ -60,21 +60,20 @@ class Import::Base
   def get_request url
     url = build_url(url)
 
-    Curl.get(url) do |http|
-      http.enable_cookies = true
-      http.follow_location = true
-      http.max_redirects = 10
-      http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
-      # http.verbose = true
+    retries = 0
+    begin
+      Curl.get(url) do |http|
+        http.enable_cookies = true
+        http.follow_location = true
+        http.max_redirects = 10
+        http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
+        # http.verbose = true
+      end
+    rescue Curl::Err::PartialFileError => e
+      retries += 1
+      retry if retries < 6
+      raise e
     end
-
-    # open(url)
-
-    # con = Faraday.new(url) do |b|
-    #   b.use FaradayMiddleware::FollowRedirects
-    #   b.adapter :net_http
-    # end
-    # con.get
   end
 
   def process_title_for_gender product_name
