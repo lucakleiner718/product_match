@@ -55,48 +55,60 @@ class Import::Lordandtaylor < Import::Base
 
     results = []
 
-    title = page.match(/br_data\.prod_name = '([^']+)';/)[1]
+    title = page.match(/br_data\.prod_name = '([^']+)';/) && $1
+    title = html.css('title').first.text.split('|').first.strip unless title
 
     brand = page.match(/"brand":\s"([^"]+)"/) && $1
     brand = page.match(/manufacturer\s([^<]+)\s<br/) && $1 unless brand
     brand = html.css('.tit').first.try(:text) unless brand
     raise "No brand" unless brand
 
-    style_code = page.match(/br_data\.prod_id = '([a-z0-9\-]+)';/i)[1]
+    style_code = page.match(/br_data\.prod_id = '([a-z0-9\-]+)';/i) && $1
+    style_code = html.css('.webid p:first').text unless style_code
 
-    store_catalog_entry_id = html.css('#storeCatalogEntryID').first.text.strip
-    json_str = html.css("#entitledItem_#{store_catalog_entry_id}").first.text
-    json_str = json_str.gsub(/,\s+}/, "}").gsub(/,\s+\]/, "]") # remove trailing comma
-    json = JSON.parse(json_str)
+    html.css('div[id^="entitledItem_"]').each_with_index do |entitledItem, index|
+      json_str = entitledItem.text.gsub(/,\s+}/, "}").gsub(/,\s+\]/, "]") # remove trailing comma
+      json = JSON.parse(json_str)
 
-    default_image = json.select{|r| r['ItemImage'].present?}.first
-    default_image = default_image['ItemImage'] if default_image
+      default_image = json.select{|r| r['ItemImage'].present?}.first
+      default_image = default_image['ItemImage'] if default_image
 
-    json.each do |row|
-      attrs = row['Attributes'].keys
-      size = attrs.select{|el| el =~ /Size/}.first
-      size.sub!('Size_', '') if size
-      color = attrs.select{|el| el =~ /VendorColor_/}.first
-      color.sub!('VendorColor_', '') if color
-      image = row['ItemImage'] || default_image
-      price = row['listPrice'].sub(/^\$/, '')
-      price_sale = row['offerPrice'].sub(/^\$/, '')
-      upc = row['ItemThumbUPC']
+      collection = html.css('#LitTabshow1').size == 1
 
-      results << {
-        source_id: row['catentry_id'],
-        title: title,
-        brand: brand,
-        price: price,
-        price_sale: price_sale,
-        upc: upc,
-        url: original_url,
-        style_code: style_code,
-        image: image,
+      json.each do |row|
+        attrs = row['Attributes'].keys
+        size = attrs.select{|el| el =~ /Size/}.first
+        size = size.sub('Size_', '') if size
+        color = attrs.select{|el| el =~ /VendorColor_/}.first
+        color = color.sub('VendorColor_', '') if color
+        image = row['ItemImage'] || default_image
+        price = row['listPrice'].sub(/^\$/, '')
+        price_sale = row['offerPrice'].sub(/^\$/, '')
+        upc = row['ItemThumbUPC']
+        source_id = row['catentry_id']
 
-        color: color,
-        size: size,
-      }
+        if collection
+          list_item = html.css('#LitTabshow1 .listitems_cont')[index]
+          title = list_item.css('h2').first.text
+          style_code = list_item.css('.listitem_descri span').first.text.match(/: : (.*)/)[1].strip
+        end
+
+        next unless brand
+
+        results << {
+          source_id: source_id,
+          title: title,
+          brand: brand,
+          price: price,
+          price_sale: price_sale,
+          upc: upc,
+          url: original_url,
+          style_code: style_code,
+          image: image,
+          color: color,
+          size: size,
+        }
+      end
     end
 
     process_results results
