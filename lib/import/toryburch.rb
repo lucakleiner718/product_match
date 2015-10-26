@@ -71,16 +71,33 @@ class Import::Toryburch < Import::Demandware
 
     results = []
 
-    product_name = html.css('#pdp-top .productname').first.text.strip
+    product_name = nil
+    brand_name = nil
 
     category = html.css('#breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
+
+    colors = {}
+    script = html.css('script:contains("new app.Product")').text
+    json_str = script.match(/app\.ProductCache = new app.Product\({\s+data:\s+({.*})\s+}\);\s+\}\);/m)[1]
+    json = JSON.parse(json_str) rescue nil
+    if json
+      product_name = json['name']
+      brand_name = json['brand']
+      json['variations']['attributes'].each do |attribute|
+        if attribute['id'] == 'color'
+          colors = attribute['vals'].inject({}){|obj, el| obj[el['id']] = el['val']; obj}
+        end
+      end
+    end
+
+    product_name = html.css('#pdp-top .productname').first.text.strip unless product_name
 
     colors = html.css('.variationattributes .color li').inject({}) do |obj, li|
       color_id = li.attr('data-value')
       color_name = li.css('a').text.strip
       obj[color_id] = color_name
       obj
-    end
+    end if colors.size == 0
 
     data = get_json product_id
     return false unless data
@@ -112,7 +129,7 @@ class Import::Toryburch < Import::Demandware
       }
     end
 
-    brand_name = page.match(/"brand":\s"([^"]+)"/)[1]
+    brand_name = page.match(/"brand":\s"([^"]+)"/)[1] unless brand_name
     brand_name = nil if brand_name.downcase == 'n/a'
 
     process_results results, brand_name
