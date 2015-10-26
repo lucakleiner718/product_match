@@ -68,6 +68,7 @@ class Import::Lordandtaylor < Import::Base
 
     html.css('div[id^="entitledItem_"]').each_with_index do |entitledItem, index|
       json_str = entitledItem.text.gsub(/,\s+}/, "}").gsub(/,\s+\]/, "]") # remove trailing comma
+      next if json_str.blank?
       json = JSON.parse(json_str)
 
       default_image = json.select{|r| r['ItemImage'].present?}.first
