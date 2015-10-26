@@ -51,6 +51,8 @@ class Import::Lordandtaylor < Import::Base
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if html.css('#ItemAddError_div_7').size == 1
+
     results = []
 
     title = page.match(/br_data\.prod_name = '([^']+)';/)[1]
