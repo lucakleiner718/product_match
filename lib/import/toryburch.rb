@@ -78,7 +78,7 @@ class Import::Toryburch < Import::Demandware
 
     colors = {}
     script = html.css('script:contains("new app.Product"):contains("variations")').first.text
-    if script =~ /app\.ProductCache/
+    if html.css('.subproduct').size > 0 && script =~ /app\.ProductCache/
       json_str = script.match(/new app.Product\({\s+data:\s+({.*})\s+}\);\s+app\.ProductCache/m)[1]
     else
       json_str = script.match(/new app.Product\({\s+data:\s+({.*})\s+}\);\s+\}\);/m)[1]
