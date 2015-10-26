@@ -47,7 +47,7 @@ class Import::Toryburch < Import::Demandware
     end
   end
 
-  def process_url original_url
+  def process_url original_url, allow_spawn=true
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -103,9 +103,9 @@ class Import::Toryburch < Import::Demandware
       obj
     end if colors.size == 0
 
-    if html.css('.subproduct').size > 0
+    if allow_spawn && html.css('.subproduct').size > 0
       html.css('.subproduct').map{|el| el.attr('id').match(/product-(.*)/)[1]}.each do |subproduct_id|
-        ProcessImportUrlWorker.perform_async self.class.name, 'process_url', "#{baseurl}/#{subproduct_id}.html"
+        ProcessImportUrlWorker.perform_async self.class.name, 'process_url', "#{baseurl}/#{subproduct_id}.html", false
       end
     end
 
