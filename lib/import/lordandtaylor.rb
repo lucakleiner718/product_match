@@ -56,11 +56,9 @@ class Import::Lordandtaylor < Import::Base
     results = []
 
     title = page.match(/br_data\.prod_name = '([^']+)';/)[1]
-    begin
-      brand = page.match(/"brand":\s"([^"]+)"/)[1]
-    rescue => e
-      brand = page.match(/manufacturer\s([^<]+)\s<br/)[1]
-    end
+    brand = page.match(/"brand":\s"([^"]+)"/) && $1
+    brand = page.match(/manufacturer\s([^<]+)\s<br/) && $1 unless brand
+    brand = html.css('.tit').first.try(:text) unless brand
     style_code = page.match(/br_data\.prod_id = '([a-z0-9\-]+)';/i)[1]
 
     store_catalog_entry_id = html.css('#storeCatalogEntryID').first.text.strip
