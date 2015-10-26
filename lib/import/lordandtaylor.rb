@@ -61,6 +61,7 @@ class Import::Lordandtaylor < Import::Base
     brand = page.match(/"brand":\s"([^"]+)"/) && $1
     brand = page.match(/manufacturer\s([^<]+)\s<br/) && $1 unless brand
     brand = html.css('.tit').first.try(:text) unless brand
+    brand = 'coach' if !brand && page =~ /CoachProductTemplate\.jsp/
     raise "No brand" unless brand
 
     style_code = page.match(/br_data\.prod_id = '([a-z0-9\-]+)';/i) && $1
