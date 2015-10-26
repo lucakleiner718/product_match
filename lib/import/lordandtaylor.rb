@@ -56,9 +56,12 @@ class Import::Lordandtaylor < Import::Base
     results = []
 
     title = page.match(/br_data\.prod_name = '([^']+)';/)[1]
+
     brand = page.match(/"brand":\s"([^"]+)"/) && $1
     brand = page.match(/manufacturer\s([^<]+)\s<br/) && $1 unless brand
     brand = html.css('.tit').first.try(:text) unless brand
+    raise "No brand" unless brand
+
     style_code = page.match(/br_data\.prod_id = '([a-z0-9\-]+)';/i)[1]
 
     store_catalog_entry_id = html.css('#storeCatalogEntryID').first.text.strip
@@ -71,8 +74,10 @@ class Import::Lordandtaylor < Import::Base
 
     json.each do |row|
       attrs = row['Attributes'].keys
-      size = attrs.select{|el| el =~ /Size/}.first.sub('Size_', '')
-      color = attrs.select{|el| el =~ /VendorColor_/}.first.sub('VendorColor_', '')
+      size = attrs.select{|el| el =~ /Size/}.first
+      size.sub!('Size_', '') if size
+      color = attrs.select{|el| el =~ /VendorColor_/}.first
+      color.sub!('VendorColor_', '') if color
       image = row['ItemImage'] || default_image
       price = row['listPrice'].sub(/^\$/, '')
       price_sale = row['offerPrice'].sub(/^\$/, '')
