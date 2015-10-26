@@ -76,26 +76,46 @@ class Suggestion
   end
 
   def similarity_to product, suggested
-    params_amount = WEIGHTS.values.sum
+    @params_amount = WEIGHTS.values.sum
     params_count = []
 
-    title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
-    title_parts_size = title_parts.size
-    multiplier = ['panty'] #boot-boots-booties
-    title_parts.each do |el|
-      index = multiplier.index(el)
-      index ? title_parts << multiplier[index].pluralize : ''
+    params_count << title_similarity(product.title, suggested.title)
+    params_count << color_similarity(product.color, suggested.color)
+    params_count << size_similarity(product.size, suggested.size)
+    params_count << price_similarity(product.price, suggested.price)
+    params_count << gender_similarity(product.gender, suggested.gender)
 
-      index = multiplier.index(el)
+    (params_count.select{|el| el.present?}.sum/@params_amount.to_f * 100).to_i
+  end
+
+  def title_similarity product_title, suggested_title
+    title_parts = product_title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
+    title_parts -= ['the', '&', 'and', 'womens']
+
+    suggested_title_parts = suggested_title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+
+    multiplier = [['panty', 'panties'], ['short', 'shorts'], ['boot', 'boots', 'booties']]
+    multiplier.each do |ar|
+      if (title_parts & ar).size > 0 && (suggested_title_parts & ar)
+        title_parts -= ar
+        suggested_title_parts -= ar
+
+        title_parts << ar.first
+        suggested_title_parts << ar.first
+      end
     end
-    title_parts -= ['the', '&', 'and', 'womens', 'women’s']
-    suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^a-z]/i, '')}
-    title_similarity = (title_parts_size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts_size.to_f : 1) * WEIGHTS[:title]
 
-    params_count << title_similarity
+    title_parts.uniq!
+    suggested_title_parts.uniq!
 
-    color_s = suggested.color
-    color_p = product.color
+    title_parts_size = title_parts.size
+
+    (title_parts_size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts_size.to_f : 1) * WEIGHTS[:title]
+  end
+
+  def color_similarity product_color, suggested_color
+    color_p = product_color
+    color_s = suggested_color
     if color_s.present? && color_p.present?
       exact_color = false
       if color_s.gsub(/[^a-z]/i, '').downcase == color_p.gsub(/[^a-z]/i, '').downcase
@@ -115,24 +135,28 @@ class Suggestion
         end
       end
 
-      if exact_color
-        params_count << WEIGHTS[:color]
-      else
-        color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
-        color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+      ratio =
+        if exact_color
+          1
+        else
+          color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+          color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+          (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f
+        end
 
-        params_count << (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f * WEIGHTS[:color]
-      end
+      ratio * WEIGHTS[:color]
     end
+  end
 
-    if suggested.size.present? && product.size.present?
-      size_s = suggested.size.gsub(/\s/, '').downcase
-      size_p = product.size.gsub(/\s/, '').downcase
+  def size_similarity product_size, suggested_size
+    if suggested_size.present? && product_size.present?
+      size_s = suggested_size.gsub(/\s/, '').downcase
+      size_p = product_size.gsub(/\s/, '').downcase
 
       basic_sizes = [
         ['2xs', 'xxs'], ['xs', 'xsmall'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
         ['xlarge', 'xl'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
-        ['5xlarge', 'xxxxxl', 'xxxxxlarge']
+        ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['one size', 'o/s']
       ]
 
       exact = false
@@ -148,35 +172,37 @@ class Suggestion
       end
 
       if exact
-        params_count << WEIGHTS[:size]
+        WEIGHTS[:size]
       elsif size_s =~ /us/ && size_s =~ /eu/
         eu_size = size_s.match(/(\d{1,2}\.?\d?)eu/i)
         if eu_size && size_p == eu_size[1]
-          params_count << WEIGHTS[:size]
+          WEIGHTS[:size]
         end
       end
     else
       if suggested.size.blank? && product.size.present? && product.size.downcase == 'one size'
-        params_count << WEIGHTS[:size]
+        WEIGHTS[:size]
       end
     end
+  end
 
-    if suggested.price.present? && product.price.present?
-      dif = (suggested.price.to_i - product.price.to_i).abs / product.price.to_f
+  def price_similarity product_price, suggested_price
+    if suggested_price.present? && product_price.present?
+      dif = (suggested_price.to_i - product_price.to_i).abs / product_price.to_f
       dif = 1 if dif > 1
       dif = 1 - dif
 
-      params_count << (dif * WEIGHTS[:price]).round(2)
+      (dif * WEIGHTS[:price]).round(2)
     end
+  end
 
-    if suggested.gender.present?
-      params_amount += GENDER_WEIGHT
-      if suggested.gender == product.gender
-        params_count << GENDER_WEIGHT
+  def gender_similarity product_gender, suggested_gender
+    if suggested_gender.present?
+      @params_amount += GENDER_WEIGHT
+      if suggested_gender == product_gender
+        GENDER_WEIGHT
       end
     end
-
-    (params_count.sum/params_amount.to_f * 100).to_i
   end
 
 end
