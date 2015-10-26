@@ -77,8 +77,12 @@ class Import::Toryburch < Import::Demandware
     category = html.css('#breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
     colors = {}
-    script = html.css('script:contains("new app.Product")').text
-    json_str = script.match(/app\.ProductCache = new app.Product\({\s+data:\s+({.*})\s+}\);\s+\}\);/m)[1]
+    script = html.css('script:contains("new app.Product"):contains("variations")').first.text
+    if script =~ /app\.ProductCache/
+      json_str = script.match(/new app.Product\({\s+data:\s+({.*})\s+}\);\s+app\.ProductCache/m)[1]
+    else
+      json_str = script.match(/new app.Product\({\s+data:\s+({.*})\s+}\);\s+\}\);/m)[1]
+    end
     json = JSON.parse(json_str) rescue nil
     if json
       product_name = json['name']
