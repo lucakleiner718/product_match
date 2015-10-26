@@ -103,6 +103,12 @@ class Import::Toryburch < Import::Demandware
       obj
     end if colors.size == 0
 
+    if html.css('.subproduct').size > 0
+      html.css('.subproduct').map{|el| el.attr('id').match(/product-(.*)/)[1]}.each do |subproduct_id|
+        ProcessImportUrlWorker.perform_async self.class.name, 'process_url', "#{baseurl}/#{subproduct_id}.html"
+      end
+    end
+
     data = get_json product_id
     return false unless data
     data['variations']['variants'].each do |v|
