@@ -84,8 +84,8 @@ class Import::Base
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
+  def self.process_url *args
+    self.new.process_url *args
   end
 
   def log str
