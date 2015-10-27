@@ -6,6 +6,8 @@ jQuery ($) ->
   series = [
     {name: 'Total products', data: values.total_products}
     {name: 'Total without UPC', data: values.total_without_upc}
+    {name: 'Total products published', data: values.total_products_published}
+    {name: 'Total without UPC published', data: values.total_without_upc_published}
     {name: 'Added without UPC', data: values.added_without_upc}
     {name: 'Managed', data: values.matched}
   ]
