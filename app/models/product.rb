@@ -15,6 +15,12 @@ class Product < ActiveRecord::Base
   scope :without_upc, -> { where("upc is null OR upc = ''") }
   scope :with_upc, -> { where("upc is not null AND upc != ''") }
 
+  after_update do
+    if self.source == 'shopbop' && self.upc_changed? && self.upc_was.nil?
+      ProductSuggestion.where(product_id: self.id).delete_all
+    end
+  end
+
   # validates :upc, length: { minimum: 12, maximum: 12 }, format: { with: /\A\d+\z/ }
   # validates :ean, length: { minimum: 13, maximum: 13 }, format: { with: /\A\d+\z/ }
 

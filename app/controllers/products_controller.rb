@@ -80,7 +80,7 @@ class ProductsController < ApplicationController
     unless product_id
       @brand = params[:brand_id] ? Brand.find(params[:brand_id]) : Brand.in_use.first
 
-      products_ids = Product.shopbop.where(match: true).joins(:suggestions)
+      products_ids = Product.shopbop.where(match: true).without_upc.joins(:suggestions)
       products_ids = products_ids.where(brand_id: @brand.id)
       products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND (product_selects.decision='found' OR product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND product_selects.created_at > '#{1.day.ago}' AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
 
