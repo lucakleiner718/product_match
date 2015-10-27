@@ -97,7 +97,7 @@ class Import::Vince < Import::Venda
       size = options['atr2']
       style_code = options['atrdssku']
 
-      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', color.downcase)}/).first
+      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', color.downcase.gsub(' ', '~'))}/).first
       raise "No image" unless image
 
       results << {
