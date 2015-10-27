@@ -64,7 +64,7 @@ class Import::Rebeccataylor < Import::Venda
       color = options['atr1']
       size = options['atr2']
 
-      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])}/).first
+      image = image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])
       # page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', '([^_]+)')}/)
       # binding.pry unless image
       raise "No image" unless image
