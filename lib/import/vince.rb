@@ -87,7 +87,9 @@ class Import::Vince < Import::Venda
     end
     category = categories.join(' > ')
 
-    image_url_mask = "#{baseurl}/content/ebiz/vince/invt/{{style_code}}/{{style_code}}_{{color}}_setmedium.jpg"
+    image_url_mask = "#{baseurl}/content/ebiz/vince/invt/{{style_code}}/{{style_code}}{{color}}setmedium.jpg"
+    colors_images = page.scan(/Venda\.Attributes\.SwatchURL\["([A-Za-z\s]+)"\]\s=\s"http:\/\/www\.vince\.com\/content\/ebiz\/vince\/invt\/[a-z0-9]+\/[a-z0-9]+(.*)setswatch\.jpg";/)
+    colors_images = colors_images.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
 
     json.each do |row|
       options = row[1]
@@ -97,7 +99,9 @@ class Import::Vince < Import::Venda
       size = options['atr2']
       style_code = options['atrdssku']
 
-      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', color.downcase.gsub(' ', '~'))}/).first
+      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])}/).first
+      # page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', '([^_]+)')}/)
+      # binding.pry unless image
       raise "No image" unless image
 
       results << {
