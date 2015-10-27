@@ -40,8 +40,6 @@ class Import::Rebeccataylor < Import::Venda
     resp = get_request url
     return false if resp.response_code != 200
 
-    binding.pry
-
     page = resp.body
     html = Nokogiri::HTML(page)
 
