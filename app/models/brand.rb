@@ -54,6 +54,11 @@ class Brand < ActiveRecord::Base
 
   def build_stat
     con = Product.connection
+    now = Time.now
+
+    shopbop_size = Product.where(brand_id: self.id).shopbop.size
+
+    shopbop_noupc_size = Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size
 
     shopbop_matched_size = con.execute("
       SELECT count(distinct(product_id)) as amount
@@ -98,16 +103,24 @@ class Brand < ActiveRecord::Base
       WHERE products.brand_id=#{self.id}
     ").to_a.first['count']
 
+    suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size
+    suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+
+    new_match_today = Product.shopbop.where('created_at >= ?', now.beginning_of_day).size
+    new_match_week = Product.shopbop.where('created_at >= ?', now.monday).size
+
     {
-      shopbop_size: Product.where(brand_id: self.id).shopbop.size,
-      shopbop_noupc_size: Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size,
+      shopbop_size: shopbop_size,
+      shopbop_noupc_size: shopbop_noupc_size,
       shopbop_matched_size: shopbop_matched_size,
       shopbop_nothing_size: shopbop_nothing_size,
       amounts_content: amounts_sources.to_a.map{|el| el.join(': ')}.join("<br>"),
       amounts_values: amounts_uniq,
       suggestions: suggestions,
-      suggestions_green: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size,
-      suggestions_yellow: ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+      suggestions_green: suggestions_green,
+      suggestions_yellow: suggestions_yellow,
+      new_match_today: new_match_today,
+      new_match_week: new_match_week
     }
   end
 

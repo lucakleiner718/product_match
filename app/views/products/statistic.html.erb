@@ -1,4 +1,4 @@
-<table class="table statistic-table pretty">
+<table class="table statistic-table pretty table-hover">
   <thead>
   <tr>
     <th><%= sortable 'name', 'Brand Name' %></th>
@@ -10,6 +10,8 @@
     <th><%= sortable 'stats.suggestions', 'Products with Suggestions' %></th>
     <th><%= sortable 'stats.suggestions_green', 'Green Suggestions Products' %></th>
     <th><%= sortable 'stats.suggestions_yellow', 'Yellow Suggestions Products' %></th>
+    <th><%= sortable 'stats.new_match_today', 'New today' %></th>
+    <th><%= sortable 'stats.new_match_week', 'New this week' %></th>
   </tr>
   </thead>
   <tbody>
@@ -26,6 +28,8 @@
       <td><%= brand.stat.suggestions %></td>
       <td><%= link_to brand.stat.suggestions_green, match_path(brand_id: brand.id, has_color: :green), target: :_blank if brand.stat.suggestions_green %></td>
       <td><%= brand.stat.suggestions_yellow if brand.stat.suggestions_yellow %></td>
+      <td><%= brand.stat.new_match_today %></td>
+      <td><%= brand.stat.new_match_week %></td>
     </tr>
   <% end %>
   </tbody>

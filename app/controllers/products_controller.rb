@@ -132,7 +132,7 @@ class ProductsController < ApplicationController
   end
 
   def statistic
-    brands = Brand.in_use.joins(:brand_stat)
+    brands = Brand.in_use.joins(:brand_stat).includes(:brand_stat)
 
     if params[:brand]
       brands = brands.where('name ILIKE ?', "%#{params[:brand]}%")
