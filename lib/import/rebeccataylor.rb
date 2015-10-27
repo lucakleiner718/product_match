@@ -55,7 +55,7 @@ class Import::Rebeccataylor < Import::Venda
     style_code = json[0][1]['atrdssku']
 
     image_url_mask = "#{baseurl}/content/ebiz/rt/invt/{{style_code}}/{{style_code}}{{color}}setlarge.jpg"
-    colors_images = page.scan(/\.loadImage\("([^"]+)",{\s+setswatch:\s"[^"]+\/#{style_code}(.*)setswatch\.jpg"/).inject({}){|obj, el| obj[el[0]] = el[1]; obj}
+    colors_images = page.scan(/\.loadImage\("([^"]+)",{\s+setswatch:\s"[^"]+\/#{style_code}(.*)setswatch(_[a-z0-9]+)\.jpg"/).inject({}){|obj, el| obj[el[0]] = el[1]; obj}
 
     json.each do |row|
       options = row[1]
