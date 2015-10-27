@@ -53,7 +53,7 @@ class Import::Vince < Import::Venda
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('.prod-search-results .prod-name a').map{|a| a.attr('href')}.select{|l| l.present?}
-        break if products.size == 0
+        break if products.size == 0 || (products.size < perpage * 0.9 && products.size == urls.size)
 
         urls.concat products
         pagenum += 1
@@ -99,11 +99,7 @@ class Import::Vince < Import::Venda
       size = options['atr2']
       style_code = options['atrdssku']
 
-      begin
       image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])}/).first
-      rescue => e
-        binding.pry
-        end
       # page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', '([^_]+)')}/)
       # binding.pry unless image
       raise "No image" unless image
