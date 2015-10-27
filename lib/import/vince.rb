@@ -61,8 +61,7 @@ class Import::Vince < Import::Venda
 
       urls = urls.map{|url| build_url(url)}.uniq
 
-      # urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls urls
     end
   end
 
