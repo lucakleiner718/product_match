@@ -159,8 +159,11 @@ class Suggestion
       basic_sizes = [
         ['2xs', 'xxs'], ['xs', 'xsmall'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
         ['xlarge', 'xl'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
-        ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['one size', 'o/s']
+        ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['onesize', 'o/s', '1sz'],
       ]
+      1..10.each do |i|
+        basic_sizes << ["#{i}1/2", "#{i}.5"]
+      end
 
       exact = false
       exact = true if size_s == size_p
