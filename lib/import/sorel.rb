@@ -3,7 +3,7 @@ class Import::Sorel < Import::Demandware
   def baseurl; 'http://www.sorel.com'; end
   def subdir; 'Sorel_US'; end
   def lang; 'en_US'; end
-  def product_id_pattern; /-([A-Z0-9]+)\.html/; end
+  def product_id_pattern; /-([A-Z0-9_]+)\.html/; end
   def brand_name_default; 'Sorel'; end
 
   def perform
@@ -50,7 +50,7 @@ class Import::Sorel < Import::Demandware
       product_id = canonical_url.match(product_id_pattern)[1]
     end
 
-    product_id_param = product_id
+    product_id_param = product_id.gsub('_', '__')
 
     results = []
 
