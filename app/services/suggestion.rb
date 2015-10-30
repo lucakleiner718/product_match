@@ -122,32 +122,29 @@ class Suggestion
     color_p = @product.color
     color_s = @suggested.color
     if color_s.present? && color_p.present?
-      exact_color = false
+      ratio = nil
       if color_s.gsub(/[^a-z]/i, '').downcase == color_p.gsub(/[^a-z]/i, '').downcase
-        exact_color = true
+        ratio = 1
       else
         color_s_ar = color_s.gsub(/\s/, '').downcase.split(/[\/,]/).map{|el| el.strip}
         color_p_ar = color_p.gsub(/\s/, '').downcase.split(/[\/,]/).map{|el| el.strip}
 
         if color_s_ar.size == 2 && color_p_ar.size == 1
           if color_s_ar.first == color_p_ar.first || color_s_ar.last == color_p_ar.first
-            exact_color = true
+            ratio = 0.99
           end
         elsif color_s_ar.size > 2 && color_s_ar.size == color_p_ar.size
           if color_s_ar.sort.join == color_p_ar.sort.join
-            exact_color = true
+            ratio = 0.99
           end
         end
       end
 
-      ratio =
-        if exact_color
-          1
-        else
-          color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
-          color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
-          (color_p_ar & color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f
-        end
+      unless ratio
+        color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+        color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
+        ratio = (color_p_ar & color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f
+      end
 
       ratio * WEIGHTS[:color]
     end
