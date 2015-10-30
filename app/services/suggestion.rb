@@ -144,7 +144,7 @@ class Suggestion
         else
           color_s_ar = color_s.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
           color_p_ar = color_p.downcase.split(/[\s\/,]/).map{|el| el.strip}.select{|el| el.present?}
-          (color_p_ar && color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f
+          (color_p_ar & color_s_ar).size / (color_s_ar + color_p_ar).uniq.size.to_f
         end
 
       ratio * WEIGHTS[:color]
@@ -161,7 +161,7 @@ class Suggestion
         ['xlarge', 'xl'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
         ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['onesize', 'o/s', '1sz'],
       ]
-      1..10.each do |i|
+      (1..10).each do |i|
         basic_sizes << ["#{i}1/2", "#{i}.5"]
       end
 
