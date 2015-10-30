@@ -104,7 +104,7 @@ class ProductsController < ApplicationController
         products_ids = products_ids.where('product_suggestions.percentage > ?', 50)
       end
 
-      products_ids = products_ids.order('title, color')
+      products_ids = products_ids.order('source_id,, title, color')
       product_id = products_ids.first.try(:id)
     end
 
