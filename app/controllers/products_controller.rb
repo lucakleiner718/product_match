@@ -133,11 +133,27 @@ class ProductsController < ApplicationController
 
   def match_undo
     last_match = ProductSelect.joins(:product).where(user: current_user.id, products: { brand_id: params[:brand_id]}).where('product_selects.created_at > ?', 1.hour.ago).order(created_at: :desc).first
-    if last_match.decision == 'found'
-      ProductUpc.where(product_id: last_match.product_id).destroy_all
-      Product.find(last_match.product_id).update_attributes upc: nil, match: true
-      ProductSuggestionsWorker.new.perform last_match.product_id
-      last_match.destroy
+    if last_match
+      if last_match.decision == 'found'
+        ProductUpc.where(product_id: last_match.product_id).destroy_all
+        Product.find(last_match.product_id).update_attributes upc: nil, match: true
+        ProductSuggestionsWorker.new.perform last_match.product_id
+        last_match.destroy
+      elsif last_match.decision == 'nothing'
+        product = last_match.product
+        same_products_options = Product.where(source: product.source, style_code: product.style_code).pluck(:id)
+        same_products_options.each do |product_id|
+          ProductSelect.where(user_id: current_user.id, product_id: product_id, decision: :nothing).where('created_at > ?', 1.hour.ago).destroy_all
+        end
+      elsif last_match.decision == 'no-color'
+        product = last_match.product
+        same_products_options = Product.where(source: product.source, style_code: product.style_code, color: product.color).pluck(:id)
+        same_products_options.each do |product_id|
+          ProductSelect.where(user_id: current_user.id, product_id: product_id, decision: 'no-color').where('created_at > ?', 1.hour.ago).destroy_all
+        end
+      elsif last_match.decision == 'no-size' || last_match.decision == 'similar'
+        last_match.destroy
+      end
     end
     render json: {}
   end
