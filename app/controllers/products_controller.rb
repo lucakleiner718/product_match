@@ -95,7 +95,19 @@ class ProductsController < ApplicationController
     end
     if product_id
       @product = Product.find(product_id)
-      @suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc').where('percentage is not null AND percentage > 0').limit(30).includes(:suggested)
+
+      suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc').where('percentage is not null AND percentage > 0').limit(30).includes(:suggested)
+      #show same upc close to green suggestion
+      @suggested_products = []
+      suggested_products.each do |product|
+        @suggested_products << product unless @suggested_products.include?(product)
+        if product.percentage == 100
+          suggested_products.select{|pr| pr.suggested.upc == product.suggested.upc}.each do |pr|
+            @suggested_products << pr unless @suggested_products.include?(pr)
+          end
+        end
+      end
+
       @brand = @product.brand unless @brand
     end
   end

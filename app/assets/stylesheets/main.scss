@@ -20,3 +20,17 @@
     }
   }
 }
+
+
+.suggested-product-table{
+  width: 100%;
+
+  td{
+    &:first-child{
+      padding-right: 5px;
+    }
+  }
+}
+.thumbnail.same-as-green .suggested-product-table .value span{
+  background: rgba(0,255,0,0.5);
+}
