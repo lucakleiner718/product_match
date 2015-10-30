@@ -28,4 +28,7 @@ jQuery ($) ->
 #
 #    get_row()
 
-  $('#filter_brand_id').select2()
+  $('.select2').select2()
+
+  $(".match-brand").on 'change', ->
+    window.location = "/match?brand_id=" + $(this).val()
