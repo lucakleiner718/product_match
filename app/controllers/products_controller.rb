@@ -98,7 +98,7 @@ class ProductsController < ApplicationController
         ).where("product_selects.id is null")
       end
 
-      if params[:has_color] == 'green'
+      if params[:has_color] == 'green' || params[:only] == 'has_green'
         products_ids = products_ids.where('product_suggestions.percentage = ?', 100)
       else
         products_ids = products_ids.where('product_suggestions.percentage > ?', 50)

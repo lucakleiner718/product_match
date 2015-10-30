@@ -26,7 +26,7 @@
         <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= brand.stat.amounts_content %>"><%= brand.stat.amounts_values %></span>
       </td>
       <td><%= brand.stat.suggestions %></td>
-      <td><%= link_to brand.stat.suggestions_green, match_path(brand_id: brand.id, has_color: :green), target: :_blank if brand.stat.suggestions_green %></td>
+      <td><%= link_to brand.stat.suggestions_green, match_path(brand_id: brand.id, only: :has_green), target: :_blank if brand.stat.suggestions_green %></td>
       <td><%= brand.stat.suggestions_yellow if brand.stat.suggestions_yellow %></td>
       <td><%= brand.stat.new_match_today %></td>
       <td><%= brand.stat.new_match_week %></td>
