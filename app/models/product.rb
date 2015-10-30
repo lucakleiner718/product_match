@@ -11,9 +11,9 @@ class Product < ActiveRecord::Base
   )
 
   scope :shopbop, -> { where source: :shopbop }
-  scope :not_shopbop, -> { where("source != ?", :shopbop) }
-  scope :without_upc, -> { where("upc is null OR upc = ''") }
-  scope :with_upc, -> { where("upc is not null AND upc != ''") }
+  scope :not_shopbop, -> { where.not(source: :shopbop) }
+  scope :without_upc, -> { where(upc: [nil, '']) }
+  scope :with_upc, -> { where.not(upc: [nil, '']) }
 
   after_update do
     if self.source == 'shopbop' && self.upc_changed? && self.upc_was.nil?
