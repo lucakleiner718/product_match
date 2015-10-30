@@ -157,8 +157,8 @@ class Suggestion
       size_p = @product.size.gsub(/\s/, '').downcase
 
       basic_sizes = [
-        ['2xs', 'xxs'], ['xs', 'xsmall'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
-        ['xlarge', 'xl'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
+        ['2xs', 'xxs'], ['xs', 'xsmall', 'xsml'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
+        ['xlarge', 'xl', 'xlrg'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
         ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['onesize', 'o/s', '1sz'],
       ]
       (1..10).each do |i|
