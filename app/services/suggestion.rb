@@ -28,14 +28,7 @@ class Suggestion
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
                     .select{|el| el.size > 2} - ['the', '&', 'and', 'womens']
-    # special_category = Product::CLOTH_KIND & title_parts
-    # if special_category.size > 0
-    #   special_category.each do |category|
-    #     related_products = related_products.where("title ILIKE :word or category ILIKE :word", word: "%#{category}%")
-    #   end
-    # else
-      related_products = related_products.where(title_parts.map{|el| "title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
-    # end
+    related_products = related_products.where(title_parts.map{|el| "title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
 
     exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id)).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
     to_create = []
