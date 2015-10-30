@@ -39,8 +39,10 @@
           <% end %>
         </ul>
       </div>
-      <div class="clearfix">&nbsp;</div>
-      <%= link_to 'Brand statistic', products_statistic_path(brand_id: @brand.id), class: 'pull-right', target: :_blank %>
+      <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
+      <%= link_to 'Brand statistic', products_statistic_path(brand_id: @brand.id), class: 'btn btn-default pull-right', target: :_blank %>
+      <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
+      <%= link_to 'Undo previous match', match_undo_path(brand_id: @brand.id), class: 'btn btn-default select-action pull-right', remote: true, method: :post %>
     </div>
   </div>
 

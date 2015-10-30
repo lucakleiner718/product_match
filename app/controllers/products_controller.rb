@@ -128,7 +128,18 @@ class ProductsController < ApplicationController
       end
     end
 
-    render json: { }
+    render json: {}
+  end
+
+  def match_undo
+    last_match = ProductSelect.joins(:product).where(user: current_user.id, products: { brand_id: params[:brand_id]}).where('product_selects.created_at > ?', 1.hour.ago).order(created_at: :desc).first
+    if last_match.decision == 'found'
+      ProductUpc.where(product_id: last_match.product_id).destroy_all
+      Product.find(last_match.product_id).update_attributes upc: nil, match: true
+      ProductSuggestionsWorker.new.perform last_match.product_id
+      last_match.destroy
+    end
+    render json: {}
   end
 
   def statistic

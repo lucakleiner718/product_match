@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get 'products' => 'products#index', as: :products
   get 'products/export' => 'products#index_export', as: :products_export
   get 'match' => 'products#match', as: :match
+  post 'match/undo' => 'products#match_undo', as: :match_undo
   post 'match/:product_id' => 'products#match_select', as: :select
   get 'products/statistic' => 'products#statistic', as: :products_statistic
   # get 'products/statistic_brand' => 'products#statistic_brand', as: :products_statistic_brand
