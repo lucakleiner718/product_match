@@ -75,14 +75,18 @@ class ProductsController < ApplicationController
 
   def match
     @brands_choose = Brand.in_use.order(:name)
-
     product_id = params[:product_id]
+
     unless product_id
       @brand = params[:brand_id] ? Brand.find(params[:brand_id]) : Brand.in_use.first
 
       products_ids = Product.shopbop.where(match: true).without_upc.joins(:suggestions)
       products_ids = products_ids.where(brand_id: @brand.id)
-      products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND (product_selects.decision='found' OR product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND product_selects.created_at > '#{1.day.ago}' AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
+      if params[:only] == 'not_matched'
+        products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id").where("product_selects.id is null")
+      else
+        products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND ((product_selects.decision='found' OR (product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND product_selects.created_at > '#{1.day.ago}')) AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
+      end
 
       if params[:has_color] == 'green'
         products_ids = products_ids.where('product_suggestions.percentage = ?', 100)
@@ -93,6 +97,7 @@ class ProductsController < ApplicationController
       products_ids = products_ids.order('title, color')
       product_id = products_ids.first.try(:id)
     end
+
     if product_id
       @product = Product.find(product_id)
 
