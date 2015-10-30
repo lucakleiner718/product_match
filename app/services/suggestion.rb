@@ -7,14 +7,21 @@ class Suggestion
     price: 2
   }
   GENDER_WEIGHT = 5
+  EXCLUDE_SOURCES = [
+    'lordandtaylor.com'
+  ]
 
-  def self.build product_id
+  def self.build product_id, rewrite: false
     instance = self.new
-    instance.build_suggestions product_id
+    instance.build_suggestions product_id, rewrite: rewrite
   end
 
-  def build_suggestions product_id
+  def build_suggestions product_id, rewrite: rewrite
     product = Product.find(product_id)
+
+    if rewrite
+      ProductSuggestion.where(product_id: product.id).destroy_all
+    end
 
     # do not generate suggestions if upc already detected
     if product.upc.present? || ProductUpc.where(product_id: product.id).first.try(:upc)
@@ -24,11 +31,13 @@ class Suggestion
     brand_name = product.brand.try(:name)
     return false unless brand_name
     brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
-    related_products = Product.not_shopbop.where.not(source: 'lordandtaylor.com').where(brand_id: brand.id).with_upc
+    related_products = Product.not_shopbop.where('products.source NOT IN (?)', EXCLUDE_SOURCES).where(brand_id: brand.id).with_upc
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
                     .select{|el| el.size > 2} - ['the', '&', 'and', 'womens']
-    related_products = related_products.where(title_parts.map{|el| "title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+    related_products = related_products.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+
+    related_products = related_products.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != '' AND p1.upc=products.upc AND p1.id != products.id AND p1.source='shopbop'").where('p1.id is null')
 
     exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id)).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
     to_create = []
@@ -163,7 +172,6 @@ class Suggestion
       unless exact
         basic_sizes.each do |options|
           if size_s.gsub('-', '').in?(options) && size_p.gsub('-', '').in?(options)
-            puts options
             exact = true
             break
           end
