@@ -37,7 +37,7 @@ class PopulateProductUpc
     # delete all suggestions for products as we found upc for it
     ProductSuggestion.where(product_id: product.id).delete_all
     # delete all suggestions with found upc
-    ProductSuggestion.joins(:suggested).where(products: { upc: product.upc}).delete_all
+    ProductSuggestion.where(suggested_id: Product.where(upc: product.upc).pluck(:id)).delete_all
 
     true
   end
