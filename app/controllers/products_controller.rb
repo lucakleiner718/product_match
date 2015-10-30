@@ -155,14 +155,16 @@ class ProductsController < ApplicationController
 
     csv_string = CSV.generate do |csv|
       csv << [
-        'Brand', 'Shopbop Products', 'Shopbop Products without UPC', 'Shopbop Products Matched', 'Other sources Products',
-        'Products with Suggestions'
+        'Brand Name', 'Shopbop Products', 'Shopbop Products without UPC', 'Shopbop Products Matched', 'Shopbop Products Nothing',
+        'Other sources Products with UPC', 'Products with Suggestions', 'Green Suggestions Products', 'Yellow Suggestions Products',
+        'New today', 'New this week', 'Match Page'
       ]
       brands.each do |brand|
         stat = brand.stat
         csv << [
-          brand.name, stat.shopbop_size, stat.shopbop_noupc_size, stat.shopbop_matched_size, stat.amounts_values,
-          stat.suggestions
+          brand.name, stat.shopbop_size, stat.shopbop_noupc_size, stat.shopbop_matched_size, stat.shopbop_nothing_size,
+          stat.amounts_values, stat.suggestions, stat.suggestions_green, stat.suggestions_yellow,
+          stat.new_match_today, stat.new_match_week, "http://upc.socialrootdata.com/match?brand_id=#{brand.id}"
         ]
       end
     end
