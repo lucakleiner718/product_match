@@ -83,9 +83,19 @@ class ProductsController < ApplicationController
       products_ids = Product.shopbop.where(match: true).without_upc.joins(:suggestions)
       products_ids = products_ids.where(brand_id: @brand.id)
       if params[:only] == 'not_matched'
-        products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id").where("product_selects.id is null")
+        products_ids = products_ids.joins("
+          LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
+        ").where("product_selects.id is null")
       else
-        products_ids = products_ids.joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id AND ((product_selects.decision='found' OR (product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND product_selects.created_at > '#{1.day.ago}')) AND product_selects.user_id=#{current_user.id})").where("product_selects.id is null")
+        products_ids = products_ids.joins("
+          LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
+          AND
+            (product_selects.decision='found' OR
+              (product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar')
+                AND product_selects.created_at > '#{1.day.ago}'
+              )
+            ) AND product_selects.user_id=#{current_user.id}"
+        ).where("product_selects.id is null")
       end
 
       if params[:has_color] == 'green'
