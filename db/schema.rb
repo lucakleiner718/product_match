@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151027140504) do
+ActiveRecord::Schema.define(version: 20151030122241) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -105,8 +105,10 @@ ActiveRecord::Schema.define(version: 20151027140504) do
     t.datetime "updated_at",   null: false
   end
 
+  add_index "product_suggestions", ["percentage"], name: "index_product_suggestions_on_percentage", using: :btree
   add_index "product_suggestions", ["product_id", "suggested_id"], name: "index_product_suggestions_on_product_id_and_suggested_id", unique: true, using: :btree
   add_index "product_suggestions", ["product_id"], name: "index_product_suggestions_on_product_id", using: :btree
+  add_index "product_suggestions", ["suggested_id"], name: "index_product_suggestions_on_suggested_id", using: :btree
 
   create_table "product_upcs", force: :cascade do |t|
     t.integer  "product_id"
