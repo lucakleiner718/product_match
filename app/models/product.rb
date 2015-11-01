@@ -2,6 +2,8 @@ class Product < ActiveRecord::Base
 
   has_many :suggestions, class_name: ProductSuggestion, dependent: :destroy, foreign_key: :product_id
   has_many :suggesteds, class_name: ProductSuggestion, dependent: :destroy, foreign_key: :suggested_id
+  has_one :product_upc, dependent: :destroy
+  has_many :product_selects, dependent: :destroy
 
   belongs_to :brand
 

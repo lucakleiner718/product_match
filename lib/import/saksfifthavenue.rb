@@ -54,6 +54,10 @@ class Import::Saksfifthavenue < Import::Base
       upc = v['upc']
       color = colors[v['color_id']]
       size = sizes[v['size_id']]
+      if v['price']
+        price = v['price']['list_price'].sub('&#36;', '') if v['price']['list_price'].present?
+        price_sale = v['price']['sale_price'].sub('&#36;', '') if v['price']['sale_price'].present?
+      end
 
       results << {
         title: product_name,
