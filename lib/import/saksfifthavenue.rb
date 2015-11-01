@@ -44,6 +44,9 @@ class Import::Saksfifthavenue < Import::Base
     product_name = d['short_description']
     style_code = d['product_id']
     image = "#{d['media']['images_server_url']}#{d['media']['images_path']}#{d['media']['images']['product_detail_image']}"
+    additional_images = []
+    additional_images << image.sub(/\/(\d+)_(\d+x\d+\.jpg)$/, '/\1_ASTL_\2')
+    additional_images << image.sub(/\/(\d+)_(\d+x\d+\.jpg)$/, '/\1_A1_\2')
 
     results = []
 
@@ -65,6 +68,7 @@ class Import::Saksfifthavenue < Import::Base
         upc: upc,
         url: original_url,
         image: image,
+        additional_images: additional_images,
         style_code: style_code,
         brand: brand
       }
