@@ -34,8 +34,10 @@ jQuery ($) ->
     window.location = "/match?brand_id=" + $(this).val()
 
   $('.suggestion-images').on 'click', ->
+    images = $('img', this)
+    return if images.length == 1
     current = $(this).find('img:visible')
-    next = current.next()
-    next = $('.suggestion-images img').first() if next.length == 0
+    next = current.next('img')
+    next = images.first() if next.length == 0
     current.css('display', 'none')
     next.css('display', 'block')

@@ -36,7 +36,19 @@
 }
 
 .suggestion-images{
+  position: relative;
   .additional-image{
     display: none;
+  }
+  .images-amount{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    text-align: center;
+    height: 20px;
+    line-height: 20px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
   }
 }
