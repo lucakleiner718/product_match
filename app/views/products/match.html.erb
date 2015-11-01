@@ -102,12 +102,18 @@
                 <tr><td>UPC:</td><td class="value"><span><%= product.upc %></span></td></tr>
               </table>
 
-              <div style="margin: 5px 0;">
-                <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank %>
+              <div style="margin: 5px 0;" class="portfolio-item suggestion-images">
+                <%= image_tag(product_image(product.image), class: 'main-image img-responsive') %>
+                <%= image_tag(product_image(product.image), class: 'additional-image img-responsive') %>
+                <%= image_tag(product_image(product.image), class: 'additional-image img-responsive') %>
+                <% product.additional_images.each do |ad_image| %>
+                  <%= image_tag(product_image(ad_image), class: 'additional-image img-responsive') %>
+                <% end %>
               </div>
 
               <%= link_to 'Found', select_path(product_id: @product.id, selected_id: product.id, decision: :found), class: "btn btn-success select-action", remote: true, method: :post %>
               <%= link_to 'Similar', select_path(product_id: @product.id, selected_id: product.id, decision: :similar), class: "btn btn-warning select-action", remote: true, method: :post %>
+              <%= link_to 'Source', product.url, class: "btn btn-default pull-right" %>
             </div>
           </div>
         <% end %>
