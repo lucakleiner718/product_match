@@ -2,8 +2,7 @@ class Import::Saksfifthavenue < Import::Base
 
   def baseurl; 'http://www.saksfifthavenue.com'; end
 
-  def get_products_urls
-    urls = []
+  def perform
     resp = get_request 'main/ShopByBrand.jsp?tre=sbdnav3'
     html = Nokogiri::HTML(resp.body)
     brands_links = html.css('.designer-list li a').map{|a| a.attr('href').sub(/\?.*/, '')}
@@ -18,10 +17,8 @@ class Import::Saksfifthavenue < Import::Base
 
         brand_urls.concat products
       end
-      log "added brand urls #{brand_urls.size}"
-      urls.concat brand_urls
+      spawn_products_urls brand_urls
     end
-    urls
   end
 
   def process_url original_url
