@@ -10,7 +10,8 @@ class BrandCollectDataWorker
       when 'popshops'
         Import::Popshops.perform brand_id: product_source.source_id
       when 'linksynergy'
-        Import::Linksynergy.perform mid: product_source.source_id, daily: true, last_update: product_source.collected_at
+        Import::Linksynergy.perform mid: product_source.source_id, daily: true,
+          product_source: product_source
       when 'shopbop'
         Import::Shopbop.perform url: product_source.source_id, update_file: true
       when 'website'

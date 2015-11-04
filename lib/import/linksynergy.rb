@@ -15,17 +15,17 @@ class Import::Linksynergy < Import::Base
     39655 => 'Sugnlass Hut',
   }
 
-  def self.perform mid: 1237, rewrite: false, update: true, daily: nil, last_update: nil
-    instance = self.new mid: mid, rewrite: rewrite, update: update, daily: daily, last_update: last_update
+  def self.perform mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil
+    instance = self.new mid: mid, rewrite: rewrite, update: update, daily: daily, product_source: product_source
     instance.process_csv
   end
 
-  def initialize mid: 1237, rewrite: false, update: true, daily: nil, last_update: nil
+  def initialize mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil
     @retailer = RETAILERS[mid.to_i]
     @mid = mid
     @update = update
     @daily = daily
-    @last_update = last_update
+    @product_source = product_source
 
     if rewrite
       Product.where(source: source, retailer: @retailer).delete_all
@@ -40,7 +40,7 @@ class Import::Linksynergy < Import::Base
       ftp = Net::FTP.new('aftp.linksynergy.com')
       ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
 
-      # if !@last_update || ftp.mtime(File.basename(filename_gz)) > @last_update.utc
+      # if !@product_source.last_update || ftp.mtime(File.basename(filename_gz)) > @last_update.utc
         ftp.getbinaryfile(File.basename(filename_gz), filename_gz)
         txt = Zlib::GzipReader.open(filename_gz).read
         File.write Rails.root.join(filename), txt
@@ -52,7 +52,14 @@ class Import::Linksynergy < Import::Base
   end
 
   def process_csv
-    filename = get_file
+    begin
+      filename = get_file
+    rescue Net::FTPPermError => e
+      @product_source.collect_status_code = :fail
+      @product_source.collect_status_message = e.message
+      return false
+    end
+
 
     columns = %w(
       id title part_number category_primary category_secondary url image emtp1 description_short description_full empt2

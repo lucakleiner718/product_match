@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151101093742) do
+ActiveRecord::Schema.define(version: 20151104122606) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -86,14 +86,17 @@ ActiveRecord::Schema.define(version: 20151101093742) do
     t.string   "source_name"
     t.string   "source_id"
     t.datetime "collected_at"
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
     t.integer  "brand_id"
     t.json     "data"
-    t.integer  "period",       default: 0, null: false
+    t.integer  "period",                 default: 0, null: false
+    t.string   "collect_status_code"
+    t.string   "collect_status_message"
   end
 
   add_index "product_sources", ["brand_id"], name: "index_product_sources_on_brand_id", using: :btree
+  add_index "product_sources", ["collect_status_code"], name: "index_product_sources_on_collect_status_code", using: :btree
   add_index "product_sources", ["name"], name: "index_product_sources_on_name", using: :btree
   add_index "product_sources", ["source_name", "source_id"], name: "index_product_sources_on_source_name_and_source_id", unique: true, using: :btree
 

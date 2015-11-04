@@ -16,6 +16,9 @@ ActiveAdmin.register ProductSource do
       end
     end
     column :collected_at
+    column :collect_status do |ps|
+      "#{status_tag(ps.collect_status_code || :ok)}#{": #{ps.collect_status_message}" if ps.collect_status_message.present?}"
+    end
     actions
     column 'Source' do |item|
       case item.source_name
@@ -44,5 +47,6 @@ ActiveAdmin.register ProductSource do
   filter :source_name
   filter :source_id, label: 'Source ID'
   filter :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]]
+  filter :status
 
 end
