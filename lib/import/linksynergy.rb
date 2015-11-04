@@ -64,7 +64,7 @@ class Import::Linksynergy < Import::Base
 
     return false unless filename
 
-    first_line = File.open('filename') {|f| f.readline}.split('|')
+    first_line = File.open(filename) {|f| f.readline}.split('|')
     if @retailer
       Product.where(source: source, retailer: @retailer).update_all(retailer: first_line[2])
     end
