@@ -95,6 +95,8 @@ class Import::Linksynergy < Import::Base
     # SmarterCSV.process(filename, headers_in_file: false, col_sep: '|', force_simple_split: true, user_provided_headers: columns, chunk_size: 1_000, verbose: Rails.env.development?) do |rows|
     #   process_rows rows
     # end
+
+    true
   end
 
   def process_rows rows

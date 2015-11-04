@@ -71,6 +71,8 @@ class Import::Shopbop < Import::Base
 
     Product.shopbop.where(id: non_active).update_all(match: false)
     Product.shopbop.where(id: updated_ids).where(match: false).update_all(match: true)
+
+    true
   end
 
   def prepare_data rows

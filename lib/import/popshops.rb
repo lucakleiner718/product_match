@@ -81,6 +81,8 @@ class Import::Popshops < Import::Base
 
       page += 1
     end
+
+    true
   end
 
   def process_to_create to_create
