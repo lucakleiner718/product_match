@@ -34,7 +34,7 @@ class Import::Base
 
   def convert_brand items
     brands_names = items.map{|it| it[:brand].to_s.sub(/\A"/, '').sub(/"\z/, '')}.uniq.select{|it| it.present?}
-    exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"')}.join(',')}}")
+    exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"').gsub('{', '\{').gsub('}', '\}')}.join(',')}}")
     brands = brands_names.map do |brand_name|
       brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
       begin
