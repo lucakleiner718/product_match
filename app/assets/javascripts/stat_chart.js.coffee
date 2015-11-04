@@ -1,3 +1,4 @@
+#= require highcharts.src
 jQuery ($) ->
   chart_box = $('#stat-chart')
   return false if chart_box.length == 0

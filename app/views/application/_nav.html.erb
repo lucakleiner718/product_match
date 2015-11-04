@@ -16,6 +16,7 @@
           { title: 'Products', url: products_path, restrict: :admin },
           { title: 'Statistic', url: products_statistic_path, restrict: [:admin, :manager] },
           { title: 'Bop products with UPC', url: products_selected_path, restrict: :admin },
+          { title: 'Marketing', url: marketing_path, restrict: [:admin, :manager] },
           { title: 'Admin', url: admin_root_path, restrict: :admin },
           { title: 'Sidekiq', url: '/sidekiq', restrict: :admin },
         ] %>

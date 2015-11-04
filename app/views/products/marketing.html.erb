@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-sm-5">
+    <h3>Last matched</h3>
+    <ul>
+    <% @links.each do |link| %>
+    <li><%= link_to link[1], link[0], target: :_blank %></li>
+    <% end %>
+    </ul>
+  </div>
+</div>
+<div id="stat-chart" style="width: 100%;height: 400px;" data-values="<%= @chart.to_json %>"></div>

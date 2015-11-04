@@ -1,3 +1,2 @@
 //= require active_admin/base
-//= require highcharts.src
-//= require admin
+//= require stat_chart

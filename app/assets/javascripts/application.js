@@ -16,4 +16,5 @@
 //= require bootstrap
 //= require products
 //= require select2
+//= require stat_chart
 // require_tree .

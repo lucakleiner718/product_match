@@ -330,6 +330,12 @@ ORDER BY t.found_count desc, avg_similarity desc
     products
   end
 
+  def marketing
+    @chart = StatChart.new.data
+    @links = Dir.glob('public/downloads/shopbop_products_upc-*').sort.reverse[0..9].sort.map{|l| l.sub '/public', ''}
+               .map{|l| [l, l.match(/shopbop_products_upc-([\d_]{8})/)[1].gsub('_', '/')]}
+  end
+
   helper_method :sort_column, :sort_direction
 
   private
@@ -343,7 +349,7 @@ ORDER BY t.found_count desc, avg_similarity desc
   end
 
   def authorize
-    if current_user.manager? && !params[:action].in?(['statistic'])
+    if current_user.manager? && !params[:action].in?(['statistic', 'marketing'])
       redirect_to(products_statistic_path) unless current_user.is_admin?
     elsif current_user.regular? && !params[:action].in?(['match', 'match_select'])
       redirect_to(match_path)

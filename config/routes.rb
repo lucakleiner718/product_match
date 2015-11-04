@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   get 'products/statistic/export' => 'products#statistic_export', as: :products_statistic_export
   get 'products/selected' => 'products#selected', as: :products_selected
   get 'products/selected/export' => 'products#selected_export', as: :products_selected_export
+  get 'marketing' => 'products#marketing', as: :marketing
 
   require 'sidekiq/web'
   if Rails.env.production?
