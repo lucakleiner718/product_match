@@ -55,8 +55,7 @@ class Import::Linksynergy < Import::Base
     begin
       filename = get_file
     rescue Net::FTPPermError => e
-      @product_source.collect_status_code = :fail
-      @product_source.collect_status_message = e.message
+      @product_source.update_columns collect_status_code: :fail, collect_status_message: e.message
       return false
     end
 
