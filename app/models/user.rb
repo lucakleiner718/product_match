@@ -4,7 +4,17 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, 
          :recoverable, :rememberable, :trackable, :validatable
 
+  ROLES = %w(manager admin)
+
   def is_admin?
     self.role == 'admin'
+  end
+
+  def manager?
+    self.role == 'manager'
+  end
+
+  def regular?
+    self.role.blank?
   end
 end

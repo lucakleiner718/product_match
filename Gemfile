@@ -39,20 +39,17 @@ group :production do
   gem 'puma', '~> 2.8.2'
 end
 
-
 gem 'pry-rails'
 gem 'simple_form'
 gem 'nokogiri'
 gem 'curb'
 gem 'faraday'
 gem 'faraday_middleware'
-
 gem 'smarter_csv'
 gem 'bootstrap-sass', '~> 3.3.5'
 gem 'bootstrap-generators', '~> 3.3.4'
 gem 'kaminari'
 gem 'bootstrap-kaminari-views'
-
 gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
 gem 'sidekiq', '~> 3.5.0'
@@ -60,15 +57,11 @@ gem 'sidekiq-failures', '~> 0.4.5'
 gem 'sidekiq-statistic'
 gem 'sidekiq-unique-jobs', '~> 3.0'
 gem 'sinatra', require: false # Web interface of Sidekiq processes
-
 gem 'god'
 gem 'redis', '~> 3.2.1'
 gem 'redis-rails'
 gem 'clockwork'
-
 gem 'dotenv'
 gem 'dotenv-deployment', require: 'dotenv/deployment'
-
 gem 'rubyzip', require: 'zip'
-
 gem 'progress_bar'

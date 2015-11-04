@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
 
-  before_filter :authorize, except: [:match, :match_select]
+  before_filter :authorize
 
   def root
     redirect_to products_path
@@ -343,7 +343,11 @@ ORDER BY t.found_count desc, avg_similarity desc
   end
 
   def authorize
-    redirect_to(match_path) unless current_user.is_admin?
+    if current_user.manager? && !params[:action].in?(['statistic'])
+      redirect_to(products_statistic_path) unless current_user.is_admin?
+    elsif current_user.regular? && !params[:action].in?(['match', 'match_select'])
+      redirect_to(match_path)
+    end
   end
 
 end

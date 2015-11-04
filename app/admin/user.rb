@@ -29,7 +29,7 @@ ActiveAdmin.register User do
       f.input :email
       f.input :password, required: false
       f.input :password_confirmation, required: false
-      f.input :role, as: :select, collection: [['Admin', 'admin']]
+      f.input :role, as: :select, collection: User::ROLES.map{|r| [r.titleize, r]}
     end
     f.actions
   end
