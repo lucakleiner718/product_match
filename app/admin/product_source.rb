@@ -17,7 +17,7 @@ ActiveAdmin.register ProductSource do
     end
     column :collected_at
     column :collect_status do |ps|
-      "#{status_tag(ps.collect_status_code || :ok)}#{": #{ps.collect_status_message}" if ps.collect_status_message.present?}"
+      status_tag(ps.collect_status_code || :ok, title: ps.collect_status_message)
     end
     actions
     column 'Source' do |item|
