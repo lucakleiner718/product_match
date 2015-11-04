@@ -26,10 +26,7 @@ class Import::Linksynergy < Import::Base
     @update = update
     @daily = daily
     @product_source = product_source
-
-    if rewrite
-      Product.where(source: source, retailer: @retailer).delete_all
-    end
+    @rewrite = rewrite
   end
 
   def get_file
@@ -59,7 +56,6 @@ class Import::Linksynergy < Import::Base
       return false
     end
 
-
     columns = %w(
       id title part_number category_primary category_secondary url image emtp1 description_short description_full empt2
       discount_type price_sale price_retail empt3 empt4 brand numb1 bool1 style_code brand2 empt5 instock gtin numb2 currency id3
@@ -67,6 +63,15 @@ class Import::Linksynergy < Import::Base
     ).map(&:to_sym)
 
     return false unless filename
+
+    first_line = File.open('filename') {|f| f.readline}.split('|')
+    if @retailer
+      Product.where(source: source, retailer: @retailer).update_all(retailer: first_line[2])
+    end
+    @retailer = first_line[2]
+    if @rewrite
+      Product.where(source: source, retailer: @retailer).delete_all
+    end
 
     chunk = []
     chunk_limit = 1_000
@@ -138,10 +143,10 @@ class Import::Linksynergy < Import::Base
         upc: r[:gtin]
       }
 
-      items << item
+      items << item if item[:upc].present?
     end
 
-    items = convert_brand(items)
+    convert_brand(items)
 
     items
   end
