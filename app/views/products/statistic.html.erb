@@ -12,6 +12,7 @@
     <th><%= sortable 'stats.suggestions_yellow', 'Yellow Suggestions Products' %></th>
     <th><%= sortable 'stats.new_match_today', 'New today' %></th>
     <th><%= sortable 'stats.new_match_week', 'New this week' %></th>
+    <th><%= sortable 'stats.not_matched', 'Not matched' %></th>
   </tr>
   </thead>
   <tbody>
@@ -30,6 +31,7 @@
       <td><%= brand.stat.suggestions_yellow if brand.stat.suggestions_yellow %></td>
       <td><%= brand.stat.new_match_today %></td>
       <td><%= brand.stat.new_match_week %></td>
+      <td><%= brand.stat.not_matched %></td>
     </tr>
   <% end %>
   </tbody>

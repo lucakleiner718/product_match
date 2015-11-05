@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151104171206) do
+ActiveRecord::Schema.define(version: 20151105163835) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,18 +45,22 @@ ActiveRecord::Schema.define(version: 20151104171206) do
     t.integer  "shopbop_nothing_size"
     t.integer  "new_match_today"
     t.integer  "new_match_week"
+    t.integer  "not_matched"
   end
 
   add_index "brand_stats", ["amounts_values"], name: "index_brand_stats_on_amounts_values", using: :btree
   add_index "brand_stats", ["brand_id"], name: "index_brand_stats_on_brand_id", unique: true, using: :btree
   add_index "brand_stats", ["new_match_today"], name: "index_brand_stats_on_new_match_today", using: :btree
   add_index "brand_stats", ["new_match_week"], name: "index_brand_stats_on_new_match_week", using: :btree
+  add_index "brand_stats", ["not_matched"], name: "index_brand_stats_on_not_matched", using: :btree
   add_index "brand_stats", ["shopbop_matched_size"], name: "index_brand_stats_on_shopbop_matched_size", using: :btree
+  add_index "brand_stats", ["shopbop_nothing_size"], name: "index_brand_stats_on_shopbop_nothing_size", using: :btree
   add_index "brand_stats", ["shopbop_noupc_size"], name: "index_brand_stats_on_shopbop_noupc_size", using: :btree
   add_index "brand_stats", ["shopbop_size"], name: "index_brand_stats_on_shopbop_size", using: :btree
   add_index "brand_stats", ["suggestions"], name: "index_brand_stats_on_suggestions", using: :btree
   add_index "brand_stats", ["suggestions_green"], name: "index_brand_stats_on_suggestions_green", using: :btree
   add_index "brand_stats", ["suggestions_yellow"], name: "index_brand_stats_on_suggestions_yellow", using: :btree
+  add_index "brand_stats", ["updated_at"], name: "index_brand_stats_on_updated_at", using: :btree
 
   create_table "brands", force: :cascade do |t|
     t.string   "name"

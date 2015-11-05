@@ -109,6 +109,13 @@ class Brand < ActiveRecord::Base
     new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago.utc).where(brand_id: self.id).size
     new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).size
 
+    not_matched = con.execute("
+      SELECT count(distinct(product_id))
+      FROM products
+      LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
+      WHERE products.brand_id=#{self.id} AND product_selects.id is null
+    ").to_a.first['count']
+
     {
       shopbop_size: shopbop_size,
       shopbop_noupc_size: shopbop_noupc_size,
@@ -120,7 +127,8 @@ class Brand < ActiveRecord::Base
       suggestions_green: suggestions_green,
       suggestions_yellow: suggestions_yellow,
       new_match_today: new_match_today,
-      new_match_week: new_match_week
+      new_match_week: new_match_week,
+      not_matched: not_matched
     }
   end
 
