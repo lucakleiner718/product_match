@@ -42,5 +42,7 @@ class StatChart
     ")
     chart[:matched] = matched.sort{|a,b| a['created_week'] <=> b['created_week']}.map{|el| week = el['created_week'].split('-')
                                                                                                     .map(&:to_i); [Date.commercial(week.first, week.last, 7).to_time(:utc).to_i*1000, el['count'].to_i]}
+
+    chart
   end
 end
