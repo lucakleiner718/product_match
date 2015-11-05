@@ -113,7 +113,7 @@ class Brand < ActiveRecord::Base
       SELECT count(products.id)
       FROM products
       LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
-      WHERE products.brand_id=#{329} AND source='shopbop' AND (upc IS NULL OR upc='') AND product_selects.id is null
+      WHERE products.brand_id=#{self.id} AND source='shopbop' AND (upc IS NULL OR upc='') AND product_selects.id is null
     ").to_a.first['count']
 
     {
