@@ -44,6 +44,8 @@ class Import::Theory < Import::Demandware
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if html.css('.errorpromo').size > 0
+
     # in case we have link with upc instead of inner uuid of product
     if html.css('link[rel="canonical"]').size == 1
       url = html.css('link[rel="canonical"]').first.attr('href').sub(/\?.*/, '')
