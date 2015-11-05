@@ -31,7 +31,7 @@
       <td><%= brand.stat.suggestions_yellow if brand.stat.suggestions_yellow %></td>
       <td><%= brand.stat.new_match_today %></td>
       <td><%= brand.stat.new_match_week %></td>
-      <td><%= brand.stat.not_matched %></td>
+      <td><%= link_to brand.stat.not_matched, match_path(only: :not_matched) %></td>
     </tr>
   <% end %>
   </tbody>

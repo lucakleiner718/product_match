@@ -110,9 +110,10 @@ class Brand < ActiveRecord::Base
     new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).size
 
     not_matched = con.execute("
-      SELECT count(products.id)
+      SELECT count(distinct(products.id))
       FROM products
-      LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
+      LEFT JOIN product_selects ON product_selects.product_id=products.id
+      INNER JOIN product_suggestions on products.id=product_suggestions.product_id AND percentage > 50
       WHERE products.brand_id=#{self.id} AND source='shopbop' AND (upc IS NULL OR upc='') AND product_selects.id is null
     ").to_a.first['count']
 

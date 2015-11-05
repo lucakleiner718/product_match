@@ -45,7 +45,7 @@ class Suggestion
     related_products.find_each do |suggested|
       percentage = similarity_to product, suggested
       ps = exists["#{product.id}_#{suggested.id}"]
-      if percentage && percentage > 30
+      if percentage && percentage > 50
         if ps
           ps.percentage = percentage
           ps.save if ps.changed?
