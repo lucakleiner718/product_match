@@ -24,14 +24,14 @@
       <td><%= brand.stat.shopbop_matched_size %></td>
       <td><%= brand.stat.shopbop_nothing_size %></td>
       <td>
-        <span data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= brand.stat.amounts_content %>"><%= brand.stat.amounts_values %></span>
+        <span style="border-bottom: 1px dashed;" data-toggle="popover" data-trigger="hover" data-html="true" data-content="<%= brand.stat.amounts_content %>"><%= brand.stat.amounts_values %></span>
       </td>
       <td><%= brand.stat.suggestions %></td>
-      <td><%= link_to brand.stat.suggestions_green, match_path(brand_id: brand.id, only: :has_green), target: :_blank if brand.stat.suggestions_green %></td>
-      <td><%= brand.stat.suggestions_yellow if brand.stat.suggestions_yellow %></td>
-      <td><%= brand.stat.new_match_today %></td>
-      <td><%= brand.stat.new_match_week %></td>
-      <td><%= link_to brand.stat.not_matched, match_path(brand_id: brand.id, only: :not_matched) %></td>
+      <td><%= link_to brand.stat.suggestions_green, match_path(brand_id: brand.id, only: :has_green), target: :_blank %></td>
+      <td><%= brand.stat.suggestions_yellow %></td>
+      <td><%= link_to brand.stat.new_match_today, match_path(brand_id: brand.id, only: :new_match_today), target: :_blank %></td>
+      <td><%= link_to brand.stat.new_match_week, match_path(brand_id: brand.id, only: :new_match_week), target: :_blank %></td>
+      <td><%= link_to brand.stat.not_matched, match_path(brand_id: brand.id, only: :not_matched), target: :_blank %></td>
     </tr>
   <% end %>
   </tbody>

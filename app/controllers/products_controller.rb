@@ -86,6 +86,10 @@ class ProductsController < ApplicationController
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
         ").where("product_selects.id is null")
+      elsif params[:only] == 'new_match_week'
+        products_ids = products_ids.where('created_at >= ?', Time.now.monday)
+      elsif params[:only] == 'new_match_today'
+        products_ids = products_ids.where('created_at >= ?', 1.day.ago.utc)
       else
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
