@@ -20,14 +20,19 @@ ActiveAdmin.register ProductSource do
       status_tag(ps.collect_status_code || :ok, title: ps.collect_status_message)
     end
     actions
-    column 'Source' do |item|
-      case item.source_name
+    column 'Source' do |ps|
+      case ps.source_name
         when 'popshops'
-          link_to 'Link', Import::Popshops.new.build_url(brand: item.source_id), target: :_blank
+          link_to 'Full', Import::Popshops.new.build_url(brand: ps.source_id), target: :_blank
         when 'website'
-          link_to 'Link', Module.const_get("Import::#{item.source_id.titleize}").new.baseurl, target: :_blank rescue nil
+          link_to 'Full', Module.const_get("Import::#{ps.source_id.titleize}").new.baseurl, target: :_blank rescue nil
         when 'shopbop'
-          link_to 'Link', item.source_id, target: :_blank
+          link_to 'Full', ps.source_id, target: :_blank
+        when "linksynergy"
+          [
+            link_to('Full', "ftp://aftp.linksynergy.com/#{ps.source_id}_2388513_mp.txt.gz", target: :_blank),
+            link_to('Delta', "ftp://aftp.linksynergy.com/#{ps.source_id}_2388513_mp_delta.txt.gz", target: :_blank)
+          ].join('&nbsp;').html_safe
       end
     end
   end

@@ -22,7 +22,6 @@ class ProductSuggestionsGeneratorWorker
         exists_ids = []
       end
     else
-      # exists_ids = ProductSuggestion.select('distinct(product_id)').to_a.map(&:product_id)
       exists_ids = ProductSuggestion.select('distinct(product_id)').joins("JOIN products on products.id=product_suggestions.product_id AND products.source='shopbop' AND products.brand_id=#{brand_id}").to_a.map(&:product_id)
     end
 

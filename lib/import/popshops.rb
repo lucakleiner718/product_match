@@ -121,7 +121,7 @@ class Import::Popshops < Import::Base
         source: source,
         source_id: r.attr('id'),
         brand: brand,
-        title: title,
+        title: r.attr('name'),
         image: r.attr('image_url_large'),
         upc: nil,
         mpn: nil,
@@ -190,7 +190,7 @@ class Import::Popshops < Import::Base
       @affected_brands << brand unless @affected_brands.include?(brand)
     end
 
-    convert_brand(items)
+    prepare_items(items)
 
     items
   end

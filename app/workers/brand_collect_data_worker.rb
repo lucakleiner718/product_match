@@ -4,7 +4,11 @@ class BrandCollectDataWorker
   sidekiq_options unique: true
 
   def perform product_source_id
-    product_source = ProductSource.find(product_source_id)
+    begin
+      product_source = ProductSource.find(product_source_id)
+    rescue ActiveRecord::RecordNotUnique => e
+      return false
+    end
 
     response =
       case product_source.source_name

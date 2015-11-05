@@ -32,13 +32,34 @@ class Import::Base
     1_000
   end
 
+  def prepare_items items
+    prepare_title items
+    normalize_color items
+    convert_brand items
+    items
+  end
+
+  def prepare_title items
+    items.map do |item|
+      item[:title] = normalize_title(item[:title], item[:brand]) if item[:title].present?
+    end
+    items
+  end
+
+  def normalize_color items
+    items.map do |item|
+      item[:color] = item[:color].gsub('&amp;', '&') if item[:color].present?
+    end
+    items
+  end
+
   def convert_brand items
     brands_names = items.map{|it| it[:brand].to_s.sub(/\A"/, '').sub(/"\z/, '')}.uniq.select{|it| it.present?}
     exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"').gsub('{', '\{').gsub('}', '\}')}.join(',')}}")
     brands = brands_names.map do |brand_name|
       brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
       begin
-      brand = Brand.create(name: brand_name) unless brand
+        brand = Brand.create(name: brand_name) unless brand
       rescue ActiveRecord::RecordNotUnique => e
         brand = Brand.get_by_name(brand_name)
       end
