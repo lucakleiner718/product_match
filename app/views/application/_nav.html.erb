@@ -22,9 +22,11 @@
         ] %>
         <ul class="nav navbar-nav">
           <% nav.each do |el| %>
-            <% next unless el[:restrict].present? && current_user.role.present? &&
+            <% if el[:restrict].present?
+                 next unless current_user.role.present? &&
                  ((el[:restrict].is_a?(Array) && el[:restrict].include?(current_user.role.to_sym)) ||
-                   el[:restrict] == current_user.role.to_sym) %>
+                   el[:restrict] == current_user.role.to_sym)
+            end %>
             <li><%= link_to el[:title], el[:url] %></li>
           <% end %>
         </ul>
