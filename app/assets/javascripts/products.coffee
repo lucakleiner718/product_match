@@ -41,3 +41,9 @@ jQuery ($) ->
     next = images.first() if next.length == 0
     current.css('display', 'none')
     next.css('display', 'block')
+
+  $(".zoom-image").elevateZoom
+    zoomType: "inner"
+    scrollZoom: true
+    minZoomLevel: 0.1
+    zoomLevel: 0.5

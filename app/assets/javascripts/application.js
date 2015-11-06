@@ -13,8 +13,9 @@
 //= require jquery
 //= require jquery_ujs
 // require turbolinks
+//= require jquery.elevatezoom
 //= require bootstrap
-//= require products
 //= require select2
+//= require products
 //= require stat_chart
 // require_tree .

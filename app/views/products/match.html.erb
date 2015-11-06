@@ -2,12 +2,12 @@
   <div class="row">
 
     <div class="col-md-3">
-      <%= image_tag @product.image, class: "img-responsive" %>
+      <%= image_tag @product.image, class: "img-responsive zoom-image" %>
     </div>
     <div class="col-md-3">
       <div class="row">
         <% @product.additional_images[0...4].each do |img| %>
-          <div class="col-md-6"><%= image_tag img, class: "img-responsive" %></div>
+          <div class="col-md-6"><%= image_tag img, class: "img-responsive zoom-image" %></div>
         <% end %>
       </div>
 
@@ -69,8 +69,12 @@
           <em>Source:</em> <%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></br>
           <em>UPC:</em> <%= product.upc %></br>
 
-          <div style="margin: 5px 0;">
-            <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank %>
+          <div style="margin: 5px 0;" class="portfolio-item suggestion-images">
+            <%= image_tag(product_image(product.image), class: 'main-image img-responsive') %>
+            <% product.additional_images.each do |ad_image| %>
+              <%= image_tag(product_image(ad_image), class: 'additional-image img-responsive') %>
+            <% end %>
+            <span class="images-amount"><%= 1+product.additional_images.size %></span>
           </div>
         </div>
       </div>
