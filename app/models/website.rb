@@ -2,8 +2,10 @@ class Website < ActiveRecord::Base
 
   def self.export file
     data = CSV.read(file).map(&:first)
+    websites = Website.where(provided_url: data).inject({}){|obj, w| obj[w.provided_url] = w; obj}
     csv_string = CSV.generate do |csv|
-      Website.where(provided_url: data).each do |w|
+      data.each do |r|
+        w = websites[r[0]]
         csv << [w.provided_url, w.url, w.platform]
       end
     end
