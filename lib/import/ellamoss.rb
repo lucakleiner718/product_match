@@ -104,6 +104,8 @@ class Import::Ellamoss < Import::Base
       end
     end
 
+    url = build_url(original_url)
+
     data.values.flatten.each do |row|
       results << {
         title: product_name,
@@ -114,7 +116,7 @@ class Import::Ellamoss < Import::Base
         color: row[:color],
         size: row[:size],
         upc: row[:upc],
-        url: original_url,
+        url: url,
         image: row[:image] || product_image,
         additional_images: row[:images],
         style_code: style_code,
