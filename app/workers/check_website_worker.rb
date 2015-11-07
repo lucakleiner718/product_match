@@ -1,7 +1,7 @@
 class CheckWebsiteWorker
   include Sidekiq::Worker
 
-  def perform website_id, force: false
+  def perform website_id, force=false
     website = Website.find(website_id)
     if website.platform.blank? || (website.platform == 'n/a' && force)
       request_url = website.provided_url
@@ -14,7 +14,7 @@ class CheckWebsiteWorker
     end
   end
 
-  def self.spawn file, force: false
+  def self.spawn file, force=false
     data = CSV.read(file).map(&:first)
     websites = Website.where(provided_url: data).group_by(&:provided_url)
     data.each do |url|
@@ -24,7 +24,7 @@ class CheckWebsiteWorker
         website.provided_url = url
         website.save if website.changed?
 
-        CheckWebsiteWorker.perform_async website.id, force: force
+        CheckWebsiteWorker.perform_async website.id, force
       end
     end
   end
