@@ -61,6 +61,10 @@ class Parser::Platform
       end
 
     [platform, resp.last_effective_url]
+  rescue Curl::Err::HostResolutionError, Curl::Err::SSLPeerCertificateError,
+    Curl::Err::TooManyRedirectsError, Curl::Err::RecvError, Curl::Err::TimeoutError,
+    Curl::Err::SSLConnectError=> e
+    [nil, nil]
   end
 
   def self.detect_multiple urls

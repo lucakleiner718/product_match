@@ -6,7 +6,11 @@ class Website < ActiveRecord::Base
     csv_string = CSV.generate do |csv|
       data.each do |r|
         w = websites[r[0]]
-        csv << [w.provided_url, w.url, w.platform]
+        if w
+          csv << [w.provided_url, w.url, w.platform]
+        else
+          csv << [r[0]]
+        end
       end
     end
     File.write file, csv_string

@@ -4,8 +4,8 @@ class CheckWebsiteWorker
   def perform website_id
     website = Website.find(website_id)
     platform, url = Parser::Platform.detect(website.url || website.provided_url)
-    website.platform = platform
-    website.url = url
+    website.platform = platform || 'n/a'
+    website.url = url || 'n/a'
     website.save
   end
 
