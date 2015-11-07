@@ -17,7 +17,7 @@ class Import::Ellamoss < Import::Base
       category_page_html = Nokogiri::HTML(category_page)
       urls.concat category_page_html.css('.threeGrid .product a.productPic').map{|l| l.attr('href')}
 
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+      urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
       log "spawned #{urls.size}"
     end
   end
