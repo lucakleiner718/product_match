@@ -61,9 +61,10 @@ class Suggestion
 
     if to_create.size > 0
       begin
-        ProductSuggestion.connection.execute("INSERT INTO product_suggestions (product_id, suggested_id, percentage, created_at, updated_at) VALUES
-          #{to_create.map{|r| "(#{r.values.map{|el| ProductSuggestion.sanitize el}.join(',')})"}.join(',')}
-          ")
+        ProductSuggestion.connection.execute("
+          INSERT INTO product_suggestions (#{to_create.first.keys.join(',')})
+          VALUES #{to_create.map{|r| "(#{r.values.map{|el| ProductSuggestion.sanitize el}.join(',')})"}.join(',')}
+        ")
       rescue ActiveRecord::RecordNotUnique => e
         to_create.each do |row|
           row.delete :created_at
