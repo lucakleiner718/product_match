@@ -2,7 +2,10 @@ class MatchController < ApplicationController
 
   def show
     @brands_choose = Brand.in_use.order(:name)
-    redirect_to match_path(brand_id: @brands_choose.first.id) unless params[:brand_id]
+    unless params[:brand_id]
+      redirect_to match_path(brand_id: @brands_choose.first.id)
+      return
+    end
 
     product_id = params[:product_id]
     unless product_id
