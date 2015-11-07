@@ -291,8 +291,6 @@ GEM
       redis-namespace (~> 1.5, >= 1.5.2)
     sidekiq-failures (0.4.5)
       sidekiq (>= 2.16.0)
-    sidekiq-statistic (1.1.0)
-      sidekiq (~> 3.3, >= 3.3.4)
     sidekiq-unique-jobs (3.0.15)
       sidekiq (>= 2.6)
     simple_form (3.2.0)
@@ -385,7 +383,6 @@ DEPENDENCIES
   sdoc (~> 0.4.0)
   sidekiq (~> 3.5.0)
   sidekiq-failures (~> 0.4.5)
-  sidekiq-statistic
   sidekiq-unique-jobs (~> 3.0)
   simple_form
   sinatra
