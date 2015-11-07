@@ -70,17 +70,6 @@ class Import::Ellamoss < Import::Base
       data[ind1] = data[ind1].select{|el| el.present? && el[:upc].present?}
     end
 
-    cxt[:aSKUUnitCostOnSale].each_with_index do |el, ind1|
-      next unless el
-      el.each_with_index do |it, ind2|
-        next if !it || !ind2
-        data[ind1] ||= []
-        data[ind1][ind2] ||= {}
-        data[ind1][ind2][:price_sale] = it.sub(/\$/, '')
-      end
-      data[ind1] = data[ind1].select{|el| el.present?}
-    end
-
     cxt[:color_names].to_a.compact.each_with_index do |color, ind|
       data[ind+1].each do |it|
        it[:color] = color
