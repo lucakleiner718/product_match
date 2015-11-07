@@ -50,7 +50,11 @@ class Suggestion
           ps.percentage = percentage
           ps.save if ps.changed?
         else
-          to_create << {product_id: product.id, suggested_id: suggested.id, percentage: percentage, created_at: Time.now, updated_at: Time.now}
+          to_create << {
+            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
+            price: suggested.price, price_sale: suggested.price_sale,
+            created_at: Time.now, updated_at: Time.now
+          }
         end
       end
     end
