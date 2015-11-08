@@ -32,7 +32,7 @@ class ImageLocalWorker
     filename = "#{product.id}-#{DateTime.now.strftime("%Y%d%m-%s")}-#{Digest::SHA1.hexdigest image_url}-#{SecureRandom.hex(4)}.#{extension}"
     image_contents = open(image_url).read rescue nil
 
-    return false unless image_contents
+    return false if image_contents.blank?
 
     connection = Fog::Storage.new(
       provider: 'AWS',
