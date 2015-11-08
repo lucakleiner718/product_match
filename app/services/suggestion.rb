@@ -209,6 +209,8 @@ class Suggestion
         diff = 1 - diff
 
         diff
+      else
+        0
       end
 
     ratio * WEIGHTS[:price]
