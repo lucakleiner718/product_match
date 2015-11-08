@@ -15,7 +15,7 @@
 
     <div style="margin: 5px 0;" class="portfolio-item suggestion-images">
       <%= image_tag(product_image(product.image_local.present? ? product.image_local : product.image), class: 'main-image img-responsive') %>
-      <% if product.additional_images.size > 0 %>
+      <% if product.additional_images_local.size > 0 %>
         <% product.additional_images_local.each do |ad_image| %>
           <%= image_tag(product_image(ad_image), class: 'additional-image img-responsive') %>
         <% end %>
