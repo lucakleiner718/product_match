@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151107055705) do
+ActiveRecord::Schema.define(version: 20151108121706) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -140,7 +140,7 @@ ActiveRecord::Schema.define(version: 20151107055705) do
     t.string   "category"
     t.string   "url"
     t.string   "image"
-    t.text     "additional_images", default: [],                 array: true
+    t.text     "additional_images",       default: [],                 array: true
     t.string   "price"
     t.string   "price_sale"
     t.string   "color"
@@ -155,10 +155,12 @@ ActiveRecord::Schema.define(version: 20151107055705) do
     t.string   "item_group_id"
     t.string   "google_category"
     t.text     "description"
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",                        null: false
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
     t.integer  "brand_id"
-    t.boolean  "match",             default: false
+    t.boolean  "match",                   default: false
+    t.string   "image_local"
+    t.text     "additional_images_local", default: [],                 array: true
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree

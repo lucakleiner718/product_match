@@ -23,6 +23,17 @@ class Product < ActiveRecord::Base
     end
   end
 
+  after_create do
+    ImageLocalWorker.perform_async self.id
+  end
+
+  after_destroy do
+    images = [self.image_local] + self.additional_images_local
+    images.compact.each do |image|
+      DeleteProductImage.perform_async image
+    end
+  end
+
   # validates :upc, length: { minimum: 12, maximum: 12 }, format: { with: /\A\d+\z/ }
   # validates :ean, length: { minimum: 13, maximum: 13 }, format: { with: /\A\d+\z/ }
 

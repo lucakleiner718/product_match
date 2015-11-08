@@ -3,34 +3,34 @@ require 'open-uri'
 class ImageLocalWorker
   include Sidekiq::Worker
 
-  # def initialize
-  #   super
-  #   @s3 = Aws::S3::Client.new
-  # end
-
   def perform product_id
     product = Product.find(product_id)
-    main_image = product.image
-    binding.pry
 
-    local_main_image = upload_image(product, main_image)
+    if product.image_local.blank?
+      image = upload_image(product, product.image)
+      product.image_local = image if image
+    end
 
+    if product.additional_images_local.size == 0 && product.additional_images.size > 0
+      additional_images = product.additional_images.map do |image_url|
+        upload_image(product, image_url)
+      end.compact
+      product.additional_images_local = additional_images if additional_images.size > 0
+    end
 
-
-    # image_hash = Digest::SHA1.hexdigest(main_image) + main_image.match(/(\.\w+)$/)[1]
-    # @s3.put_object({
-    #   bucket: 'upc-images',
-    #   key: image_hash,
-    #   body: open(main_image).read,
-    #   acl: 'public-read'
-    # })
-    # obj.public_url
+    product.save! if product.changed?
   end
 
   def upload_image product, image_url
+    if Rails.env.development? && image_url =~ /nordstrom/
+      image_url = "http://sinatra-proxy-dl.herokuapp.com/?url=#{image_url}"
+    end
+
     extension = image_url.match(/\.(\w+)\z/)[1]
-    filename = "#{product.id}-#{DateTime.now.strftime("%Y%d%m-%s")}-#{SecureRandom.hex(4)}.#{extension}"
-    image_contents = open(image_url).read
+    filename = "#{product.id}-#{DateTime.now.strftime("%Y%d%m-%s")}-#{Digest::SHA1.hexdigest image_url}-#{SecureRandom.hex(4)}.#{extension}"
+    image_contents = open(image_url).read rescue nil
+
+    return false unless image_contents
 
     connection = Fog::Storage.new(
       provider: 'AWS',
