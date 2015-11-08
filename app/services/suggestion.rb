@@ -95,6 +95,8 @@ class Suggestion
     params_count << price_similarity
     params_count << gender_similarity
 
+    binding.pry
+
     (params_count.select{|el| el.present?}.sum/@params_amount.to_f * 100).to_i
   end
 
@@ -196,13 +198,20 @@ class Suggestion
   end
 
   def price_similarity
-    if @suggested.price.present? && @product.price.present?
-      dif = (@suggested.price.to_i - @product.price.to_i).abs / @product.price.to_f
-      dif = 1 if dif > 1
-      dif = 1 - dif
+    suggested_prices = [@suggested.price, @suggested.price_sale].compact.uniq
+    product_prices = [@product.price, @product.price_sale].compact.uniq
+    ratio =
+      if (suggested_prices & product_prices).size > 0
+        1
+      elsif @suggested.price.present? && @product.price.present?
+        diff = (@suggested.price.to_i - @product.price.to_i).abs / @product.price.to_f
+        diff = 1 if diff > 1
+        diff = 1 - diff
 
-      (dif * WEIGHTS[:price]).round(2)
-    end
+        diff
+      end
+
+    ratio * WEIGHTS[:price]
   end
 
   def gender_similarity
