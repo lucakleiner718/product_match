@@ -14,15 +14,15 @@
     </table>
 
     <div style="margin: 5px 0;" class="portfolio-item suggestion-images">
-      <%= image_tag(product_image(product.image_local.present? ? product.image_local : product.image), class: 'main-image img-responsive') %>
+      <%= suggestion_image(product.image_local.present? ? product.image_local : product.image) %>
       <% if product.additional_images_local.size > 0 %>
         <% product.additional_images_local.each do |ad_image| %>
-          <%= image_tag(product_image(ad_image), class: 'additional-image img-responsive') %>
+          <%= suggestion_image(ad_image) %>
         <% end %>
         <span class="images-amount"><%= product.additional_images_local.size + 1 %></span>
       <% else %>
         <% product.additional_images.each do |ad_image| %>
-          <%= image_tag(product_image(ad_image), class: 'additional-image img-responsive') %>
+          <%= suggestion_image(ad_image) %>
         <% end %>
         <span class="images-amount"><%= product.additional_images.size + 1 %></span>
       <% end %>

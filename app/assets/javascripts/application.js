@@ -13,7 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 // require turbolinks
-//= require jquery.elevatezoom
+//= require jquery.zoom
 //= require bootstrap
 //= require select2
 //= require products

@@ -37,9 +37,15 @@
 
 .suggestion-images{
   position: relative;
-  .additional-image{
+
+  .img-wrap{
     display: none;
+
+    &:first-child{
+      display: block;
+    }
   }
+
   .images-amount{
     position: absolute;
     bottom: 0;

@@ -34,16 +34,13 @@ jQuery ($) ->
     window.location = "/match?brand_id=" + $(this).val()
 
   $('.suggestion-images').on 'click', ->
-    images = $('img', this)
+    images = $('.img-wrap', this)
     return if images.length == 1
-    current = $(this).find('img:visible')
-    next = current.next('img')
+    current = $(this).find('.img-wrap:visible')
+    next = current.next('.img-wrap')
     next = images.first() if next.length == 0
     current.css('display', 'none')
     next.css('display', 'block')
 
-  $(".zoom-image").elevateZoom
-    zoomType: "inner"
-    scrollZoom: true
-    minZoomLevel: 0.1
-    zoomLevel: 0.5
+  $(".zoom-image").zoom
+    on: 'right-click'
