@@ -45,7 +45,6 @@ class Import::Herroom < Import::Base
     product_name = html.css('#product-name h1').text
     style_code = html.css('#hdnStyleNumber').first.attr('value')
     category = html.css('.crumbtrail a').inject([]){|ar, el| el.text == 'home' ? '' : ar << el.text; ar}.join(' > ')
-    # price = html.css('.itemPrice').text.
     price = page.match(/'price'\s?:\s?'([^']+)'/)[1]
     brand = page.match(/'brand'\s?:\s?'([^']+)'/)[1]
     images = html.css('.product-thumbs-wrapper a.product-thumbnail').map{|a| a.attr('rel').match(/largeimage:\s?\'([^\']+)\'/)[1]}
@@ -61,7 +60,7 @@ class Import::Herroom < Import::Base
 
     data = JSON.parse variants.gsub("'", '"')
     data.each do |row|
-      title = normalize_title(product_name.sub(/^#{Regexp.quote brand}\s?/i, '').sub(/\s?#{id}$/i, ''), brand)
+      title = product_name.sub(/^#{Regexp.quote brand}\s?/i, '').sub(/\s?#{id}$/i, '')
       results << {
         title: title,
         brand: brand,
@@ -78,6 +77,7 @@ class Import::Herroom < Import::Base
       }
     end
 
+    prepare_items results
     process_results results
   end
 

@@ -13,6 +13,7 @@ gem 'jquery-rails'
 gem 'turbolinks'
 gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'therubyracer'
 
 group :development, :test do
 
@@ -54,7 +55,7 @@ gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
 gem 'sidekiq', '~> 3.5.0'
 gem 'sidekiq-failures', '~> 0.4.5'
-gem 'sidekiq-statistic'
+# gem 'sidekiq-statistic'
 gem 'sidekiq-unique-jobs', '~> 3.0'
 gem 'sinatra', require: false # Web interface of Sidekiq processes
 gem 'god'
@@ -65,3 +66,5 @@ gem 'dotenv'
 gem 'dotenv-deployment', require: 'dotenv/deployment'
 gem 'rubyzip', require: 'zip'
 gem 'progress_bar'
+gem 'aws-sdk'
+gem 'fog'

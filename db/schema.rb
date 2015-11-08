@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151105163835) do
+ActiveRecord::Schema.define(version: 20151108121706) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -110,6 +110,8 @@ ActiveRecord::Schema.define(version: 20151105163835) do
     t.integer  "percentage"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.string   "price"
+    t.string   "price_sale"
   end
 
   add_index "product_suggestions", ["percentage"], name: "index_product_suggestions_on_percentage", using: :btree
@@ -138,7 +140,7 @@ ActiveRecord::Schema.define(version: 20151105163835) do
     t.string   "category"
     t.string   "url"
     t.string   "image"
-    t.text     "additional_images", default: [],                 array: true
+    t.text     "additional_images",       default: [],                 array: true
     t.string   "price"
     t.string   "price_sale"
     t.string   "color"
@@ -153,10 +155,12 @@ ActiveRecord::Schema.define(version: 20151105163835) do
     t.string   "item_group_id"
     t.string   "google_category"
     t.text     "description"
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",                        null: false
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
     t.integer  "brand_id"
-    t.boolean  "match",             default: false
+    t.boolean  "match",                   default: false
+    t.string   "image_local"
+    t.text     "additional_images_local", default: [],                 array: true
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree
@@ -201,5 +205,17 @@ ActiveRecord::Schema.define(version: 20151105163835) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
+
+  create_table "websites", force: :cascade do |t|
+    t.string   "provided_url"
+    t.string   "url"
+    t.string   "platform"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "websites", ["platform"], name: "index_websites_on_platform", using: :btree
+  add_index "websites", ["provided_url"], name: "index_websites_on_provided_url", unique: true, using: :btree
+  add_index "websites", ["url"], name: "index_websites_on_url", using: :btree
 
 end

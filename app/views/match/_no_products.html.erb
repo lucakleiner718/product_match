@@ -1,0 +1,27 @@
+<div class="row">
+  <div class="col-sm-8">
+    <h3>There is no products for you</h3>
+  </div>
+  <div class="col-sm-4">
+    <%= select_tag 'brand', options_from_collection_for_select(@brands_choose, :id, :name, @brand.id), class: "form-control select2 match-brand" %>
+    <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
+    <%= link_to 'Brand statistic', products_statistic_path(brand_id: @brand.id), class: 'btn btn-default pull-right', target: :_blank %>
+    <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
+    <% show_formats = {
+      all: 'All',
+      not_matched: "Not matched",
+      has_green: 'Has green',
+    } %>
+    <div class="dropdown pull-right">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        Show <%= params[:only] && show_formats[params[:only].to_sym] || 'All' %>
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1">
+        <% show_formats.each do |param, label| %>
+          <li><%= link_to label, match_path(brand_id: @brand.id, only: param) %></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
