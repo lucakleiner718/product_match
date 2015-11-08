@@ -26,6 +26,8 @@ class ImageLocalWorker
       image_url = "http://sinatra-proxy-dl.herokuapp.com/?url=#{image_url}"
     end
 
+    "http:#{image_url}" if image_url[0,2] == '//'
+
     extension = image_url.match(/\.(\w+)\z/)[1]
     filename = "#{product.id}-#{DateTime.now.strftime("%Y%d%m-%s")}-#{Digest::SHA1.hexdigest image_url}-#{SecureRandom.hex(4)}.#{extension}"
     image_contents = open(image_url).read rescue nil
