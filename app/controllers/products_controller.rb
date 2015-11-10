@@ -220,8 +220,13 @@ ORDER BY t.found_count desc, avg_similarity desc
 
   def marketing
     @chart = StatChart.new.data
-    @links = Dir.glob('public/downloads/shopbop_products_upc-*').sort.reverse[0..9].sort.map{|l| l.sub /^public/, ''}
-               .map{|l| [l, l.match(/shopbop_products_upc-([\d_]{8})/)[1].gsub('_', '/')]}
+    @links = Dir.glob('public/downloads/shopbop_products_upc-*').sort.reverse[0..9].sort.map do |l|
+      [
+        l.sub(/^public/, ''),
+        l.match(/shopbop_products_upc-([\d_]{8})/)[1].gsub('_', '/'),
+        File.readlines(l).size
+      ]
+    end
   end
 
   helper_method :sort_column, :sort_direction

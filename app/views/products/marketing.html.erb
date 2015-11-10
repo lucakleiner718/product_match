@@ -2,8 +2,9 @@
   <div class="col-sm-5">
     <h3>Last matched</h3>
     <ul>
+      <li><%= link_to 'Current week', '/downloads/shopbop_products_upc.csv', target: :_blank %></li>
     <% @links.each do |link| %>
-    <li><%= link_to link[1], link[0], target: :_blank %></li>
+    <li><%= link_to link[1], link[0], target: :_blank %> (<%= link[2] %>)</li>
     <% end %>
     </ul>
   </div>
