@@ -73,7 +73,9 @@ class Import::Stevenalan < Import::Demandware
       if color_id && color_id[1] && color_id[1].present?
         color_id = color_id[1]
       else
-        color_id = html.css('.product-primary-image img').first.attr('src').match(/#{product_id.gsub('.', '').gsub('%2F', '')}_([^_]+)_/)[1]
+        product_id_image = product_id.gsub('.', '').gsub('%2F', '').gsub('%27', '')
+        color_id = html.css('.product-primary-image img')
+                     .first.attr('src').match(/#{product_id_image}_([^_]+)_/)[1]
       end
       obj[color_id] = a.attr('data-lgimg').match(/"url":"([^"]+)"/)[1]
       obj

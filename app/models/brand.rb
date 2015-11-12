@@ -50,7 +50,7 @@ class Brand < ActiveRecord::Base
     bs = self.brand_stat
     bs = self.build_brand_stat unless bs
     bs.attributes = built_stat
-    bs.touch(:updated_at)
+    bs.touch(:updated_at) unless bs.new_record?
     bs.save
   end
 

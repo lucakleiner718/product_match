@@ -10,7 +10,7 @@ class Import::Shopbop < Import::Base
 
     url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
 
-    if !File.exists?(filename) || (update_file && File.mtime(filename) < 12.hours.ago)
+    if !File.exists?(filename) || (update_file && File.mtime(filename) < 3.hours.ago)
       body = Curl.get(url).body
       body.force_encoding('UTF-8')
       File.write filename, body
