@@ -95,8 +95,6 @@ class Suggestion
     params_count << price_similarity
     params_count << gender_similarity
 
-    binding.pry
-
     (params_count.select{|el| el.present?}.sum/@params_amount.to_f * 100).to_i
   end
 
