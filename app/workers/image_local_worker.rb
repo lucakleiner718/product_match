@@ -28,7 +28,7 @@ class ImageLocalWorker
 
     "http:#{image_url}" if image_url[0,2] == '//'
 
-    extension = image_url.match(/\.(\w+)\z/)[1]
+    extension = image_url.match(/\.(jpg|png|jpeg|gif)\??/) && $1 || 'jpg'
     filename = "#{product.id}-#{DateTime.now.strftime("%Y%d%m-%s")}-#{Digest::SHA1.hexdigest image_url}-#{SecureRandom.hex(4)}.#{extension}"
     image_contents = open(image_url).read rescue nil
 
