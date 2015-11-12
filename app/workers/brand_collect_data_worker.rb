@@ -19,6 +19,10 @@ class BrandCollectDataWorker
             product_source: product_source
         when 'shopbop'
           Import::Shopbop.perform url: product_source.source_id, update_file: true
+          Product.shopbop.where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
+            ProductSuggestionsWorker.perform_async pid
+          end
+          BrandStatWorker.spawn
         when 'website'
           begin
             Module.const_get("Import::#{product_source.source_id.titleize}").perform

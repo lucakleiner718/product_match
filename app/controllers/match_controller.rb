@@ -17,10 +17,6 @@ class MatchController < ApplicationController
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
         ").where("product_selects.id is null")
-      elsif params[:only] == 'new_match_week'
-        products_ids = products_ids.where('products.created_at >= ?', Time.now.monday)
-      elsif params[:only] == 'new_match_today'
-        products_ids = products_ids.where('products.created_at >= ?', 1.day.ago)
       else
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
@@ -31,6 +27,12 @@ class MatchController < ApplicationController
               )
             AND product_selects.user_id=#{current_user.id})"
         ).where("product_selects.id is null")
+      end
+
+      if params[:only] == 'new_match_week'
+        products_ids = products_ids.where('products.created_at >= ?', Time.now.monday)
+      elsif params[:only] == 'new_match_today'
+        products_ids = products_ids.where('products.created_at >= ?', 1.day.ago)
       end
 
       if params[:has_color] == 'green' || params[:only] == 'has_green'
