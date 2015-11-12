@@ -46,10 +46,12 @@ class Brand < ActiveRecord::Base
   end
 
   def update_stat
-    s = self.build_stat
-    self.build_brand_stat unless self.brand_stat
-    self.brand_stat.attributes = s
-    self.brand_stat.save
+    built_stat = self.build_stat
+    bs = self.brand_stat
+    bs = self.build_brand_stat unless bs
+    bs.attributes = built_stat
+    bs.touch(:updated_at)
+    bs.save
   end
 
   def build_stat
