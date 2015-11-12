@@ -56,7 +56,7 @@ class Brand < ActiveRecord::Base
 
   def build_stat
     con = Product.connection
-    now = Time.now.utc
+    now = Time.now
 
     shopbop_size = Product.where(brand_id: self.id).shopbop.size
 
@@ -108,7 +108,7 @@ class Brand < ActiveRecord::Base
     suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size
     suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
 
-    new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago.utc).where(brand_id: self.id).size
+    new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).size
     new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).size
 
     not_matched = con.execute("

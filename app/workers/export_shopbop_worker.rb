@@ -13,7 +13,7 @@ class ExportShopbopWorker
     end
     File.write("public/downloads/shopbop_products_upc-#{te.strftime('%m_%d_%y')}-archive.csv", csv_string)
 
-    ts = Time.now.utc.monday
+    ts = Time.now.monday
 
     products_ids = Product.where('products.created_at >= ?', ts)
                      .joins('RIGHT JOIN product_upcs ON product_upcs.product_id=products.id')

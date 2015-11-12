@@ -37,12 +37,10 @@ class Import::Linksynergy < Import::Base
       ftp = Net::FTP.new('aftp.linksynergy.com')
       ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
 
-      # if !@product_source.last_update || ftp.mtime(File.basename(filename_gz)) > @last_update.utc
-        ftp.getbinaryfile(File.basename(filename_gz), filename_gz)
-        txt = Zlib::GzipReader.open(filename_gz).read
-        File.write Rails.root.join(filename), txt
-        File.delete filename_gz
-      # end
+      ftp.getbinaryfile(File.basename(filename_gz), filename_gz)
+      txt = Zlib::GzipReader.open(filename_gz).read
+      File.write Rails.root.join(filename), txt
+      File.delete filename_gz
     end
 
     filename

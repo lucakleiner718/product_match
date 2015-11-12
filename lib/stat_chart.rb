@@ -13,7 +13,7 @@ class StatChart
 
     stats = StatAmount.where('date > ?', 6.months.ago).where(key: ['shopbop_total', 'not_matched_size', 'shopbop_total_published', 'not_matched_size_published'])
     stats.each do |s|
-      item = [s.date.to_time(:utc).to_i*1000, s.value]
+      item = [s.date.to_time.to_i*1000, s.value]
       if s.key == 'shopbop_total'
         chart[:total_products] << item
       elsif s.key == 'shopbop_total_published'
@@ -35,7 +35,7 @@ class StatChart
       added_without_upc.sort{|a,b| a['created_week'] <=> b['created_week']}
       .map do |el|
         week = el['created_week'].split('-').map(&:to_i)
-        [Date.commercial(week.first, week.last, 7).to_time(:utc).to_i*1000, el['count'].to_i]
+        [Date.commercial(week.first, week.last, 7).to_time.to_i*1000, el['count'].to_i]
       end
 
     matched = ProductUpc.connection.execute("
@@ -48,7 +48,7 @@ class StatChart
       matched.sort{|a,b| a['created_week'] <=> b['created_week']}
         .map do |el|
           week = el['created_week'].split('-').map(&:to_i)
-          [Date.commercial(week.first, week.last, 7).to_time(:utc).to_i*1000, el['count'].to_i]
+          [Date.commercial(week.first, week.last, 7).to_time.to_i*1000, el['count'].to_i]
         end
 
     chart
