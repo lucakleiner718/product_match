@@ -6,13 +6,13 @@ class ImageLocalWorker
   def perform product_id
     product = Product.find(product_id)
 
-    if product.image_local.blank?
+    if product.image_local.blank? && product.image.present?
       image = upload_image(product, product.image)
       product.image_local = image if image
     end
 
     if product.additional_images_local.size == 0 && product.additional_images.size > 0
-      additional_images = product.additional_images.map do |image_url|
+      additional_images = product.additional_images.compact.map do |image_url|
         upload_image(product, image_url)
       end.compact
       product.additional_images_local = additional_images if additional_images.size > 0
