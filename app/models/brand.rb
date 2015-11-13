@@ -58,15 +58,15 @@ class Brand < ActiveRecord::Base
     con = Product.connection
     now = Time.now
 
-    shopbop_size = Product.where(brand_id: self.id).shopbop.size
-
-    shopbop_noupc_size = Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''").size
+    shopbop_size = Product.where(brand_id: self.id).shopbop.where(match: true).size
+    shopbop_noupc_size = Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''")
+                           .where(match: true).size
 
     shopbop_matched_size = con.execute("
       SELECT count(distinct(product_id)) as amount
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
-      WHERE ps.decision='found' AND pr.brand_id=#{self.id}
+      WHERE ps.decision='found' AND pr.brand_id=#{self.id} AND pr.match=#{true}
     ").to_a.first['amount'].to_i
 
     shopbop_nothing_size = con.execute("
@@ -74,6 +74,7 @@ class Brand < ActiveRecord::Base
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
       WHERE ps.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND pr.brand_id=#{self.id}
+            AND pr.match=#{true}
     ").to_a.first['amount'].to_i
 
     amounts_uniq = con.execute("
@@ -102,22 +103,22 @@ class Brand < ActiveRecord::Base
       SELECT count(distinct(product_id))
       FROM product_suggestions
       INNER JOIN products on products.id=product_suggestions.product_id AND source='shopbop'
-      WHERE products.brand_id=#{self.id}
-    ").to_a.first['count']
+      WHERE products.brand_id=#{self.id} AND products.match=#{true}
+    ").to_a.first['count'].to_i
 
     suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size
     suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
 
-    new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).size
-    new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).size
+    new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).where(match: true).size
+    new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).where(match: true).size
 
     not_matched = con.execute("
       SELECT count(distinct(products.id))
       FROM products
       LEFT JOIN product_selects ON product_selects.product_id=products.id
       INNER JOIN product_suggestions on products.id=product_suggestions.product_id AND percentage > 50
-      WHERE products.brand_id=#{self.id} AND source='shopbop' AND (upc IS NULL OR upc='') AND product_selects.id is null
-    ").to_a.first['count']
+      WHERE products.brand_id=#{self.id} AND source='shopbop' AND match=#{true} AND (upc IS NULL OR upc='') AND product_selects.id is null
+    ").to_a.first['count'].to_i
 
     {
       shopbop_size: shopbop_size,
