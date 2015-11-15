@@ -2,15 +2,15 @@ module MatchHelper
 
   def match_item_bg suggest_item
     if suggest_item.percentage == 100
-      "rgba(0,255,0,0.5)"
+      "rgba(0, 165, 0, 1)"
     elsif suggest_item.percentage < 100 && suggest_item.percentage >= 90
-      "rgba(190,255,0,0.5)"
+      "rgba(190, 255, 0, 0.5)"
     elsif suggest_item.percentage < 90 && suggest_item.percentage >= 60
-      "rgba(255,255,0,0.5)"
+      "rgba(255, 255, 0, 0.5)"
     elsif suggest_item.percentage < 60 && suggest_item.percentage >= 50
-      "rgba(90, 90, 96, 0.5)"
+      "rgba(90, 90, 96, 0.3)"
     elsif suggest_item.percentage < 50
-      "rgba(90, 90, 96, 0.2)"
+      "rgba(90, 90, 96, 0.1)"
     end
   end
 

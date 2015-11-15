@@ -9,7 +9,7 @@ class ExportShopbopWorker
 
   private
 
-  def weekly_file(time_start)
+  def weekly(time_start)
     ts = (time_start ? time_start.to_datetime : 1.week.ago).monday.beginning_of_day
     te = ts.sunday.end_of_day
     products_ids = ProductUpc.where('created_at >= ? AND created_at <= ?', ts, te).pluck(:product_id)

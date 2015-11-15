@@ -103,8 +103,12 @@ class Suggestion
 
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
 
-    multiplier = [['panty', 'panties'], ['short', 'shorts'], ['boot', 'boots', 'booties']]
+    multiplier = [
+      ['panty'], ['short'], ['boot', ['booties']], ['sneaker']
+    ]
     multiplier.each do |ar|
+      ar[1] ||= []
+      ar[1] << ar[0].pluralize
       if (title_parts & ar).size > 0 && (suggested_title_parts & ar)
         title_parts -= ar
         suggested_title_parts -= ar
