@@ -1,6 +1,6 @@
 class Brand < ActiveRecord::Base
 
-  has_many :sources, class_name: 'ProductSource'
+  has_many :sources, class_name: :ProductSource
   has_one :brand_stat
   has_many :products
 

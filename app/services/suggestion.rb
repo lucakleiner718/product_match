@@ -7,6 +7,7 @@ class Suggestion
     price: 2
   }
   GENDER_WEIGHT = 5
+  STYLE_CODE_WEIGHT = 10
   EXCLUDE_SOURCES = [
     'lordandtaylor.com'
   ]
@@ -17,16 +18,17 @@ class Suggestion
   end
 
   def build
-    if rewrite
-      ProductSuggestion.where(product_id: product.id).destroy_all
-    end
-
     # do not generate suggestions if upc already detected
     if product.upc.present? || ProductUpc.where(product_id: product.id).first.try(:upc)
       return false
     end
 
     return false unless product.brand.try(:name)
+
+    if rewrite
+      ProductSuggestion.where(product_id: product.id).destroy_all
+    end
+
     to_create = process_related_products
     create_items(to_create)
     to_create.size
@@ -36,7 +38,7 @@ class Suggestion
 
   attr_reader :product, :rewrite
 
-  def similarity_to(suggested)
+  def similarity_to(suggested, upc_patterns)
     @params_amount = WEIGHTS.values.sum
     params_count = []
 
@@ -45,8 +47,16 @@ class Suggestion
     params_count << size_similarity(suggested)
     params_count << price_similarity(suggested)
     params_count << gender_similarity(suggested)
+    params_count << style_code_similarity(suggested, upc_patterns) if upc_patterns.size > 0
 
     (params_count.select{|el| el.present?}.sum/@params_amount.to_f * 100).to_i
+  end
+
+  def style_code_similarity(suggested, upc_patterns)
+    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}\d{2,3}$/ }.size > 0
+      @params_amount += STYLE_CODE_WEIGHT
+      STYLE_CODE_WEIGHT
+    end
   end
 
   def title_similarity(suggested)
@@ -112,9 +122,18 @@ class Suggestion
       size_p = product.size.gsub(/\s/, '').downcase
 
       basic_sizes = [
-        ['2xs', 'xxs'], ['xs', 'xsmall', 'xsml'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
-        ['xlarge', 'xl', 'xlrg'], ['xxl', '2xlarge', 'xxlarge'], ['3xlarge', 'xxxlarge', 'xxxl'], ['4xlarge', 'xxxxlarge', 'xxxxl'],
-        ['5xlarge', 'xxxxxl', 'xxxxxlarge'], ['onesize', 'o/s', '1sz'],
+        ['2xs', 'xxs', 'xxsmall', 'xxsml'],
+        ['xs', 'xsmall', 'xsml'],
+        ['petite', 'p'],
+        ['small', 's'],
+        ['medium', 'm'],
+        ['large', 'l'],
+        ['xlarge', 'xl', 'xlrg'],
+        ['xxl', '2xlarge', 'xxlarge'],
+        ['3xlarge', 'xxxlarge', 'xxxl'],
+        ['4xlarge', 'xxxxlarge', 'xxxxl'],
+        ['5xlarge', 'xxxxxl', 'xxxxxlarge'],
+        ['onesize', 'o/s', '1sz'],
       ]
       (1..10).each do |i|
         basic_sizes << ["#{i}1/2", "#{i}.5"]
@@ -207,8 +226,12 @@ class Suggestion
 
     to_create = []
 
+    same_products_upcs = Product.where(style_code: product.style_code, source: product.source, color: product.color)
+                           .with_upc.pluck(:upc)
+    upc_patterns = same_products_upcs.map{|upc| upc[0,10]}.uniq
+
     related_products.find_each do |suggested|
-      percentage = similarity_to suggested
+      percentage = similarity_to(suggested, upc_patterns)
       ps = exists["#{product.id}_#{suggested.id}"]
       if percentage && percentage > 50
         if ps
