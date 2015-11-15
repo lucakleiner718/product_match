@@ -12,7 +12,7 @@ class Suggestion
     'lordandtaylor.com'
   ]
 
-  def initialize(product_id, rewrite: false)
+  def initialize(product_id, rewrite=false)
     @product = Product.find(product_id)
     @rewrite = rewrite
   end
@@ -26,7 +26,7 @@ class Suggestion
     return false unless product.brand.try(:name)
 
     if rewrite
-      ProductSuggestion.where(product_id: product.id).destroy_all
+      ProductSuggestion.where(product_id: product.id).delete_all
     end
 
     to_create = process_related_products
@@ -37,6 +37,44 @@ class Suggestion
   private
 
   attr_reader :product, :rewrite
+
+  def process_related_products
+    related_products = build_related_products
+
+    if rewrite
+      exists = {}
+    else
+      exists = ProductSuggestion.where(
+        product_id: product.id,
+        suggested_id: related_products.map(&:id)
+      ).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
+    end
+
+    to_create = []
+
+    upc_patterns = product.upc_patterns
+
+    related_products.find_each do |suggested|
+      percentage = similarity_to(suggested, upc_patterns)
+      ps = exists["#{product.id}_#{suggested.id}"]
+      if percentage && percentage > 50
+        if ps
+          ps.percentage = percentage
+          ps.upc_patterns = upc_patterns
+          ps.save if ps.changed?
+        else
+          to_create << {
+            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
+            upc_patterns: "{#{upc_patterns.join(',')}}",
+            price: suggested.price, price_sale: suggested.price_sale,
+            created_at: Time.now, updated_at: Time.now
+          }
+        end
+      end
+    end
+
+    to_create
+  end
 
   def similarity_to(suggested, upc_patterns)
     @params_amount = WEIGHTS.values.sum
@@ -53,7 +91,7 @@ class Suggestion
   end
 
   def style_code_similarity(suggested, upc_patterns)
-    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}\d{2,3}$/ }.size > 0
+    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}$/ }.size > 0
       @params_amount += STYLE_CODE_WEIGHT
       STYLE_CODE_WEIGHT
     end
@@ -210,44 +248,6 @@ class Suggestion
            .where('p1.id is null')
 
     rp
-  end
-
-  def process_related_products
-    related_products = build_related_products
-
-    if rewrite
-      exists = {}
-    else
-      exists = ProductSuggestion.where(
-        product_id: product.id,
-        suggested_id: related_products.map(&:id)
-      ).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
-    end
-
-    to_create = []
-
-    same_products_upcs = Product.where(style_code: product.style_code, source: product.source, color: product.color)
-                           .with_upc.pluck(:upc)
-    upc_patterns = same_products_upcs.map{|upc| upc[0,10]}.uniq
-
-    related_products.find_each do |suggested|
-      percentage = similarity_to(suggested, upc_patterns)
-      ps = exists["#{product.id}_#{suggested.id}"]
-      if percentage && percentage > 50
-        if ps
-          ps.percentage = percentage
-          ps.save if ps.changed?
-        else
-          to_create << {
-            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
-            price: suggested.price, price_sale: suggested.price_sale,
-            created_at: Time.now, updated_at: Time.now
-          }
-        end
-      end
-    end
-
-    to_create
   end
 
   def create_items(to_create)

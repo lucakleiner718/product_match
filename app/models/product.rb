@@ -55,4 +55,12 @@ class Product < ActiveRecord::Base
     File.write "tmp/#{source}-#{brand_id}#{"-#{category.gsub(/\'/, '').gsub(/\s/, '-')}" if category}-#{Time.now.to_i}.csv", csv_string
   end
 
+  def upc_patterns
+    @upc_patterns ||= begin
+      same_products_upcs = Product.where(style_code: self.style_code, source: self.source, color: self.color)
+                             .with_upc.pluck(:upc)
+      same_products_upcs.map{|upc| upc[0,9]}.uniq
+    end
+  end
+
 end

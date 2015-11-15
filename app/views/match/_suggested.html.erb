@@ -1,6 +1,6 @@
 <% product = suggested_product.suggested %>
 <div class="col-sm-3 col-xs-6" data-percentage="<%= suggested_product.percentage %>">
-  <div class="thumbnail<%= ' same-as-green' if suggested_product.percentage < 100 && @suggested_products.select{|s| s.percentage == 100 && s.suggested.upc == product.upc}.size > 0 %>" style="background: <%= match_item_bg suggested_product %>" data-id="<%= product.id %>">
+  <div class="thumbnail suggestion-thumbnail<%= ' same-as-green' if suggested_product.percentage < 100 && @suggested_products.select{|s| s.percentage == 100 && s.suggested.upc == product.upc}.size > 0 %>" style="border-color: <%= match_item_bg suggested_product %>" data-id="<%= product.id %>" data-suggestion-id="<%= suggested_product.id %>">
     <strong><%= product.title %></strong></br>
     <table class="suggested-product-table">
       <tr><td>Color:</td><td><%= product.color %></td></tr>
@@ -10,7 +10,7 @@
         <tr><td>Old Price:</td><td><%= suggested_product.price %><%= " (#{suggested_product.price_sale})" %></td></tr>
       <% end %>
       <tr><td>Source:</td><td><%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></td></tr>
-      <tr><td>UPC:</td><td class="value"><span><%= product.upc %></span></td></tr>
+      <tr><td>UPC:</td><td class="value"><span><%= product_upc(product.upc, suggested_product.upc_patterns, @upc_patterns) %></span></td></tr>
     </table>
 
     <div style="margin: 5px 0;" class="portfolio-item suggestion-images">

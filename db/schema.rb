@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151108121706) do
+ActiveRecord::Schema.define(version: 20151115081833) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -108,10 +108,11 @@ ActiveRecord::Schema.define(version: 20151108121706) do
     t.integer  "product_id"
     t.integer  "suggested_id"
     t.integer  "percentage"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
     t.string   "price"
     t.string   "price_sale"
+    t.text     "upc_patterns", default: [],              array: true
   end
 
   add_index "product_suggestions", ["percentage"], name: "index_product_suggestions_on_percentage", using: :btree
