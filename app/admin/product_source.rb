@@ -40,7 +40,7 @@ ActiveAdmin.register ProductSource do
   form do |f|
     f.inputs do
       f.input :name, hint: 'Can be Brand name either just a name for shop. Brand name should be exact like added in brands section.'
-      f.input :source_name, collection: [['Popshops', 'popshops'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Website', 'website']]
+      f.input :source_name, collection: [['Popshops', 'popshops'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Eastdane', 'eastdane'], ['Website', 'website']]
       f.input :source_id, label: 'Source ID'
       f.input :brand, collection: Brand.in_use.order(:name)
       f.input :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]], prompt: false

@@ -11,7 +11,7 @@ class MatchController < ApplicationController
     unless product_id
       @brand = Brand.find(params[:brand_id])
 
-      products_ids = Product.shopbop.where(match: true).without_upc.joins(:suggestions)
+      products_ids = Product.matching.where(match: true).without_upc.joins(:suggestions)
       products_ids = products_ids.where(brand_id: @brand.id)
       if params[:only] == 'not_matched'
         products_ids = products_ids.joins("

@@ -28,7 +28,8 @@ class StatChart
     added_without_upc = ProductUpc.connection.execute("
       SELECT count(*), EXTRACT(YEAR FROM created_at)::text || '-' || EXTRACT(WEEK FROM created_at)::text AS created_week
       FROM products
-      WHERE source='shopbop' AND (upc is null OR upc = '')
+      WHERE source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
+            AND (upc is null OR upc = '')
       GROUP BY created_week
     ")
     chart[:added_without_upc] =

@@ -19,7 +19,13 @@ class BrandCollectDataWorker
             product_source: product_source
         when 'shopbop'
           Import::Shopbop.perform url: product_source.source_id, update_file: true
-          Product.shopbop.where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
+          Product.where(source: :shopbop).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
+            ProductSuggestionsWorker.perform_async pid
+          end
+          BrandStatWorker.spawn
+        when 'eastdane'
+          Import::Eastdane.perform url: product_source.source_id, update_file: true
+          Product.where(source: :eastdane).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
             ProductSuggestionsWorker.perform_async pid
           end
           BrandStatWorker.spawn

@@ -11,14 +11,12 @@ class Suggestion
     'lordandtaylor.com'
   ]
 
-  def self.build product_id, rewrite: false
-    instance = self.new
-    instance.build_suggestions product_id, rewrite: rewrite
+  def initialize(product_id, rewrite: false)
+    @product = Product.find(product_id)
+    @rewrite = rewrite
   end
 
-  def build_suggestions product_id, rewrite: rewrite
-    product = Product.find(product_id)
-
+  def build
     if rewrite
       ProductSuggestion.where(product_id: product.id).destroy_all
     end
@@ -28,81 +26,34 @@ class Suggestion
       return false
     end
 
-    brand_name = product.brand.try(:name)
-    return false unless brand_name
-    brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
-    related_products = Product.not_shopbop.where('products.source NOT IN (?)', EXCLUDE_SOURCES).where(brand_id: brand.id).with_upc
-
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
-                    .select{|el| el.size > 2} - ['the', '&', 'and', 'womens']
-    related_products = related_products.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
-
-    related_products = related_products.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != '' AND p1.upc=products.upc AND p1.id != products.id AND p1.source='shopbop'").where('p1.id is null')
-
-    exists = ProductSuggestion.where(product_id: product.id, suggested_id: related_products.map(&:id)).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
-    to_create = []
-
-    related_products.find_each do |suggested|
-      percentage = similarity_to product, suggested
-      ps = exists["#{product.id}_#{suggested.id}"]
-      if percentage && percentage > 50
-        if ps
-          ps.percentage = percentage
-          ps.save if ps.changed?
-        else
-          to_create << {
-            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
-            price: suggested.price, price_sale: suggested.price_sale,
-            created_at: Time.now, updated_at: Time.now
-          }
-        end
-      end
-    end
-
-    if to_create.size > 0
-      begin
-        ProductSuggestion.connection.execute("
-          INSERT INTO product_suggestions (#{to_create.first.keys.join(',')})
-          VALUES #{to_create.map{|r| "(#{r.values.map{|el| ProductSuggestion.sanitize el}.join(',')})"}.join(',')}
-        ")
-      rescue ActiveRecord::RecordNotUnique => e
-        to_create.each do |row|
-          row.delete :created_at
-          row.delete :updated_at
-          ProductSuggestion.create row rescue nil
-        end
-      end
-    end
-
+    return false unless product.brand.try(:name)
+    to_create = process_related_products
+    create_items(to_create)
     to_create.size
-
-    # delete not needed suggestions if we have some popular
-    # if ProductSuggestion.where(product_id: product.id).where('percentage > 50').size > 0
-    #   ProductSuggestion.where(product_id: product.id).where('percentage <= 40').delete_all
-    # end
   end
 
-  def similarity_to product, suggested
+  private
+
+  attr_reader :product, :rewrite
+
+  def similarity_to(suggested)
     @params_amount = WEIGHTS.values.sum
     params_count = []
 
-    @product = product
-    @suggested = suggested
-
-    params_count << title_similarity
-    params_count << color_similarity
-    params_count << size_similarity
-    params_count << price_similarity
-    params_count << gender_similarity
+    params_count << title_similarity(suggested)
+    params_count << color_similarity(suggested)
+    params_count << size_similarity(suggested)
+    params_count << price_similarity(suggested)
+    params_count << gender_similarity(suggested)
 
     (params_count.select{|el| el.present?}.sum/@params_amount.to_f * 100).to_i
   end
 
-  def title_similarity
-    title_parts = @product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
+  def title_similarity(suggested)
+    title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
     title_parts -= ['the', '&', 'and', 'womens']
 
-    suggested_title_parts = @suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+    suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
 
     multiplier = [['panty', 'panties'], ['short', 'shorts'], ['boot', 'boots', 'booties']]
     multiplier.each do |ar|
@@ -123,9 +74,9 @@ class Suggestion
     (title_parts_size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts_size.to_f : 1) * WEIGHTS[:title]
   end
 
-  def color_similarity
-    color_p = @product.color
-    color_s = @suggested.color
+  def color_similarity(suggested)
+    color_p = product.color
+    color_s = suggested.color
     if color_s.present? && color_p.present?
       ratio = nil
       if color_s.gsub(/[^a-z]/i, '').downcase == color_p.gsub(/[^a-z]/i, '').downcase
@@ -155,10 +106,10 @@ class Suggestion
     end
   end
 
-  def size_similarity
-    if @suggested.size.present? && @product.size.present?
-      size_s = @suggested.size.gsub(/\s/, '').downcase
-      size_p = @product.size.gsub(/\s/, '').downcase
+  def size_similarity(suggested)
+    if suggested.size.present? && product.size.present?
+      size_s = suggested.size.gsub(/\s/, '').downcase
+      size_p = product.size.gsub(/\s/, '').downcase
 
       basic_sizes = [
         ['2xs', 'xxs'], ['xs', 'xsmall', 'xsml'], ['petite', 'p'], ['small', 's'], ['medium', 'm'], ['large', 'l'],
@@ -189,20 +140,20 @@ class Suggestion
         end
       end
     else
-      if @suggested.size.blank? && @product.size.present? && @product.size.downcase == 'one size'
+      if suggested.size.blank? && product.size.present? && product.size.downcase == 'one size'
         WEIGHTS[:size]
       end
     end
   end
 
-  def price_similarity
-    suggested_prices = [@suggested.price, @suggested.price_sale].compact.uniq
-    product_prices = [@product.price, @product.price_sale].compact.uniq
+  def price_similarity(suggested)
+    suggested_prices = [suggested.price, suggested.price_sale].compact.uniq
+    product_prices = [product.price, product.price_sale].compact.uniq
     ratio =
       if (suggested_prices & product_prices).size > 0
         1
-      elsif @suggested.price.present? && @product.price.present?
-        diff = (@suggested.price.to_i - @product.price.to_i).abs / @product.price.to_f
+      elsif suggested.price.present? && product.price.present?
+        diff = (suggested.price.to_i - product.price.to_i).abs / product.price.to_f
         diff = 1 if diff > 1
         diff = 1 - diff
 
@@ -214,11 +165,81 @@ class Suggestion
     ratio * WEIGHTS[:price]
   end
 
-  def gender_similarity
-    if @suggested.gender.present?
+  def gender_similarity(suggested)
+    if suggested.gender.present?
       @params_amount += GENDER_WEIGHT
-      if @suggested.gender == @product.gender
+      if suggested.gender == product.gender
         GENDER_WEIGHT
+      end
+    end
+  end
+
+  def build_related_products
+    brand_name = product.brand.try(:name)
+    brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
+
+    rp = Product.not_matching.where('products.source NOT IN (?)', EXCLUDE_SOURCES)
+           .where(brand_id: brand.id).with_upc
+
+    title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
+                    .select{|el| el.size > 2} - ['the', '&', 'and', 'womens']
+    rp = rp.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+
+    rp = rp.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
+                   AND p1.upc=products.upc AND p1.id != products.id
+                   AND p1.source IN (#{Product::MATCHED_SOURCES.map{|el| Product.sanitize el}.join(',')})")
+           .where('p1.id is null')
+
+    rp
+  end
+
+  def process_related_products
+    related_products = build_related_products
+
+    if rewrite
+      exists = {}
+    else
+      exists = ProductSuggestion.where(
+        product_id: product.id,
+        suggested_id: related_products.map(&:id)
+      ).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
+    end
+
+    to_create = []
+
+    related_products.find_each do |suggested|
+      percentage = similarity_to suggested
+      ps = exists["#{product.id}_#{suggested.id}"]
+      if percentage && percentage > 50
+        if ps
+          ps.percentage = percentage
+          ps.save if ps.changed?
+        else
+          to_create << {
+            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
+            price: suggested.price, price_sale: suggested.price_sale,
+            created_at: Time.now, updated_at: Time.now
+          }
+        end
+      end
+    end
+
+    to_create
+  end
+
+  def create_items(to_create)
+    if to_create.size > 0
+      begin
+        ProductSuggestion.connection.execute("
+          INSERT INTO product_suggestions (#{to_create.first.keys.join(',')})
+          VALUES #{to_create.map{|r| "(#{r.values.map{|el| ProductSuggestion.sanitize el}.join(',')})"}.join(',')}
+          ")
+      rescue ActiveRecord::RecordNotUnique => e
+        to_create.each do |row|
+          row.delete :created_at
+          row.delete :updated_at
+          ProductSuggestion.create row rescue nil
+        end
       end
     end
   end

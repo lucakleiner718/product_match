@@ -70,7 +70,7 @@
         <td><%= product.category %></td>
         <td>
           <%= link_to 'Source link', product.url, class: 'btn btn-default btn-xs', target: :_blank if product.url.present? %>
-          <%= link_to 'Match', match_path(product_id: product.id), class: 'btn btn-default btn-xs', target: :_blank if product.source == 'shopbop' %>
+          <%= link_to 'Match', match_path(product_id: product.id), class: 'btn btn-default btn-xs', target: :_blank if product.source.in?(Product::MATCHED_SOURCES) %>
         </td>
       </tr>
     <% end %>

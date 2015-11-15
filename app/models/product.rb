@@ -12,13 +12,17 @@ class Product < ActiveRecord::Base
     robe chemise
   )
 
-  scope :shopbop, -> { where source: :shopbop }
-  scope :not_shopbop, -> { where.not(source: :shopbop) }
+  MATCHED_SOURCES = %w(shopbop eastdane)
+
+  scope :matching, -> { where source: Product::MATCHED_SOURCES}
+  scope :not_matching, -> { where.not(source: Product::MATCHED_SOURCES) }
+  scope :shopbop, -> { matched }
+  scope :not_shopbop, -> { not_matched }
   scope :without_upc, -> { where(upc: [nil, '']) }
   scope :with_upc, -> { where.not(upc: [nil, '']) }
 
   after_update do
-    if self.source == 'shopbop' && self.upc_changed? && self.upc_was.nil?
+    if self.source.in?(Product::MATCHED_SOURCES) && self.upc_changed? && self.upc_was.nil?
       ProductSuggestion.where(product_id: self.id).delete_all
     end
   end

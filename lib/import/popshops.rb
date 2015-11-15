@@ -190,13 +190,9 @@ class Import::Popshops < Import::Base
       @affected_brands << brand unless @affected_brands.include?(brand)
     end
 
-    prepare_items(items)
+    prepare_items items
 
     items
-  end
-
-  def source
-    'popshops'
   end
 
   def build_url params = {}
@@ -230,6 +226,10 @@ class Import::Popshops < Import::Base
         ProductSuggestionsGeneratorWorker.perform_async brand.id
       end
     end
+  end
+
+  def source
+    'popshops'
   end
 
 end

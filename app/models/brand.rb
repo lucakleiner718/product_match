@@ -58,8 +58,8 @@ class Brand < ActiveRecord::Base
     con = Product.connection
     now = Time.now
 
-    shopbop_size = Product.where(brand_id: self.id).shopbop.where(match: true).size
-    shopbop_noupc_size = Product.where(brand_id: self.id).shopbop.where("upc is null OR upc = ''")
+    shopbop_size = Product.where(brand_id: self.id).matching.where(match: true).size
+    shopbop_noupc_size = Product.where(brand_id: self.id).matching.without_upc
                            .where(match: true).size
 
     shopbop_matched_size = con.execute("
@@ -82,8 +82,8 @@ class Brand < ActiveRecord::Base
       FROM (
         SELECT count(distinct(upc)) as total
         FROM products
-        WHERE brand_id=#{self.id} AND source != 'shopbop' AND
-          ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+        WHERE brand_id=#{self.id} AND source NOT IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
+          AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
         GROUP BY upc
       ) AS products
     ").to_a.first['count']
@@ -93,8 +93,8 @@ class Brand < ActiveRecord::Base
       FROM (
         SELECT upc, source
         FROM products
-        WHERE brand_id=#{self.id} AND source != 'shopbop' AND
-          ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+        WHERE brand_id=#{self.id} AND source NOT IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
+          AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
       ) AS products
       GROUP BY source
     ").to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}
@@ -102,22 +102,25 @@ class Brand < ActiveRecord::Base
     suggestions = con.execute("
       SELECT count(distinct(product_id))
       FROM product_suggestions
-      INNER JOIN products on products.id=product_suggestions.product_id AND source='shopbop'
+      INNER JOIN products on products.id=product_suggestions.product_id
+              AND source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
       WHERE products.brand_id=#{self.id} AND products.match=#{true}
     ").to_a.first['count'].to_i
 
-    suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where(percentage: 100).pluck(:product_id).uniq.size
-    suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: :shopbop}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+    suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES}).where(percentage: 100).pluck(:product_id).uniq.size
+    suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
 
-    new_match_today = Product.shopbop.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).where(match: true).size
-    new_match_week = Product.shopbop.where('created_at >= ?', now.monday).where(brand_id: self.id).where(match: true).size
+    new_match_today = Product.matching.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).where(match: true).size
+    new_match_week = Product.matching.where('created_at >= ?', now.monday).where(brand_id: self.id).where(match: true).size
 
     not_matched = con.execute("
       SELECT count(distinct(products.id))
       FROM products
       LEFT JOIN product_selects ON product_selects.product_id=products.id
       INNER JOIN product_suggestions on products.id=product_suggestions.product_id AND percentage > 50
-      WHERE products.brand_id=#{self.id} AND source='shopbop' AND match=#{true} AND (upc IS NULL OR upc='') AND product_selects.id is null
+      WHERE products.brand_id=#{self.id}
+            AND source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
+            AND match=#{true} AND (upc IS NULL OR upc='') AND product_selects.id is null
     ").to_a.first['count'].to_i
 
     {

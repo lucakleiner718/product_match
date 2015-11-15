@@ -33,9 +33,17 @@ class Import::Base
   end
 
   def prepare_items items
-    prepare_title items
-    normalize_color items
-    convert_brand items
+    prepare_title(items)
+    normalize_color(items)
+    convert_brand(items)
+    prepare_additional_images(items)
+    items
+  end
+
+  def prepare_additional_images items
+    items.map do |item|
+      item[:additional_images] = item[:additional_images].select{|img| img.present?}
+    end
     items
   end
 

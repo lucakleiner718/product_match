@@ -1,4 +1,4 @@
-class Import::Shopbop < Import::Base
+class Import::Eastdane < Import::Base
 
   def self.perform rewrite: false, update_file: true, url: nil
     instance = self.new
@@ -6,9 +6,9 @@ class Import::Shopbop < Import::Base
   end
 
   def get_file update_file=true, url=nil
-    filename = "tmp/sources/shopbop.csv"
+    filename = "tmp/sources/eastdane.csv"
 
-    url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'
+    url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-eastdan474-amazonpadsedgoogle_usd_no_sku_upc.csv'
 
     if !File.exists?(filename) || (update_file && File.mtime(filename) < 3.hours.ago)
       body = Curl.get(url).body
@@ -29,7 +29,7 @@ class Import::Shopbop < Import::Base
     created_ids = []
     updated_ids = []
 
-    SmarterCSV.process(filename, chunk_size: 5_000) do |rows|
+    SmarterCSV.process(filename, col_sep: "\t", chunk_size: 2_000) do |rows|
       items = prepare_data rows
 
       products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
@@ -89,17 +89,17 @@ class Import::Shopbop < Import::Base
         url: r[:link],
         image: r[:image_link],
         price: r[:price],
-        price_sale: (r[:sale_price].present? ? r[:sale_price] : nil),
+        # price_sale: (r[:sale_price].present? ? r[:sale_price] : nil),
         color: r[:color],
         size: r[:size],
-        upc: r[:gtin],
+        upc: (r[:upc] || r[:ean]),
         material: r[:material],
         gender: r[:gender],
-        additional_images: [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2], r[:additional_image_link3], r[:additional_image_link4]].select{|img| img.present?}
+        additional_images: [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2], r[:additional_image_link3], r[:additional_image_link4]]
       }
     end
 
-    convert_brand(items)
+    prepare_items items
 
     Brand.where(id: items.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
 
@@ -107,7 +107,7 @@ class Import::Shopbop < Import::Base
   end
 
   def source
-    'shopbop'
+    'eastdane'
   end
 
 end
