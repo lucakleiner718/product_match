@@ -42,7 +42,9 @@ class Import::Base
 
   def prepare_additional_images items
     items.map do |item|
-      item[:additional_images] = item[:additional_images].select{|img| img.present?}
+      if item[:additional_images] && item[:additional_images].size > 0
+        item[:additional_images] = item[:additional_images].select{|img| img.present?}
+      end
     end
     items
   end

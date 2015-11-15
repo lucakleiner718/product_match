@@ -182,7 +182,7 @@ class Suggestion
       end
 
       exact = false
-      exact = true if size_s == size_p
+      exact = true if size_s == size_p || size_s.sub(/\sm$/i, '') == size_p.sub(/\sm$/i, '')
       unless exact
         basic_sizes.each do |options|
           if size_s.gsub('-', '').in?(options) && size_p.gsub('-', '').in?(options)
