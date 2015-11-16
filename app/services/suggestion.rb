@@ -11,6 +11,7 @@ class Suggestion
   EXCLUDE_SOURCES = [
     'lordandtaylor.com'
   ]
+  SIMILARITY_MIN = 40
 
   def initialize(product_id, rewrite=false)
     @product = Product.find(product_id)
@@ -57,7 +58,7 @@ class Suggestion
     related_products.find_each do |suggested|
       percentage = similarity_to(suggested, upc_patterns)
       ps = exists["#{product.id}_#{suggested.id}"]
-      if percentage && percentage > 50
+      if percentage && percentage > SIMILARITY_MIN
         if ps
           ps.percentage = percentage
           ps.upc_patterns = upc_patterns

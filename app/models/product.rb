@@ -27,7 +27,7 @@ class Product < ActiveRecord::Base
     end
   end
 
-  after_create do
+  after_commit do
     ImageLocalWorker.perform_async self.id
   end
 

@@ -3,8 +3,12 @@ require 'open-uri'
 class ImageLocalWorker
   include Sidekiq::Worker
 
+  sidekiq_options retry: true
+
   def perform product_id
-    product = Product.find(product_id)
+    product = Product.find(product_id) rescue nil
+
+    return false unless product
 
     if product.image_local.blank? && product.image.present?
       image = upload_image(product, product.image)
