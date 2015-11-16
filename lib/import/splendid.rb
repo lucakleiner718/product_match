@@ -46,6 +46,12 @@ class Import::Splendid < Import::Base
     if categories[0] == 'Womens'
       categories.shift
       gender = 'Female'
+    elsif categories[0] == 'Mens'
+      categories.shift
+      gender = 'Male'
+    elsif categories[0] == 'Littles'
+      categories.shift
+      gender = 'Kids'
     end
     category = categories.join(' > ')
     product_image = cxt[:utag_data][:product_image]
