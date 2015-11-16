@@ -43,8 +43,11 @@ ActiveAdmin.register Brand do
     actions
   end
 
-  batch_action :merge_to, confirm: 'Select brand you want to merge selected brands', form: {
-      brand_id: -> { Brand.in_use.map{|b| [b.name, b.id]}.sort }
+  batch_action :merge_to, confirm: 'Select brand you want to merge selected brands',
+    form: -> {
+      {
+        brand_id: Brand.in_use.map{|b| [b.name, b.id]}.sort
+      }
     } do |ids, inputs|
     brand = Brand.find(inputs['brand_id'])
     brand.merge_with! ids
