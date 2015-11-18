@@ -2,9 +2,9 @@ class ExportShopbopWorker
 
   include Sidekiq::Worker
 
-  def perform(time_start=nil)
-    weekly(time_start)
-    current_week
+  def perform(period, time_start=nil)
+    weekly(time_start) if period == 'last'
+    current_week if period == 'current'
   end
 
   private

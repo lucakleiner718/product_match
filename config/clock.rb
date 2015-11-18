@@ -12,7 +12,8 @@ module Clockwork
     config[:tz] = Time.zone
   end
 
-  every(1.week, 'ExportShopbopWorker', at: "Monday 00:00") { ExportShopbopWorker.perform_async }
+  every(1.week, 'ExportShopbopWorkerLastWeek', at: "Monday 00:30") { ExportShopbopWorker.perform_async 'last' }
+  every(1.data, 'ExportShopbopWorkerCurrentWeek', at: "00:40") { ExportShopbopWorker.perform_async 'current' }
   every(1.day, 'ProductSuggestionsGeneratorWorker', at: "02:00") { ProductSuggestionsGeneratorWorker.spawn }
   every(1.day, 'BrandStatWorker', at: "01:00") { BrandStatWorker.spawn }
   every(1.day, 'DailyStatWorker', at: "23:50") { DailyStatWorker.perform_async }
