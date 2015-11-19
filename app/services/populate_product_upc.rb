@@ -19,8 +19,7 @@ class PopulateProductUpc
     selected = product_select.selected
 
     gtin = nil
-    gtin = selected.upc if !gtin && selected.upc.present?
-    gtin = selected.ean if !gtin && selected.ean.present?
+    gtin = selected.upc if selected.upc.present?
     unless gtin
       product_select.delete
       return false

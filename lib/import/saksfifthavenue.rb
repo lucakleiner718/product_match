@@ -74,7 +74,8 @@ class Import::Saksfifthavenue < Import::Base
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results

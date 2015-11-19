@@ -16,8 +16,8 @@ class Product < ActiveRecord::Base
 
   scope :matching, -> { where source: Product::MATCHED_SOURCES}
   scope :not_matching, -> { where.not(source: Product::MATCHED_SOURCES) }
-  scope :shopbop, -> { matched }
-  scope :not_shopbop, -> { not_matched }
+  scope :shopbop, -> { matching }
+  scope :not_shopbop, -> { not_matching }
   scope :without_upc, -> { where(upc: [nil, '']) }
   scope :with_upc, -> { where.not(upc: [nil, '']) }
 
@@ -28,7 +28,7 @@ class Product < ActiveRecord::Base
   end
 
   after_commit do
-    ImageLocalWorker.perform_async self.id
+    ImageLocalWorker.perform_async self.id if Rails.env.production?
   end
 
   after_destroy do
@@ -38,8 +38,7 @@ class Product < ActiveRecord::Base
     end
   end
 
-  # validates :upc, length: { minimum: 12, maximum: 12 }, format: { with: /\A\d+\z/ }
-  # validates :ean, length: { minimum: 13, maximum: 13 }, format: { with: /\A\d+\z/ }
+  # validates :upc, length: { minimum: 8, maximum: 14 }, format: { with: /\A\d+\z/ }
 
   def self.export_to_csv source: 'popshops', brand_id: nil, category: nil
     products = Product.where(source: source, brand_id: brand_id)

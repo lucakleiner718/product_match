@@ -1,4 +1,4 @@
-class Import::Herveleger < Import::Demandware
+class Import::Herveleger < Import::Platform::Demandware
 
   def baseurl; 'http://www.herveleger.com'; end
   def subdir; 'HerveLeger'; end
@@ -116,7 +116,8 @@ class Import::Herveleger < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

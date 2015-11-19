@@ -1,4 +1,4 @@
-class Import::Katespade < Import::Demandware
+class Import::Katespade < Import::Platform::Demandware
 
   def baseurl; 'https://www.katespade.com'; end
   def subdir; 'Shop'; end
@@ -135,7 +135,8 @@ class Import::Katespade < Import::Demandware
       end
     end
 
-    process_results_source_id results
+    prepare_items(results)
+    process_results_source_id(results)
   end
 
 end

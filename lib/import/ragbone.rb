@@ -1,4 +1,4 @@
-class Import::Ragbone < Import::Demandware
+class Import::Ragbone < Import::Platform::Demandware
 
   def baseurl; 'https://www.rag-bone.com'; end
   def subdir; 'ragandbone'; end
@@ -83,7 +83,8 @@ class Import::Ragbone < Import::Demandware
       }
     end
 
-    process_results_source_id results
+    prepare_items(results)
+    process_results_source_id(results)
   end
 
 end

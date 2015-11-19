@@ -1,4 +1,4 @@
-class Import::Rebeccataylor < Import::Venda
+class Import::Rebeccataylor < Import::Platform::Venda
 
   def baseurl; 'http://www.rebeccataylor.com'; end
   def brand_name_default; 'Rebecca Taylor'; end
@@ -66,11 +66,7 @@ class Import::Rebeccataylor < Import::Venda
 
       next unless colors_images[color]
 
-      # binding.pry
       image = image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])
-      # page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', '([^_]+)')}/)
-      # binding.pry unless image
-      raise "No image" unless image
 
       results << {
         title: product_name,
@@ -86,7 +82,8 @@ class Import::Rebeccataylor < Import::Venda
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

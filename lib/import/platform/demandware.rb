@@ -1,4 +1,4 @@
-class Import::Demandware < Import::Base
+class Import::Platform::Demandware < Import::Base
 
   def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
   def lang; 'default'; end

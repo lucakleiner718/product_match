@@ -1,4 +1,4 @@
-class Import::Dogeared < Import::Demandware
+class Import::Dogeared < Import::Platform::Demandware
 
   def baseurl; 'http://www.dogeared.com'; end
   def subdir; 'Dogeared'; end
@@ -105,7 +105,8 @@ class Import::Dogeared < Import::Demandware
       end
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results, brand_name=nil

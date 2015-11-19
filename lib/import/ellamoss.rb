@@ -38,7 +38,6 @@ class Import::Ellamoss < Import::Base
     js = html.css('script:contains("product_image")').first.text
     cxt.eval(js)
     product_name = cxt[:utag_data][:product_name]
-    # style_code = cxt[:utag_data][:product]
     style_code = cxt[:utag_data][:mfr_number]
     category = cxt[:utag_data][:category].gsub(':', ' > ')
     product_image = cxt[:utag_data][:product_image]
@@ -113,8 +112,8 @@ class Import::Ellamoss < Import::Base
       }
     end
 
-    prepare_items results
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results

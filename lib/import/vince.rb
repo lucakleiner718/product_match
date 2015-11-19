@@ -1,4 +1,4 @@
-class Import::Vince < Import::Venda
+class Import::Vince < Import::Platform::Venda
 
   def baseurl; 'http://www.vince.com'; end
   def brand_name_default; 'Vince'; end
@@ -100,8 +100,6 @@ class Import::Vince < Import::Venda
       style_code = options['atrdssku']
 
       image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])}/).first
-      # page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', '([^_]+)')}/)
-      # binding.pry unless image
       raise "No image" unless image
 
       results << {
@@ -118,7 +116,8 @@ class Import::Vince < Import::Venda
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

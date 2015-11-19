@@ -32,11 +32,34 @@ class Import::Base
     1_000
   end
 
-  def prepare_items items
+  def prepare_items items, check_upc_rule: :full
     prepare_title(items)
     normalize_color(items)
     convert_brand(items)
+    prepare_prices(items)
     prepare_additional_images(items)
+    check_upc(items, check_upc_rule)
+    items
+  end
+
+  def prepare_prices(items)
+    items.map do |item|
+      if item[:price_sale].present? && item[:price_sale] == item[:price]
+        item[:price_sale] = nil
+      end
+    end
+  end
+
+  def check_upc(items, check_upc_rule=:full)
+    items.map do |item|
+      if item[:ean].present? && item[:upc].blank?
+        item[:upc] = item[:ean]
+      end
+      # if check_upc_rule.to_sym == :full && item[:upc].present?
+      #   item[:upc] = (GTIN.process(item[:upc]) || nil)
+      # end
+      item[:ean] = nil
+    end
     items
   end
 
@@ -78,6 +101,7 @@ class Import::Base
     items.map do |item|
       br = brands.select{|b| b.name == item[:brand] || item[:brand].in?(b.synonyms) }.first
       item[:brand_id] = br.try(:id)
+      item[:brand_name] = br.try(:name)
       item.delete :brand
     end
     items

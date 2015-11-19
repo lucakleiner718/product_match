@@ -1,5 +1,5 @@
 require 'open-uri'
-class Import::Helmutlang < Import::Demandware
+class Import::Helmutlang < Import::Platform::Demandware
 
   def baseurl; 'https://www.helmutlang.com'; end
   def subdir;  'helmutlang_US'; end
@@ -82,7 +82,8 @@ class Import::Helmutlang < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

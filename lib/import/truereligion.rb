@@ -1,4 +1,4 @@
-class Import::Truereligion < Import::Demandware
+class Import::Truereligion < Import::Platform::Demandware
 
   def baseurl; 'http://www.truereligion.com'; end
   def subdir; 'TrueReligion'; end
@@ -96,7 +96,8 @@ class Import::Truereligion < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

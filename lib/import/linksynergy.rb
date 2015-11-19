@@ -118,7 +118,7 @@ class Import::Linksynergy < Import::Base
   end
 
   def prepare_data rows
-    items = []
+    results = []
     rows.each do |r|
       title = normalize_title(r[:title], r[:brand])
       gender = process_title_for_gender(title)
@@ -141,12 +141,12 @@ class Import::Linksynergy < Import::Base
         upc: r[:gtin]
       }
 
-      items << item if item[:upc].present?
+      results << item if item[:upc].present?
     end
 
-    convert_brand(items)
+    prepare_items(results)
 
-    items
+    results
   end
 
   def process_to_create to_create
