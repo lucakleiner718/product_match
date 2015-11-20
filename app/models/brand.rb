@@ -83,7 +83,7 @@ class Brand < ActiveRecord::Base
         SELECT count(distinct(upc)) as total
         FROM products
         WHERE brand_id=#{self.id} AND source NOT IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
-          AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+          AND (upc IS NOT NULL AND upc != '')
         GROUP BY upc
       ) AS products
     ").to_a.first['count']
@@ -94,7 +94,7 @@ class Brand < ActiveRecord::Base
         SELECT upc, source
         FROM products
         WHERE brand_id=#{self.id} AND source NOT IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
-          AND ((upc IS NOT NULL AND upc != '') OR (ean IS NOT NULL AND ean != ''))
+          AND (upc IS NOT NULL AND upc != '')
       ) AS products
       GROUP BY source
     ").to_a.inject({}){|obj, r| obj[r['source']] = r['count'].to_i; obj}

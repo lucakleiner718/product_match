@@ -118,8 +118,6 @@ class Import::Lordandtaylor < Import::Base
   end
 
   def process_results results
-    convert_brand(results)
-
     results.each do |row|
       if row[:source_id]
         product = Product.where(source: source, source_id: row[:source_id]).first_or_initialize

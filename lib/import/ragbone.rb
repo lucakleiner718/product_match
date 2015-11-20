@@ -57,6 +57,10 @@ class Import::Ragbone < Import::Platform::Demandware
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
     color_param = "dwvar_#{product_id_param}_color"
 
+    gender = nil
+    gender = 'Female' if url =~ /\/womens\//
+    gender = 'Male' if url =~ /\/mens\//
+
     data = get_json product_id
     return false unless data
     data.each do |k, v|
@@ -79,12 +83,13 @@ class Import::Ragbone < Import::Platform::Demandware
         upc: upc,
         url: color_url,
         image: image_url,
-        source_id: product_id,
+        style_code: product_id,
+        gender: gender
       }
     end
 
     prepare_items(results)
-    process_results_source_id(results)
+    process_results(results)
   end
 
 end

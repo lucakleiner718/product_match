@@ -120,16 +120,13 @@ class Import::Linksynergy < Import::Base
   def prepare_data rows
     results = []
     rows.each do |r|
-      title = normalize_title(r[:title], r[:brand])
-      gender = process_title_for_gender(title)
-      brand = normalize_brand(r[:brand])
       item = {
         source: source,
         source_id: r[:id],
-        title: title,
+        title: r[:title],
         url: r[:url],
         image: r[:image],
-        brand: brand,
+        brand: r[:brand],
         style_code: r[:style_code],
         size: r[:size],
         color: r[:color],
@@ -137,7 +134,6 @@ class Import::Linksynergy < Import::Base
         price: r[:price_retail],
         price_sale: r[:price_sale],
         description: r[:description_full],
-        gender: gender,
         upc: r[:gtin]
       }
 
