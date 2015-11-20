@@ -9,6 +9,9 @@
       <% if suggested_product.price.present? && suggested_product.price != product.price %>
         <tr><td>Old Price:</td><td><%= suggested_product.price %><%= " (#{suggested_product.price_sale})" %></td></tr>
       <% end %>
+      <% if product.gender.present? %>
+        <tr><td>Gender:</td><td><%= product.gender %></td></tr>
+      <% end %>
       <tr><td>Source:</td><td><%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></td></tr>
       <tr><td>UPC:</td><td class="value"><span><%= product_upc(product.upc, suggested_product.upc_patterns, @upc_patterns) %></span></td></tr>
     </table>
