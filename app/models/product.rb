@@ -27,9 +27,7 @@ class Product < ActiveRecord::Base
     end
   end
 
-  after_commit do
-    ImageLocalWorker.perform_async self.id if Rails.env.production?
-  end
+  after_commit :image_local_update, on: :create
 
   after_destroy do
     images = [self.image_local] + self.additional_images_local
@@ -62,4 +60,9 @@ class Product < ActiveRecord::Base
     end
   end
 
+  private
+
+  def image_local_update
+    ImageLocalWorker.perform_async self.id if Rails.env.production?
+  end
 end
