@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151120064741) do
+ActiveRecord::Schema.define(version: 20151120075026) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -161,11 +161,13 @@ ActiveRecord::Schema.define(version: 20151120064741) do
     t.boolean  "match",                   default: false
     t.string   "image_local"
     t.text     "additional_images_local", default: [],                 array: true
+    t.boolean  "in_store",                default: false
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree
   add_index "products", ["brand_name"], name: "index_products_on_brand_name", using: :btree
   add_index "products", ["color"], name: "index_products_on_color", using: :btree
+  add_index "products", ["in_store"], name: "index_products_on_in_store", using: :btree
   add_index "products", ["match"], name: "index_products_on_match", using: :btree
   add_index "products", ["mpn"], name: "index_products_on_mpn", using: :btree
   add_index "products", ["size"], name: "index_products_on_size", using: :btree

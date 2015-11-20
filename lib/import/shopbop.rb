@@ -68,9 +68,12 @@ class Import::Shopbop < Import::Base
 
     active_ids = Product.where(source: source).where(match: true).pluck(:id)
     non_active = active_ids - processed_ids
-
     Product.where(source: source).where(id: non_active).update_all(match: false)
     Product.where(source: source).where(id: updated_ids).where(match: false).update_all(match: true)
+
+    in_store_ids = Product.where(source: source).where(in_store: true).pluck(:id)
+    Product.where(source: source).where(id: in_store_ids - processed_ids).update_all(in_store: false)
+    Product.where(source: source).where(id: processed_ids).update_all(in_store: true)
 
     true
   end

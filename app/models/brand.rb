@@ -58,9 +58,10 @@ class Brand < ActiveRecord::Base
     con = Product.connection
     now = Time.now
 
-    shopbop_size = Product.where(brand_id: self.id).matching.where(match: true).size
+    shopbop_size = Product.where(brand_id: self.id).matching
+                     .where(in_store: true).size
     shopbop_noupc_size = Product.where(brand_id: self.id).matching.without_upc
-                           .where(match: true).size
+                           .where(in_store: true).size
 
     shopbop_matched_size = con.execute("
       SELECT count(distinct(product_id)) as amount
