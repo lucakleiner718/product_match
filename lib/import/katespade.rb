@@ -6,7 +6,7 @@ class Import::Katespade < Import::Platform::Demandware
   def brand_name_default; 'Kate Spade'; end
   def lang; 'en_US'; end
 
-  def self.perform
+  def perform
     [
       'new/view-all/', 'handbags/view-all/', 'clothing/view-all/', 'shoes/view-all/',
       'accessories/wallets-wristlets/', 'accessories/jewelry/view-all/',

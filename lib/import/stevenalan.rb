@@ -6,11 +6,6 @@ class Import::Stevenalan < Import::Platform::Demandware
   def product_id_pattern; /\/([^\/]+)\.html/; end
   def brand_name_default; 'Steven Alan'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'New-Arrivals', 'Women%27s-2', 'Men%27s-2', 'Jewelry', 'Kid%27s', 'Home-Store', 'Sale-1'
@@ -35,10 +30,6 @@ class Import::Stevenalan < Import::Platform::Demandware
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"
     end
-  end
-
-  def self.process_url url
-    self.new.process_url url
   end
 
   def process_url original_url

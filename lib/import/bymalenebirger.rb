@@ -8,11 +8,6 @@ class Import::Bymalenebirger < Import::Platform::Demandware
   def url_prefix_country; 'dk'; end
   def url_prefix_lang; 'da'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'nyheder', 'inspiration', 'shop-by-look', 'accessories-1', 'sko-1', 'tasker-2'
@@ -37,10 +32,6 @@ class Import::Bymalenebirger < Import::Platform::Demandware
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"
     end
-  end
-
-  def self.process_url url
-    self.new.process_url url
   end
 
   def process_url original_url

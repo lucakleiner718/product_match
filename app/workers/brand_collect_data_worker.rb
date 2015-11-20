@@ -30,12 +30,17 @@ class BrandCollectDataWorker
           end
           BrandStatWorker.spawn
         when 'website'
+          const = product_source.source_id.titleize
           begin
-            Module.const_get("Import::#{product_source.source_id.titleize}").perform
+            Module.const_get("Import::#{const}").perform
             true
-          rescue => e
-            Rails.logger.info "Wrong import file name"
-            false
+          rescue NameError => e
+            if e.message =~ /wrong constant name/
+              Rails.logger.info "Wrong import file name"
+              false
+            else
+              raise e
+            end
           end
         else
           false

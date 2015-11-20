@@ -144,8 +144,8 @@ class Import::Base
     urls.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
   end
 
-  def self.perform
-    instance = self.new
+  def self.perform *args
+    instance = self.new *args
     instance.perform
   end
 

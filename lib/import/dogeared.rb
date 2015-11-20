@@ -33,10 +33,6 @@ class Import::Dogeared < Import::Platform::Demandware
     end
   end
 
-  def self.process_url url
-    self.new.process_url url
-  end
-
   def process_url original_url
     log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern

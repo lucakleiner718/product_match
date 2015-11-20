@@ -5,7 +5,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
   def product_id_pattern; /\/([a-z0-9\-\.\+]+)\.html/i; end
   def brand_name_default; 'Marc Jacobs'; end
 
-  def self.perform
+  def perform
     [
       'women/featured', 'women/ready-to-wear', 'women/bags-wallets', 'women/shoes', 'women/accessories',
       'women/jewelry', 'women/sunglasses',

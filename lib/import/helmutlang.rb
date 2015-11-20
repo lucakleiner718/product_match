@@ -6,11 +6,6 @@ class Import::Helmutlang < Import::Platform::Demandware
   def product_id_pattern; /\/([^\.\/]+)\.html/; end #F07HM419,default,pd.html
   def brand_name_default; 'Helmut Lang'; end
 
-  def self.perform
-    instance = self.new
-    instance.perform
-  end
-
   def perform
     [
       'womens-all/all-items,default,sc.html', 'mens-all/mens-all,default,sc.html', 'fragrance/fragrance,default,pg.html',
