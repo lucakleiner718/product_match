@@ -1,4 +1,4 @@
-class Import::Bymalenebirger < Import::Demandware
+class Import::Bymalenebirger < Import::Platform::Demandware
 
   def baseurl; 'http://www.bymalenebirger.com'; end
   def subdir; 'BMB-DK'; end
@@ -111,7 +111,8 @@ class Import::Bymalenebirger < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

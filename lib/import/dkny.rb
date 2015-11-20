@@ -1,4 +1,4 @@
-class Import::Dkny < Import::Demandware
+class Import::Dkny < Import::Platform::Demandware
 
   def baseurl; 'http://www.dkny.com'; end
   def subdir; 'dkny'; end
@@ -99,7 +99,8 @@ class Import::Dkny < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

@@ -23,7 +23,6 @@ FactoryGirl.define do
     gender 'Female'
     upc nil
     mpn nil
-    ean nil
     sku nil
     style_code 'VINCE20605'
     item_group_id nil

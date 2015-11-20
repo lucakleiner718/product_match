@@ -126,8 +126,8 @@ class Import::Splendid < Import::Base
       }
     end
 
-    prepare_items results
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results

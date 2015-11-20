@@ -1,4 +1,4 @@
-class Import::Sorel < Import::Demandware
+class Import::Sorel < Import::Platform::Demandware
 
   def baseurl; 'http://www.sorel.com'; end
   def subdir; 'Sorel_US'; end
@@ -107,7 +107,8 @@ class Import::Sorel < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

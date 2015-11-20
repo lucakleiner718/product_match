@@ -1,4 +1,4 @@
-class Import::Anyahindmarch < Import::Demandware
+class Import::Anyahindmarch < Import::Platform::Demandware
 
   def baseurl; 'http://www.anyahindmarch.com'; end
   def subdir; 'anya_uk'; end
@@ -41,10 +41,10 @@ class Import::Anyahindmarch < Import::Demandware
     log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]
-      product_id_ean = true
+      product_id_gtin = true
     else
       product_id = original_url.match(/-([a-z0-9]+)\.html/i)[1]
-      product_id_ean = false
+      product_id_gtin = false
     end
 
     resp = get_request("#{baseurl}/#{product_id}.html")
@@ -72,12 +72,12 @@ class Import::Anyahindmarch < Import::Demandware
     color = url.match(/\/([^\/]+)-[a-z0-9]+\.html/i)[1].gsub('-', ' ')
     image_url = page.match(/large:\[\s+\{url: '([^']+)'/)[1]
 
-    if product_id_ean
+    if product_id_gtin
       pricing = page.match(/"pricing": {"standard": "([^"]+)", "sale": "([^"]+)"/)
       price = pricing[1].to_f
       price_sale = pricing[2].to_f
 
-      ean = product_id
+      upc = product_id
       if price == 0 && price_sale.present? && price_sale > 0
         price = price_sale
         price_sale = nil
@@ -89,7 +89,7 @@ class Import::Anyahindmarch < Import::Demandware
         price: price,
         price_sale: price_sale,
         color: color,
-        ean: ean,
+        upc: upc,
         url: url,
         image: image_url,
       }
@@ -97,7 +97,7 @@ class Import::Anyahindmarch < Import::Demandware
       data = get_json product_id
       return false unless data
       data['variations']['variants'].each do |variant|
-        ean = variant['id']
+        upc = variant['id']
         size = variant['attributes']['size']
         price = variant['pricing']['standard']
         price_sale = variant['pricing']['sale']
@@ -109,14 +109,15 @@ class Import::Anyahindmarch < Import::Demandware
           price_sale: price_sale,
           color: color,
           size: size,
-          ean: ean,
+          upc: upc,
           url: url,
           image: image_url
         }
       end
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results, brand_name=nil
@@ -128,7 +129,7 @@ class Import::Anyahindmarch < Import::Demandware
     end
 
     results.each do |row|
-      product = Product.where(source: source, ean: row[:ean]).first_or_initialize
+      product = Product.where(source: source, upc: row[:upc]).first_or_initialize
       product.attributes = row
       product.brand_id = brand.id if brand
       product.save

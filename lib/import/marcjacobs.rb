@@ -1,4 +1,4 @@
-class Import::Marcjacobs < Import::Demandware
+class Import::Marcjacobs < Import::Platform::Demandware
 
   def baseurl; 'https://www.marcjacobs.com'; end
   def subdir; 'marcjacobs'; end
@@ -149,7 +149,8 @@ class Import::Marcjacobs < Import::Demandware
       end
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
   def process_results results, brand_name=nil

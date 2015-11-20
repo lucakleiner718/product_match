@@ -8,8 +8,11 @@ class Import::Base
     brand_name
   end
 
-  def normalize_title title, brand
-    title.sub(/#{Regexp.quote brand.to_s}\s?/i, '').sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
+  def normalize_title item
+    if item[:title].present?
+      item[:title] = item[:title].sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
+                       .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
+    end
   end
 
   def normalize_retailer retailer
@@ -32,35 +35,48 @@ class Import::Base
     1_000
   end
 
-  def prepare_items items
-    prepare_title(items)
-    normalize_color(items)
+  def prepare_items items, check_upc_rule: :full
+    items.map do |item|
+      normalize_title(item)
+      normalize_color(item)
+      prepare_prices(item)
+      prepare_additional_images(item)
+      check_upc(item, check_upc_rule)
+      process_gender(item)
+    end
     convert_brand(items)
-    prepare_additional_images(items)
-    items
   end
 
-  def prepare_additional_images items
-    items.map do |item|
-      if item[:additional_images] && item[:additional_images].size > 0
-        item[:additional_images] = item[:additional_images].select{|img| img.present?}
-      end
+  def process_gender(item)
+    if item[:gender].blank?
+      item[:gender] = process_title_for_gender(item[:title])
     end
-    items
   end
 
-  def prepare_title items
-    items.map do |item|
-      item[:title] = normalize_title(item[:title], item[:brand]) if item[:title].present?
+  def prepare_prices(item)
+    if item[:price_sale].present? && item[:price_sale] == item[:price]
+      item[:price_sale] = nil
     end
-    items
   end
 
-  def normalize_color items
-    items.map do |item|
-      item[:color] = item[:color].gsub('&amp;', '&') if item[:color].present?
+  def check_upc(item, check_upc_rule=:full)
+    if item[:ean].present?
+      item[:upc] = item[:ean] if item[:upc].blank?
+      item[:ean] = nil
     end
-    items
+    # if check_upc_rule.to_sym == :full && item[:upc].present?
+    #   item[:upc] = (GTIN.process(item[:upc]) || nil)
+    # end
+  end
+
+  def prepare_additional_images item
+    if item[:additional_images] && item[:additional_images].size > 0
+      item[:additional_images] = item[:additional_images].select{|img| img.present?}
+    end
+  end
+
+  def normalize_color item
+    item[:color] = item[:color].gsub('&amp;', '&') if item[:color].present?
   end
 
   def convert_brand items
@@ -78,6 +94,7 @@ class Import::Base
     items.map do |item|
       br = brands.select{|b| b.name == item[:brand] || item[:brand].in?(b.synonyms) }.first
       item[:brand_id] = br.try(:id)
+      item[:brand_name] = br.try(:name)
       item.delete :brand
     end
     items
@@ -107,10 +124,10 @@ class Import::Base
     end
   end
 
-  def process_title_for_gender product_name
-    if product_name.downcase =~ /^women's\s/
+  def process_title_for_gender title
+    if title.downcase =~ /^women's\s/
       'Female'
-    elsif product_name.downcase =~ /^men's\s/
+    elsif title.downcase =~ /^men's\s/
       'Male'
     end
   end
@@ -155,7 +172,7 @@ class Import::Base
     end
 
     results.each do |row|
-      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/) ||
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) ||
         row[:color].blank? || row[:size].blank?
 
       product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
@@ -178,7 +195,7 @@ class Import::Base
     end
 
     results.each do |row|
-      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) || (row[:ean].present? && row[:ean] !~ /\A\d{12,}\z/)
+      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/)
       product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
       if brand

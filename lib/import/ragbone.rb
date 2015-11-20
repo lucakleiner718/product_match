@@ -1,4 +1,4 @@
-class Import::Ragbone < Import::Demandware
+class Import::Ragbone < Import::Platform::Demandware
 
   def baseurl; 'https://www.rag-bone.com'; end
   def subdir; 'ragandbone'; end
@@ -57,6 +57,10 @@ class Import::Ragbone < Import::Demandware
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
     color_param = "dwvar_#{product_id_param}_color"
 
+    gender = nil
+    gender = 'Female' if url =~ /\/womens\//
+    gender = 'Male' if url =~ /\/mens\//
+
     data = get_json product_id
     return false unless data
     data.each do |k, v|
@@ -79,11 +83,13 @@ class Import::Ragbone < Import::Demandware
         upc: upc,
         url: color_url,
         image: image_url,
-        source_id: product_id,
+        style_code: product_id,
+        gender: gender
       }
     end
 
-    process_results_source_id results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

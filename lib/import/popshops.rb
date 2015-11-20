@@ -101,7 +101,6 @@ class Import::Popshops < Import::Base
     to_update.each do |row|
       product = @exists_products.select{|pr| pr.source_id == row[:source_id]}.first
       row.delete :upc if row[:upc].blank?
-      row.delete :ean if row[:ean].blank?
       row.delete :size if row[:size].blank?
       row.delete :color if row[:color].blank?
       product.attributes = row
@@ -110,13 +109,10 @@ class Import::Popshops < Import::Base
   end
 
   def prepare_data products
-    items = []
+    results = []
     brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = normalize_brand(el.attr('name')); obj}
     products.each do |r|
       brand = brands[r.attr('brand')]
-      title = normalize_title(r.attr('name'), brand)
-      gender = process_title_for_gender(title)
-
       item = {
         source: source,
         source_id: r.attr('id'),
@@ -125,7 +121,6 @@ class Import::Popshops < Import::Base
         image: r.attr('image_url_large'),
         upc: nil,
         mpn: nil,
-        ean: nil,
         url: nil,
         price: nil,
         size: nil,
@@ -133,8 +128,7 @@ class Import::Popshops < Import::Base
         sku: nil,
         category: nil,
         description: r.attr('description'),
-        retailer: nil,
-        gender: gender
+        retailer: nil
       }
 
       if r.attr('category')
@@ -161,19 +155,11 @@ class Import::Popshops < Import::Base
         item[:retailer] = @merchants[offer.attr('merchant')] if offer.attr('merchant')
       end
 
-      if item[:sku].present? && item[:sku] =~ /\A\d{8,14}\z/
-        if item[:sku] =~ /^\d{12}$/ && item[:upc].blank?
+      if item[:upc].blank?
+        if item[:sku].present? && item[:sku] =~ /\A\d{8,14}\z/
           item[:upc] = item[:sku]
-        elsif item[:sku] =~ /^\d{13}$/ && item[:ean].blank?
-          item[:ean] = item[:sku]
-        end
-      end
-
-      if item[:mpn].present? && item[:mpn] =~ /\A\d{8,14}\z/
-        if item[:mpn] =~ /^\d{12}$/ && item[:upc].blank?
+        elsif item[:mpn].present? && item[:mpn] =~ /\A\d{8,14}\z/
           item[:upc] = item[:mpn]
-        elsif item[:mpn] =~ /^\d{13}$/ && item[:ean].blank?
-          item[:ean] = item[:mpn]
         end
       end
 
@@ -185,14 +171,13 @@ class Import::Popshops < Import::Base
 
       item[:retailer] = normalize_retailer(item[:retailer]) if item[:retailer]
 
-      items << item
+      results << item
 
       @affected_brands << brand unless @affected_brands.include?(brand)
     end
 
-    prepare_items items
-
-    items
+    prepare_items(results)
+    results
   end
 
   def build_url params = {}

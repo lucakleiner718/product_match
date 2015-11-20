@@ -76,34 +76,34 @@ class Import::Shopbop < Import::Base
   end
 
   def prepare_data rows
-    items = []
+    results = []
     rows.each do |r|
-      items << {
+      results << {
         source: source,
         source_id: r[:id],
         style_code: r[:item_group_id],
-        brand: normalize_brand(r[:brand]),
-        title: normalize_title(r[:title], r[:brand]),
+        brand: r[:brand],
+        title: r[:title],
         category: r[:product_type],
         google_category: r[:google_product_category],
         url: r[:link],
         image: r[:image_link],
         price: r[:price],
-        price_sale: (r[:sale_price].present? ? r[:sale_price] : nil),
+        price_sale: r[:sale_price],
         color: r[:color],
         size: r[:size],
-        upc: r[:gtin],
+        upc: (r[:gtin] || r[:ean]),
         material: r[:material],
         gender: r[:gender],
         additional_images: [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2], r[:additional_image_link3], r[:additional_image_link4]].select{|img| img.present?}
       }
     end
 
-    convert_brand(items)
+    prepare_items(results, check_upc_rule: :simple)
 
-    Brand.where(id: items.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
+    Brand.where(id: results.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
 
-    items
+    results
   end
 
   def source

@@ -1,4 +1,4 @@
-class Import::Dvf < Import::Demandware
+class Import::Dvf < Import::Platform::Demandware
 
   def baseurl; 'https://www.dvf.com'; end
   def subdir; 'DvF_US'; end
@@ -84,7 +84,8 @@ class Import::Dvf < Import::Demandware
       }
     end
 
-    process_results_source_id results
+    prepare_items(results)
+    process_results_source_id(results)
   end
 
 end

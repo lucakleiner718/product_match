@@ -1,4 +1,4 @@
-class Import::Stevenalan < Import::Demandware
+class Import::Stevenalan < Import::Platform::Demandware
 
   def baseurl; 'http://www.stevenalan.com'; end
   def subdir; 'stevenalan'; end
@@ -115,7 +115,8 @@ class Import::Stevenalan < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

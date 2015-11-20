@@ -1,4 +1,4 @@
-class Import::Donnakaran < Import::Demandware
+class Import::Donnakaran < Import::Platform::Demandware
 
   def baseurl; 'http://www.donnakaran.com'; end
   def subdir; 'donnakaran'; end
@@ -108,7 +108,8 @@ class Import::Donnakaran < Import::Demandware
       }
     end
 
-    process_results_source_id results
+    prepare_items(results)
+    process_results_source_id(results)
   end
 
 end

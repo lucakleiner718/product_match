@@ -1,4 +1,4 @@
-class Import::Toryburch < Import::Demandware
+class Import::Toryburch < Import::Platform::Demandware
 
   def baseurl; 'http://www.toryburch.com'; end
   def subdir; 'ToryBurch_US'; end
@@ -109,6 +109,9 @@ class Import::Toryburch < Import::Demandware
       end
     end
 
+    brand_name = page.match(/"brand":\s"([^"]+)"/)[1] unless brand_name
+    brand_name = nil if brand_name.downcase == 'n/a'
+
     data = get_json product_id
     return false unless data
     data['variations']['variants'].each do |v|
@@ -136,13 +139,12 @@ class Import::Toryburch < Import::Demandware
         url: color_url,
         image: image_url,
         style_code: product_id,
+        brand: brand_name
       }
     end
 
-    brand_name = page.match(/"brand":\s"([^"]+)"/)[1] unless brand_name
-    brand_name = nil if brand_name.downcase == 'n/a'
-
-    process_results results, brand_name
+    prepare_items(results)
+    process_results(results, brand_name)
   end
 
 end

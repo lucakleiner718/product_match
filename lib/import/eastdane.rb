@@ -82,14 +82,14 @@ class Import::Eastdane < Import::Base
         source: source,
         source_id: r[:id],
         style_code: r[:item_group_id],
-        brand: normalize_brand(r[:brand]),
-        title: normalize_title(r[:title], r[:brand]),
+        brand: r[:brand],
+        title: r[:title],
         category: r[:product_type],
         google_category: r[:google_product_category],
         url: r[:link],
         image: r[:image_link],
         price: r[:price],
-        # price_sale: (r[:sale_price].present? ? r[:sale_price] : nil),
+        price_sale: r[:sale_price],
         color: r[:color],
         size: r[:size],
         upc: (r[:upc] || r[:ean]),
@@ -99,7 +99,7 @@ class Import::Eastdane < Import::Base
       }
     end
 
-    prepare_items items
+    prepare_items(items)
 
     Brand.where(id: items.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
 

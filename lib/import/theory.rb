@@ -1,4 +1,4 @@
-class Import::Theory < Import::Demandware
+class Import::Theory < Import::Platform::Demandware
 
   def baseurl; 'https://www.theory.com'; end
   def subdir;  'Sites-theory_US-Site'; end
@@ -73,7 +73,6 @@ class Import::Theory < Import::Demandware
       price_sale = v['pricing']['sale']
       color = v['attributes']['color']
       size = v['attributes']['size']
-      # color_id = k.split('|').inject({}){|obj, el| a = el.split('-'); obj[a[0]] = a[1]; obj}['color']
       color_url = url
 
       results << {
@@ -90,7 +89,8 @@ class Import::Theory < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end

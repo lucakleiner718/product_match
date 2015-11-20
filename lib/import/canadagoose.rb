@@ -1,4 +1,4 @@
-class Import::Canadagoose < Import::Demandware
+class Import::Canadagoose < Import::Platform::Demandware
 
   def baseurl; 'http://www.canada-goose.com'; end
   def subdir; 'CanadaGooseCA'; end
@@ -94,7 +94,8 @@ class Import::Canadagoose < Import::Demandware
       }
     end
 
-    process_results results
+    prepare_items(results)
+    process_results(results)
   end
 
 end
