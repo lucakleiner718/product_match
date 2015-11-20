@@ -185,25 +185,4 @@ class Import::Base
     end
   end
 
-  def process_results_source_id results, brand_name=nil
-    brand = Brand.get_by_name(brand_name)
-    if !brand && brand_name_default
-      brand = Brand.where(name: brand_name_default).first
-      brand = Brand.create(name: brand_name_default) unless brand
-      brand.synonyms.push brand_name if brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/)
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      if brand
-        product.brand_id = brand.id
-        product.brand_name = brand.name
-      end
-      product.save
-    end
-  end
-
 end

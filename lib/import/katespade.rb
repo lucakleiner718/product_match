@@ -115,7 +115,7 @@ class Import::Katespade < Import::Platform::Demandware
             upc: upc,
             url: color_url,
             image: image_url,
-            source_id: product_id,
+            style_code: product_id,
           }
         end
       else
@@ -130,13 +130,13 @@ class Import::Katespade < Import::Platform::Demandware
           upc: upc,
           url: url,
           image: image_url,
-          source_id: product_id
+          style_code: product_id
         }
       end
     end
 
     prepare_items(results)
-    process_results_source_id(results)
+    process_results(results)
   end
 
 end

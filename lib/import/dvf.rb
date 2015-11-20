@@ -80,12 +80,12 @@ class Import::Dvf < Import::Platform::Demandware
         upc: upc,
         url: color_url,
         image: image_url,
-        source_id: product_id,
+        style_code: product_id,
       }
     end
 
     prepare_items(results)
-    process_results_source_id(results)
+    process_results(results)
   end
 
 end
