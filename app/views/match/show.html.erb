@@ -1,21 +1,8 @@
 <% if @product %>
   <div class="row">
 
-    <div class="col-md-3">
-      <%= image_tag @product.image, class: "img-responsive" %>
-    </div>
-    <div class="col-md-3">
-      <div class="row">
-        <% @product.additional_images[0...4].each do |img| %>
-          <div class="col-md-6"><%= image_tag img, class: "img-responsive" %></div>
-        <% end %>
-      </div>
+    <%= render partial: 'original_product' %>
 
-    </div>
-
-    <div class="col-md-3">
-      <%= render partial: 'original_product' %>
-    </div>
     <div class="col-md-3">
       <% unless params[:product_id] %>
         <%= select_tag 'brand', options_from_collection_for_select(@brands_choose, :id, :name, @brand.id), class: "form-control select2 match-brand" %>

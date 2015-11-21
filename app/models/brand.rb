@@ -1,7 +1,7 @@
 class Brand < ActiveRecord::Base
 
   has_many :sources, class_name: :ProductSource
-  has_one :brand_stat
+  has_one :brand_stat, dependent: :destroy
   has_many :products
 
   scope :in_use, -> { where in_use: true }

@@ -58,6 +58,11 @@ class Import::Shopbop < Import::Base
         product = products[row[:source_id]]
         row.delete :upc if row[:upc].blank?
         product.attributes = row
+
+        if product.price_changed?
+          ProcessImportUrlWorker.perform_async self.class.name, 'update_product_page', product.id
+        end
+
         product.save if product.changed?
 
         updated_ids << product.id
@@ -81,6 +86,8 @@ class Import::Shopbop < Import::Base
   def prepare_data rows
     results = []
     rows.each do |r|
+      addit_images = [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2],
+        r[:additional_image_link3], r[:additional_image_link4]].select{|img| img.present? && img != r[:image_link]}
       results << {
         source: source,
         source_id: r[:id],
@@ -98,7 +105,7 @@ class Import::Shopbop < Import::Base
         upc: (r[:gtin] || r[:ean]),
         material: r[:material],
         gender: r[:gender],
-        additional_images: [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2], r[:additional_image_link3], r[:additional_image_link4]].select{|img| img.present?}
+        additional_images: addit_images
       }
     end
 
@@ -111,6 +118,35 @@ class Import::Shopbop < Import::Base
 
   def source
     'shopbop'
+  end
+
+  def self.update_product_page product_id
+    product = Product.new(product_id)
+    instance = self.new
+    instance.update_product_page(product)
+  end
+
+  def update_product_page product
+    url = product.url
+    return false if url !~ /shopbop\.com/
+
+    resp = get_request(url)
+
+    style_code = resp.body.scan(/productPage\.productCode=['"]([^'"]+)['"]/).first.first
+    return false if product.style_code != style_code
+
+    list_price = resp.body.scan(/productPage\.listPrice=['"]([^'"]+)['"]/).first.first
+    sale_price = resp.body.scan(/productPage\.sellingPrice=['"]([^'"]+)['"]/).first.first
+
+    if product.price != list_price
+      product.price = list_price
+      product.price_sale = nil
+    end
+    if list_price != sale_price
+      product.price_sale = sale_price
+    end
+
+    product.save if product.changed?
   end
 
 end
