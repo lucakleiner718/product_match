@@ -10,7 +10,7 @@ class Import::Base
 
   def normalize_title item
     if item[:title].present?
-      item[:title] = item[:title].sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
+      item[:title] = item[:title].to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
                        .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
     end
   end
@@ -76,7 +76,7 @@ class Import::Base
   end
 
   def normalize_color item
-    item[:color] = item[:color].gsub('&amp;', '&') if item[:color].present?
+    item[:color] = item[:color].to_s.gsub('&amp;', '&') if item[:color].present?
   end
 
   def convert_brand items
