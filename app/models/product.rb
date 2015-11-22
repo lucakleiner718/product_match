@@ -10,29 +10,34 @@ class Product < ActiveRecord::Base
   MATCHED_SOURCES = %w(shopbop eastdane)
 
   KINDS = {
-    pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos'],
+    pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos', 'leggings'],
     shoes: [
-      'boot', 'boots', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
+      'boot', 'boots', 'bootie', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
       'flats', 'wedge', 'plimsole', 'espadrilles'
     ],
     accessories: [
       'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
     ],
-    underware: ['chemise', 'thong', 'bralette'],
+    underware: [
+      'chemise', 'thong', 'bra', 'bralette', 'bikini top', 'bikini bottoms', 'bottoms', 'lace',
+    ],
     bags: ['clutch', 'bag', 'backpack'],
-    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'tee'],
+    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'slipdress', 'minidress'],
     jacket: ['jacket', 'parka', 'vest'],
-    top: ['top', 'tee', 'tank', 'blouse', 'shirt'],
+    top: [
+      'top', 'tee', 'tank', 'blouse', 'shirt', 'cami', 'camisole', 'tee', 'polo', 'tunic',
+      'pullover'
+    ],
+    sweater: ['sweater', 'sweatshirt', 'sleepshirt', 'vee'],
 
-    skirt: ['skirt'],
-    sweater: ['sweater', 'sweatshirt', 'sleepshirt'],
-    pullover: ['pullover'],
-    coat: ['coat'],
+
+    skirt: ['skirt', 'miniskirt'],
+    coat: ['coat', 'peacoat'],
     slip: ['slip'],
-    polo: ['polo', 'tunic'],
-    cardigan: ['cardigan'],
+    cardigan: ['cardigan', 'poncho'],
     shorts: ['shorts'],
     bodysuit: ['bodysuit'],
+    turtleneck: ['turtleneck']
   }
 
   scope :matching, -> { where source: Product::MATCHED_SOURCES}

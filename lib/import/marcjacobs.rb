@@ -24,7 +24,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
         resp = Curl.get(url)
         html = Nokogiri::HTML(resp.body)
 
-        products = html.css('#search-result-items .mobile-row li.grid-tile .product-tile')
+        products = html.css('#search-result-items .product-tile')
         break if products.size == 0
 
         urls += products.map do |item|
@@ -129,7 +129,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
             upc: upc,
             url: color_url,
             image: image_url,
-            source_id: product_id,
+            style_code: product_id,
           }
         end
       else
@@ -144,7 +144,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
           upc: upc,
           url: url,
           image: image_url,
-          source_id: product_id
+          style_code: product_id
         }
       end
     end
@@ -154,17 +154,9 @@ class Import::Marcjacobs < Import::Platform::Demandware
   end
 
   def process_results results, brand_name=nil
-    brand = Brand.get_by_name(brand_name)
-    if !brand && brand_name_default
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name if brand_name
-      brand.save if brand.changed?
-    end
-
     results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
+      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
-      product.brand_id = brand.id if brand
       product.save
     end
   end
