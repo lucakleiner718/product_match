@@ -62,8 +62,9 @@ class Import::Base
   def check_upc(item, check_upc_rule=:full)
     if item[:ean].present?
       item[:upc] = item[:ean] if item[:upc].blank?
-      item[:ean] = nil
     end
+
+    item.delete :ean
     # if check_upc_rule.to_sym == :full && item[:upc].present?
     #   item[:upc] = (GTIN.process(item[:upc]) || nil)
     # end

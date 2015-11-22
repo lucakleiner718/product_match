@@ -21,7 +21,12 @@ class Product < ActiveRecord::Base
     underware: [
       'chemise', 'thong', 'bra', 'bralette', 'bikini top', 'bikini bottoms', 'bottoms', 'lace',
     ],
-    bags: ['clutch', 'bag', 'backpack'],
+    watch: ['watch'],
+    sunglasses: ['sunglasses'],
+    bags: [
+      'clutch', 'bag', 'backpack', 'wallet', 'travel kit', 'passport holder', 'card case', 'keychain',
+      'pouch'
+    ],
     dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'slipdress', 'minidress'],
     jacket: ['jacket', 'parka', 'vest'],
     top: [
