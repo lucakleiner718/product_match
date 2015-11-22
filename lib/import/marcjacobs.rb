@@ -130,6 +130,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
             url: color_url,
             image: image_url,
             style_code: product_id,
+            brand: brand_name
           }
         end
       else
@@ -144,7 +145,8 @@ class Import::Marcjacobs < Import::Platform::Demandware
           upc: upc,
           url: url,
           image: image_url,
-          style_code: product_id
+          style_code: product_id,
+          brand: brand_name
         }
       end
     end
@@ -153,7 +155,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
     process_results(results)
   end
 
-  def process_results results, brand_name=nil
+  def process_results results
     results.each do |row|
       product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
       product.attributes = row
