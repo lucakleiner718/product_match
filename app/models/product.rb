@@ -13,7 +13,7 @@ class Product < ActiveRecord::Base
     pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos'],
     shoes: [
       'boot', 'boots', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
-      'flats', 'wedge', 'plimsole'
+      'flats', 'wedge', 'plimsole', 'espadrilles'
     ],
     accessories: [
       'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
@@ -78,6 +78,18 @@ class Product < ActiveRecord::Base
       same_products_upcs = Product.where(style_code: self.style_code, source: self.source, color: self.color)
                              .with_upc.pluck(:upc)
       same_products_upcs.map{|upc| upc[0,upc.size-3]}.uniq
+    end
+  end
+
+  def display_price
+    if self.price.present?
+      if self.price_sale.present? && self.price_sale < self.price
+        "#{self.price_sale} (#{self.price})"
+      else
+        self.price
+      end
+    else
+      'N/A'
     end
   end
 
