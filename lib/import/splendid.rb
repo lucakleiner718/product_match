@@ -65,40 +65,43 @@ class Import::Splendid < Import::Base
       next unless el
       el.each_with_index do |it, ind2|
         next unless it
-        data[ind1] ||= []
+        data[ind1] ||= {}
         data[ind1][ind2] ||= {}
         data[ind1][ind2][:upc] = it
       end
-      data[ind1] = data[ind1].select{|el| el.present?}
     end
 
     cxt[:aSKUUnitCost].each_with_index do |el, ind1|
       next unless el
       el.each_with_index do |it, ind2|
         next unless it
-        data[ind1] ||= []
+        data[ind1] ||= {}
         data[ind1][ind2] ||= {}
         data[ind1][ind2][:price] = it.sub(/\$/, '')
       end
-      data[ind1] = data[ind1].select{|el| el.present? && el[:upc].present?}
     end
 
     cxt[:color_names].to_a.compact.each_with_index do |color, ind|
-      data[ind+1].each do |it|
-       it[:color] = color
+      data[ind+1].each do |k, it|
+        it[:color] = color
       end
     end
 
     cxt[:size_names].to_a.compact.each_with_index do |size, ind|
       data.each do |id, el|
-        el[ind][:size] = size
+        el[ind+1][:size] = size
       end
+    end
+
+    data = data.inject({}) do |d_obj, (index, rows)|
+      d_obj[index] = rows.select{|k, v| v[:upc].present?}
+      d_obj
     end
 
     color_images = cxt[:aColor].to_a
     color_images.shift
     color_images.each_with_index do |color_image, ind|
-      data[ind+1].each do |it|
+      data[ind+1].each do |ind, it|
         it[:image] = "#{baseurl}/store/ProductImages/details/#{color_image}"
         it[:images] ||= []
         it[:images] << "#{baseurl}/store/ProductImages/details/#{color_image.sub(/_l\.jpg/, '_b.jpg')}"
@@ -108,7 +111,8 @@ class Import::Splendid < Import::Base
 
     url = build_url(original_url)
 
-    data.values.flatten.each do |row|
+    elements = data.values.map{|obj| obj.values}.flatten
+    elements.each do |row|
       results << {
         title: product_name,
         brand: brand_name,
