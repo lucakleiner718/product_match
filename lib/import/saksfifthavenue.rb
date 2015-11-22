@@ -22,7 +22,9 @@ class Import::Saksfifthavenue < Import::Base
   end
 
   def process_url original_url
-    resp = get_request original_url
+    url = URI.decode(original_url).sub(/FOLDER<>folder_id=\d+\&/, '')
+
+    resp = get_request url
     html = Nokogiri::HTML(resp.body)
 
     script = html.css('script:contains("var mlrs")').text
@@ -66,7 +68,7 @@ class Import::Saksfifthavenue < Import::Base
         color: color,
         size: size,
         upc: upc,
-        url: original_url,
+        url: url,
         image: image,
         additional_images: additional_images,
         style_code: style_code,
