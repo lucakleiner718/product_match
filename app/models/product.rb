@@ -20,7 +20,7 @@ class Product < ActiveRecord::Base
     ],
     underware: ['chemise', 'thong', 'bralette'],
     bags: ['clutch', 'bag', 'backpack'],
-    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit'],
+    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'tee'],
     jacket: ['jacket', 'parka', 'vest'],
     top: ['top', 'tee', 'tank', 'blouse', 'shirt'],
 

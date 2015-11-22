@@ -121,7 +121,7 @@ class Import::Shopbop < Import::Base
   end
 
   def self.update_product_page product_id
-    product = Product.new(product_id)
+    product = Product.find(product_id)
     instance = self.new
     instance.update_product_page(product)
   end
