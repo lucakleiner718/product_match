@@ -20,7 +20,7 @@ class Import::Toryburch < Import::Platform::Demandware
       'accessories/britten', 'accessories/brody',
       'accessories/fleming', 'accessories/frances', 'accessories/marion',
       'accessories/robinson', 'accessories/york', 'accessories/797',
-      'watches', 'home/view-all'
+      'watches',
     ].each do |url_part|
       log url_part
       size = 99
