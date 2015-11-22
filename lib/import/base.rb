@@ -102,7 +102,7 @@ class Import::Base
   end
 
   def build_url url
-    url = "#{baseurl}#{'/' if url !~ /^\//}#{url}" if url !~ /^http/
+    url = "#{baseurl}#{'/' if url[0] != '/'}#{url}" if url[0,4] != 'http'
     url
   end
 
