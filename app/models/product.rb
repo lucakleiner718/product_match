@@ -35,7 +35,7 @@ class Product < ActiveRecord::Base
     ],
     sweater: ['sweater', 'sweatshirt', 'sleepshirt', 'vee'],
 
-
+    dickey: ['dickey'],
     skirt: ['skirt', 'miniskirt'],
     coat: ['coat', 'peacoat'],
     slip: ['slip'],
@@ -100,6 +100,17 @@ class Product < ActiveRecord::Base
       end
     else
       'N/A'
+    end
+  end
+
+  def cancel_upc
+    product_upc = ProductUpc.find_by(product_id: self.id)
+
+    if product_upc
+      self.update_columns match: true, upc: nil
+      ProductSelect.find(product_upc.product_select_id).destroy
+      product_upc.destroy
+      ProductSuggestionsWorker.perform_async self.id
     end
   end
 
