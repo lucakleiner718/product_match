@@ -7,12 +7,33 @@ class Product < ActiveRecord::Base
 
   belongs_to :brand
 
-  CLOTH_KIND = %w(
-    trousers shorts shirt skirt dress jeans pants panties neckle jacket earrings bodysuit clutch belt thong
-    robe chemise
-  )
-
   MATCHED_SOURCES = %w(shopbop eastdane)
+
+  KINDS = {
+    pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos'],
+    shoes: [
+      'boot', 'boots', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
+      'flats', 'wedge', 'plimsole'
+    ],
+    accessories: [
+      'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
+    ],
+    underware: ['chemise', 'thong', 'bralette'],
+    bags: ['clutch', 'bag', 'backpack'],
+    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit'],
+    jacket: ['jacket', 'parka', 'vest'],
+    top: ['top', 'tee', 'tank', 'blouse', 'shirt'],
+
+    skirt: ['skirt'],
+    sweater: ['sweater', 'sweatshirt', 'sleepshirt'],
+    pullover: ['pullover'],
+    coat: ['coat'],
+    slip: ['slip'],
+    polo: ['polo', 'tunic'],
+    cardigan: ['cardigan'],
+    shorts: ['shorts'],
+    bodysuit: ['bodysuit'],
+  }
 
   scope :matching, -> { where source: Product::MATCHED_SOURCES}
   scope :not_matching, -> { where.not(source: Product::MATCHED_SOURCES) }
@@ -56,7 +77,7 @@ class Product < ActiveRecord::Base
     @upc_patterns ||= begin
       same_products_upcs = Product.where(style_code: self.style_code, source: self.source, color: self.color)
                              .with_upc.pluck(:upc)
-      same_products_upcs.map{|upc| upc[0,9]}.uniq
+      same_products_upcs.map{|upc| upc[0,upc.size-3]}.uniq
     end
   end
 
