@@ -23,12 +23,16 @@ class BrandCollectDataWorker
             ProductSuggestionsWorker.perform_async pid
           end
           BrandStatWorker.spawn
+          DailyStatWorker.perform_async
+          ExportShopbopWorker.perform_async 'current'
         when 'eastdane'
           Import::Eastdane.perform url: product_source.source_id, update_file: true
           Product.where(source: :eastdane).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
             ProductSuggestionsWorker.perform_async pid
           end
           BrandStatWorker.spawn
+          DailyStatWorker.perform_async
+          ExportShopbopWorker.perform_async 'current'
         when 'website'
           const = product_source.source_id.titleize
           begin

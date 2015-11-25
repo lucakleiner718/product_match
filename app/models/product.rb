@@ -13,7 +13,7 @@ class Product < ActiveRecord::Base
     pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos', 'leggings'],
     shoes: [
       'boot', 'boots', 'bootie', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
-      'flats', 'wedge', 'plimsole', 'espadrilles'
+      'flats', 'wedge', 'plimsole', 'espadrilles', 'shoes', 'flip flop', 'pump', 'pumps', 'Ankle-Wrap Platform'
     ],
     accessories: [
       'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
@@ -25,22 +25,23 @@ class Product < ActiveRecord::Base
     sunglasses: ['sunglasses'],
     bags: [
       'clutch', 'bag', 'backpack', 'wallet', 'travel kit', 'passport holder', 'card case', 'keychain',
-      'pouch'
+      'pouch', 'tote'
     ],
     dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'slipdress', 'minidress'],
-    jacket: ['jacket', 'parka', 'vest'],
+    jacket: ['jacket', 'parka', 'vest', 'blazer'],
     top: [
       'top', 'tee', 'tank', 'blouse', 'shirt', 'cami', 'camisole', 'tee', 'polo', 'tunic',
       'pullover'
     ],
     sweater: ['sweater', 'sweatshirt', 'sleepshirt', 'vee'],
+    fedora: ['fedora', 'hat', 'BASEBALL CAP', 'beanie'],
 
     dickey: ['dickey'],
     skirt: ['skirt', 'miniskirt'],
     coat: ['coat', 'peacoat'],
     slip: ['slip'],
     cardigan: ['cardigan', 'poncho'],
-    shorts: ['shorts'],
+    shorts: ['shorts', 'short'],
     bodysuit: ['bodysuit'],
     turtleneck: ['turtleneck']
   }
