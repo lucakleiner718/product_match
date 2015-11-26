@@ -11,7 +11,9 @@ class StatChart
       matched: []
     }
 
-    stats = StatAmount.where('date > ?', 6.months.ago).where(key: ['shopbop_total', 'not_matched_size', 'shopbop_total_published', 'not_matched_size_published'])
+    stats = StatAmount.where('date > ?', 6.months.ago)
+              .where(key: ['shopbop_total', 'not_matched_size', 'shopbop_total_published', 'not_matched_size_published'])
+              .order(:date)
     stats.each do |s|
       item = [s.date.to_time.to_i*1000, s.value]
       if s.key == 'shopbop_total'

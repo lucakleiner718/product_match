@@ -226,9 +226,16 @@ ORDER BY t.found_count desc, avg_similarity desc
       [
         l.sub(/^public/, ''),
         l.match(/shopbop_products_upc-([\d_]{8})/)[1].gsub('_', '/'),
-        File.readlines(l).size
+        File.readlines(l).size,
+        File.mtime(l)
       ]
     end
+    @links = [[
+      '/downloads/shopbop_products_upc.csv',
+      'Current week',
+      File.readlines('public/downloads/shopbop_products_upc.csv').size,
+      File.mtime('public/downloads/shopbop_products_upc.csv')
+    ]] + @links
   end
 
   helper_method :sort_column, :sort_direction
