@@ -15,16 +15,12 @@
         <tr>
           <td><%= link[1] %></td>
           <td><%= link[2] %></td>
-          <td><%= link[3].strftime('%b %d %Y %H:%M:%S') %></td>
+          <td><%= link[3].in_time_zone.strftime('%b %d %Y %H:%M:%S') %></td>
           <td><%= link_to 'Open', link[0], target: :_blank %></td>
         </tr>
       <% end %>
-
       </tbody>
     </table>
-
-
-    </ul>
   </div>
 </div>
 

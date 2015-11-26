@@ -45,7 +45,7 @@ class Import::Eastdane < Import::Base
       if to_create.size > 0
         keys = to_create.first.keys
         keys += [:match, :created_at, :updated_at]
-        tn = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+        tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
         sql = "INSERT INTO products
                 (#{keys.join(',')})
                 VALUES #{to_create.map{|r| "(#{r.values.concat([true, tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}

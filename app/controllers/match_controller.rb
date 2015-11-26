@@ -30,7 +30,7 @@ class MatchController < ApplicationController
       end
 
       if params[:only] == 'new_match_week'
-        products_ids = products_ids.where('products.created_at >= ?', Time.now.monday)
+        products_ids = products_ids.where('products.created_at >= ?', Time.in_time_zone.now.monday)
       elsif params[:only] == 'new_match_today'
         products_ids = products_ids.where('products.created_at >= ?', 1.day.ago)
       end

@@ -70,7 +70,7 @@ class ProductsController < ApplicationController
       end
     end
 
-    filename = "upc-products#{"-#{brand.try(:name)}" if brand}-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+    filename = "upc-products#{"-#{brand.try(:name)}" if brand}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}.csv"
     send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
@@ -113,7 +113,7 @@ class ProductsController < ApplicationController
       end
     end
 
-    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "upc-brands-statistic-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "upc-brands-statistic-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}.csv"
   end
 
   # def statistic_brand
@@ -154,7 +154,7 @@ class ProductsController < ApplicationController
       end
     end
 
-    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "shopbop-upc-#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: "shopbop-upc-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}.csv"
   end
 
   def selected_products

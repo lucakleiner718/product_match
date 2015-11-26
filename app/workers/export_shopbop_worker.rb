@@ -22,7 +22,7 @@ class ExportShopbopWorker
   end
 
   def current_week
-    ts = Time.now.monday
+    ts = Time.zone.now.monday
     products_ids = ProductUpc.where('created_at >= ?', ts).pluck(:product_id)
     csv_string = CSV.generate do |csv|
       Product.where(id: products_ids).each do |product|

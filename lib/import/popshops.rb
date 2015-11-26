@@ -89,7 +89,7 @@ class Import::Popshops < Import::Base
     if to_create.size > 0
       keys = to_create.first.keys
       keys += [:created_at, :updated_at]
-      tn = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+      tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
       sql = "INSERT INTO products
                 (#{keys.join(',')})
                 VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize el}.join(',')})"}.join(',')}"

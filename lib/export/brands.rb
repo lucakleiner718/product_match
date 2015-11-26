@@ -26,7 +26,7 @@ class Export::Brands
       end
     end
 
-    filename = "brand-data-#{Time.now.to_i}.csv"
+    filename = "brand-data-#{Time.zone.now.to_i}.csv"
     File.write Rails.root.join("public/#{filename}"), csv_string
     "http://upc.socialrootdata.com/#{filename}"
   end

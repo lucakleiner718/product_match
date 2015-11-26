@@ -9,7 +9,7 @@ class Brand < ActiveRecord::Base
   after_save do
     if self.in_use
       if self.in_use_changed? || self.name_changed? || self.synonyms_changed?
-        ProductSuggestionsGeneratorWorker.perform_at Time.now.end_of_day, self.id
+        ProductSuggestionsGeneratorWorker.perform_at Time.zone.now.end_of_day, self.id
       end
     end
   end
@@ -56,7 +56,7 @@ class Brand < ActiveRecord::Base
 
   def build_stat
     con = Product.connection
-    now = Time.now
+    now = Time.zone.now
 
     shopbop_size = Product.where(brand_id: self.id).matching
                      .where(in_store: true).size
