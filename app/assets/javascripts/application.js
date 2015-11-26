@@ -18,4 +18,5 @@
 //= require select2
 //= require products
 //= require stat_chart
+//= require chart_general
 // require_tree .

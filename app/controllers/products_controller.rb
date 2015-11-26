@@ -221,7 +221,20 @@ ORDER BY t.found_count desc, avg_similarity desc
   end
 
   def marketing
-    @chart = StatChart.new.data
+    chart = StatChart.new.data
+    @chart_db = [
+      {name: 'Total products', data: chart[:total_products]},
+      {name: 'Total without UPC', data: chart[:total_without_upc]},
+    ]
+    @chart_shopbop_file = [
+      {name: 'Total products published', data: chart[:total_products_published]},
+      {name: 'Total without UPC published', data: chart[:total_without_upc_published]},
+    ]
+    @chart_matching = [
+      {name: 'Added without UPC', data: chart[:added_without_upc]},
+      {name: 'Managed', data: chart[:matched]},
+    ]
+
     @links = Dir.glob('public/downloads/shopbop_products_upc-*').sort.reverse[0..9].sort.map do |l|
       [
         l.sub(/^public/, ''),

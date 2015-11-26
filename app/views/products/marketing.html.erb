@@ -27,4 +27,24 @@
     </ul>
   </div>
 </div>
-<div id="stat-chart" style="width: 100%;height: 400px;" data-values="<%= @chart.to_json %>"></div>
+
+<div class="row">
+  <div class="col-sm-6">
+    <div id="chart-db" class="chart-general" style="width: 100%;height: 400px;"
+         data-chart-name="Data in DB"
+         data-values="<%= @chart_db.to_json %>"></div>
+  </div>
+  <div class="col-sm-6">
+    <div id="chart-shopbop-file" class="chart-general" style="width: 100%;height: 400px;"
+         data-chart-name="Data in live product file"
+         data-values="<%= @chart_shopbop_file.to_json %>"></div>
+  </div>
+  <div class="col-sm-6">
+    <div id="chart-matching" class="chart-general" style="width: 100%;height: 400px;"
+         data-chart-name="Matching data"
+         data-values="<%= @chart_matching.to_json %>"></div>
+  </div>
+</div>
+
+
+
