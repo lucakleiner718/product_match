@@ -10,7 +10,7 @@ class Product < ActiveRecord::Base
   MATCHED_SOURCES = %w(shopbop eastdane)
 
   KINDS = {
-    pants: ['trousers', 'pants', 'panties', 'jeans', 'chinos', 'leggings'],
+    pants: ['trousers', 'pants', 'jeans', 'chinos', 'leggings'],
     shoes: [
       'boot', 'boots', 'bootie', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
       'flats', 'wedge', 'plimsole', 'espadrilles', 'shoes', 'flip flop', 'pump', 'pumps', 'Ankle-Wrap Platform'
@@ -19,7 +19,8 @@ class Product < ActiveRecord::Base
       'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
     ],
     underware: [
-      'chemise', 'thong', 'bra', 'bralette', 'bikini top', 'bikini bottoms', 'bottoms', 'lace',
+      'chemise', 'thong', 'bra', 'bralette', 'bikini top', 'bikini bottoms', 'bottoms', 'lace', 'panties',
+      'robe'
     ],
     watch: ['watch'],
     sunglasses: ['sunglasses'],
@@ -42,7 +43,7 @@ class Product < ActiveRecord::Base
     slip: ['slip'],
     cardigan: ['cardigan', 'poncho'],
     shorts: ['shorts', 'short'],
-    bodysuit: ['bodysuit'],
+    bodysuit: ['bodysuit', 'body suit'],
     turtleneck: ['turtleneck']
   }
 
