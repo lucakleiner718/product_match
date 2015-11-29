@@ -18,6 +18,8 @@ class Import::Saksfifthavenue < Import::Base
         brand_urls.concat products
       end
       spawn_products_urls brand_urls
+      urls.each {|u| process_url u }
+      log "spawned #{urls.size} urls"
     end
   end
 
@@ -27,11 +29,11 @@ class Import::Saksfifthavenue < Import::Base
     resp = get_request url
     html = Nokogiri::HTML(resp.body)
 
-    script = html.css('script:contains("var mlrs")').text
-    json_str = script.strip.sub('var mlrs =', '').strip
-    json = JSON.parse(json_str)
+    cxt = V8::Context.new
+    js = html.css('script:contains("var mlrs")').first.text
+    cxt.eval(js)
 
-    d = json['response']['body']['main_products'].first
+    d = cxt['mlrs']['response']['body']['main_products'].first
     colors = d['colors']['colors'].inject({}){|obj, e| obj[e['color_id']] = e['label']; obj}
     sizes_names = {'SML' => 'Small', 'MED' => 'Medium', 'LRG' => 'Large'}
     sizes = d['sizes']['sizes'].inject({}) do |obj, e|
