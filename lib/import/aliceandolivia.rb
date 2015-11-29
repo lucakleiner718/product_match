@@ -71,7 +71,9 @@ class Import::Aliceandolivia < Import::Base
         end
       end
 
-      images = item['images'].select{|el| el['sizeCode'] == 'IMG_768_1024'}.map{|el| "#{IMAGE_PREFIX}#{el['filename']}"}
+      images = item['images'].select{|el| el['sizeCode'] == 'IMG_768_1024'}
+                 .sort_by{|e| e['imageTag']}
+                 .map{|el| "#{IMAGE_PREFIX}#{el['filename']}"}
       main_image = images.shift
       style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
 

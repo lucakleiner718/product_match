@@ -10,7 +10,7 @@ class Product < ActiveRecord::Base
   MATCHED_SOURCES = %w(shopbop eastdane)
 
   KINDS = {
-    pants: ['trousers', 'pants', 'jeans', 'chinos', 'leggings'],
+    pants: ['trousers', 'pant', 'pants', 'jeans', 'chinos', 'leggings'],
     shoes: [
       'boot', 'boots', 'bootie', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
       'flats', 'wedge', 'plimsole', 'espadrilles', 'shoes', 'flip flop', 'pump', 'pumps', 'Ankle-Wrap Platform'
