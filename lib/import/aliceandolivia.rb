@@ -77,6 +77,8 @@ class Import::Aliceandolivia < Import::Base
       main_image = images.shift
       style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
 
+      binding.pry
+
       results << {
         title: product_name,
         brand: brand_name,

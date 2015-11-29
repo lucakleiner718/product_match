@@ -9,44 +9,6 @@ class Product < ActiveRecord::Base
 
   MATCHED_SOURCES = %w(shopbop eastdane)
 
-  KINDS = {
-    pants: ['trousers', 'pant', 'pants', 'jeans', 'chinos', 'leggings'],
-    shoes: [
-      'boot', 'boots', 'bootie', 'booties', 'sneaker', 'sneakers', 'sandal', 'sandals', 'mule', 'oxford', 'oxfords',
-      'flats', 'wedge', 'plimsole', 'espadrilles', 'shoes', 'flip flop', 'pump', 'pumps', 'Ankle-Wrap Platform'
-    ],
-    accessories: [
-      'belt', 'neckle', 'necklace', 'earrings', 'bracelet', 'scarf', 'earring set', 'ring'
-    ],
-    underware: [
-      'chemise', 'thong', 'bra', 'bralette', 'bikini top', 'bikini bottoms', 'bottoms', 'lace', 'panties',
-      'robe'
-    ],
-    watch: ['watch'],
-    sunglasses: ['sunglasses'],
-    bags: [
-      'clutch', 'bag', 'backpack', 'wallet', 'travel kit', 'passport holder', 'card case', 'keychain',
-      'pouch', 'tote'
-    ],
-    dresses: ['dress', 'robe', 'gown', 'romper', 'jumpsuit', 'slipdress', 'minidress'],
-    jacket: ['jacket', 'parka', 'vest', 'blazer'],
-    top: [
-      'top', 'tee', 'tank', 'blouse', 'shirt', 'cami', 'camisole', 'tee', 'polo', 'tunic',
-      'pullover'
-    ],
-    sweater: ['sweater', 'sweatshirt', 'sleepshirt', 'vee'],
-    fedora: ['fedora', 'hat', 'BASEBALL CAP', 'beanie'],
-
-    dickey: ['dickey'],
-    skirt: ['skirt', 'miniskirt'],
-    coat: ['coat', 'peacoat'],
-    slip: ['slip'],
-    cardigan: ['cardigan', 'poncho'],
-    shorts: ['shorts', 'short'],
-    bodysuit: ['bodysuit', 'body suit'],
-    turtleneck: ['turtleneck']
-  }
-
   scope :matching, -> { where source: Product::MATCHED_SOURCES}
   scope :not_matching, -> { where.not(source: Product::MATCHED_SOURCES) }
   scope :shopbop, -> { matching }

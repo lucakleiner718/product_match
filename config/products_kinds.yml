@@ -1,0 +1,120 @@
+- pants:
+  - pant
+  - trousers
+  - jeans
+  - chinos
+  - leggings
+
+# shoes
+- flats
+- wedge
+- plimsole
+- espadrilles
+- flip flop
+- pump:
+  - pumps
+- ankle-wrap platform
+- boots:
+  - boot
+  - booties
+  - booties
+  - shoes
+  - sneaker
+  - sneakers
+  - sandal
+  - sandals
+  - mule
+  - oxford
+  - oxfords
+
+# accessories
+- belt
+- watch
+- sunglasses
+- neckle:
+  - necklace
+- earrings
+  - earring set
+- bracelet
+- scarf
+- ring
+
+# bags
+- backpack
+- bag
+- card case
+- clutch
+- keychain
+- passport holder
+- pouch
+- travel kit
+- tote
+- wallet
+
+# underware
+- chemise
+- thong:
+  - bottoms
+  - lace
+  - panties
+- bralette:
+  - bra
+- bikini top
+- bikini bottom:
+  - bikini bottoms
+- robe
+- sleepshirt
+
+# dresses
+- dress:
+  - shirtdress
+  - gown
+  - slipdress
+  - minidress
+- robe
+- romper
+- jumpsuit
+
+# jacket
+- jacket
+- parka
+- vest
+- blazer
+
+# top
+- top
+- tee
+- tank
+- blouse
+- shirt
+- cami
+- camisole
+- polo
+- tunic
+- pullover
+
+# sweater
+- sweater
+- sweatshirt
+- vee
+
+# hats
+- fedora
+- hat
+- cap
+- beanie
+
+# other
+- dickey
+- skirt:
+  - miniskirt
+- coat:
+  - peacoat
+- slip
+- cardigan
+- poncho
+- shorts:
+    - short
+- bodysuit:
+    - body suit
+- turtleneck
