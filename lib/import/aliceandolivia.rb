@@ -73,7 +73,7 @@ class Import::Aliceandolivia < Import::Base
 
       images = item['images'].select{|el| el['sizeCode'] == 'IMG_768_1024'}.map{|el| "#{IMAGE_PREFIX}#{el['filename']}"}
       main_image = images.shift
-      style_code = page.scan(/pid:'([A-Z0-9]+)'/).first.first
+      style_code = page.scan(/pid:'([A-Z0-9\s]+)'/).first.first.strip
 
       results << {
         title: product_name,
