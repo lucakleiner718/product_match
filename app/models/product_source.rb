@@ -30,7 +30,7 @@ class ProductSource < ActiveRecord::Base
 
   PERIODS = [
     ['Every 12 hours', 0.5], ['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]
-  ].map{|el| el[1] = el[1] * 1.day.to_i; el}
+  ].map{|el| el[1] = (el[1] * 1.day).to_i; el}
 
   def period_days
     self.period / 1.day.to_i if self.period && self.period > 0
