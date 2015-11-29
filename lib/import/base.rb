@@ -43,8 +43,13 @@ class Import::Base
       prepare_additional_images(item)
       check_upc(item, check_upc_rule)
       process_gender(item)
+      check_source(item)
     end
     convert_brand(items)
+  end
+
+  def check_source(item)
+    item[:source] = source if item[:source].blank? && source
   end
 
   def process_gender(item)
