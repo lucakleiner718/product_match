@@ -7,17 +7,16 @@ class Import::Saksfifthavenue < Import::Base
     html = Nokogiri::HTML(resp.body)
     brands_links = html.css('.designer-list li a').map{|a| a.attr('href').sub(/\?.*/, '')}
     brands_links.each do |link|
-      brand_urls = []
+      urls = []
       while true
-        resp = get_request "#{link}?Nao=#{brand_urls.size}"
+        resp = get_request "#{link}?Nao=#{urls.size}"
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('.image-container-large a[id^=image-url]').map{|a| a.attr('href')}
         break if products.size == 0
 
-        brand_urls.concat products
+        urls.concat products
       end
-      spawn_products_urls brand_urls
       urls.each {|u| process_url u }
       log "spawned #{urls.size} urls"
     end
