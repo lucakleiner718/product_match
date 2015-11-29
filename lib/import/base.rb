@@ -186,4 +186,13 @@ class Import::Base
     end
   end
 
+  def init_js(vars: [], funcs: [])
+    new_rows = []
+    new_rows << "var #{vars.join(',')};" if vars.size > 0
+    funcs.each do |func|
+      new_rows << "function #{func}(){};"
+    end
+    new_rows.join
+  end
+
 end
