@@ -200,4 +200,57 @@ class Import::Base
     new_rows.join
   end
 
+  def process_results_batch results
+    to_update = []
+    to_create = []
+    created_ids = []
+    updated_ids = []
+
+    if results.size == results.select{|r| r[:source_id].present?}.size
+      products = Product.where(source: source, source_id: results.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
+      results.each do |r|
+        exists = products[r[:source_id]]
+        if exists
+          to_update << [r, exists]
+        else
+          to_create << r
+        end
+      end
+    elsif results.size == results.select{|r| r[:style_code].present?}.size
+      products = Product.where(source: source, style_code: results.map{|r| r[:style_code]}.uniq).to_a
+      results.each do |r|
+        exists = products.find{|pr| r[:style_code] == pr.style_code && r[:color] == pr.color && r[:size] == pr.size}
+        if exists
+          to_update << [r, exists]
+        else
+          to_create << r
+        end
+      end
+    else
+      raise Exception, 'No options to process results'
+    end
+
+    if to_create.size > 0
+      keys = to_create.first.keys
+      keys += [:created_at, :updated_at]
+      tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
+      sql = "INSERT INTO products
+                (#{keys.join(',')})
+                VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
+                RETURNING id"
+      resp = Product.connection.execute sql
+      created_ids.concat resp.map{|r| r['id'].to_i}
+    end
+
+    to_update.each do |row|
+      product, exist = row
+
+      product.delete :upc if product[:upc].blank?
+      exist.attributes = product
+      exist.save if exist.changed?
+
+      updated_ids << exist.id
+    end
+  end
+
 end

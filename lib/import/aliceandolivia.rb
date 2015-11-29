@@ -93,42 +93,6 @@ class Import::Aliceandolivia < Import::Base
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
-  def process_results results
-    products = Product.where(source: source, source_id: results.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
-    to_update = []
-    to_create = []
-    created_ids = []
-    updated_ids = []
-
-    source_ids = products.keys
-
-    results.each do |r|
-      (r[:source_id].in?(source_ids) ? to_update : to_create) << r
-    end
-
-    if to_create.size > 0
-      keys = to_create.first.keys
-      keys += [:created_at, :updated_at]
-      tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
-      sql = "INSERT INTO products
-                (#{keys.join(',')})
-                VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
-                RETURNING id"
-      resp = Product.connection.execute sql
-      created_ids.concat resp.map{|r| r['id'].to_i}
-    end
-
-    to_update.each do |row|
-      product = products[row[:source_id]]
-      row.delete :upc if row[:upc].blank?
-      product.attributes = row
-      product.save if product.changed?
-
-      updated_ids << product.id
-    end
-  end
-
 end
