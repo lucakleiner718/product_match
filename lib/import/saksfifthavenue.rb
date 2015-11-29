@@ -42,8 +42,21 @@ class Import::Saksfifthavenue < Import::Base
       obj
     end
     brand = d['brand_name']['label']
-    price = d['price']['list_price'].sub('&#36;', '')
-    price_sale = d['price']['on_sale'] && d['price']['sale_price'] ? d['price']['sale_price'].sub('&#36;', '') : nil
+
+    price = d['price']['list_price']
+    price_currency = nil
+    if price
+      price = price.sub('&#36;', '').sub('&#163;', '').sub('&nbsp;', '')
+      price_currency = price =~ /GBP/ ? 'GBP' : 'USD'
+    end
+
+    price_sale = d['price']['on_sale'] && d['price']['sale_price'] ? d['price']['sale_price'] : nil
+    price_sale_currency = nil
+    if price_sale
+      price_sale = price_sale.sub('&#36;', '').sub('&#163;', '').sub('&nbsp;', '')
+      price_sale_currency = price_sale =~ /GBP/ ? 'GBP' : 'USD'
+    end
+
     product_name = d['short_description']
     style_code = d['product_id']
     image = "#{d['media']['images_server_url']}#{d['media']['images_path']}#{d['media']['images']['product_detail_image']}"
@@ -65,7 +78,9 @@ class Import::Saksfifthavenue < Import::Base
       results << {
         title: product_name,
         price: price,
+        price_currency: price_currency,
         price_sale: price_sale,
+        price_sale_currency: price_sale_currency,
         color: color,
         size: size,
         upc: upc,
