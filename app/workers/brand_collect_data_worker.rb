@@ -65,7 +65,7 @@ class BrandCollectDataWorker
 
   def self.spawn
     ProductSource.where('period > 0')
-      .where("collected_at < now() - INTERVAL '1 day' * period OR collected_at IS NULL")
+      .where("collected_at < now() - INTERVAL '1 day' * (period / #{1.day.to_i}) OR collected_at IS NULL")
       .order('collected_at ASC NULLS FIRST')
       .limit(50).each do |ps|
 

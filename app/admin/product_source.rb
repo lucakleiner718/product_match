@@ -10,7 +10,7 @@ ActiveAdmin.register ProductSource do
     column :brand
     column 'Regular update' do |it|
       if it.period && it.period > 0
-        "#{it.period} day(s)"
+        "#{it.period_days} day(s)"
       else
         'Manual'
       end
@@ -43,7 +43,7 @@ ActiveAdmin.register ProductSource do
       f.input :source_name, collection: [['Popshops', 'popshops'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Eastdane', 'eastdane'], ['Website', 'website']]
       f.input :source_id, label: 'Source ID'
       f.input :brand, collection: Brand.in_use.order(:name)
-      f.input :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]], prompt: false
+      f.input :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS, prompt: false
     end
     f.actions
   end
@@ -51,7 +51,7 @@ ActiveAdmin.register ProductSource do
   filter :name
   filter :source_name
   filter :source_id, label: 'Source ID'
-  filter :period, label: 'Regular update', as: :select, collection: [['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]]
+  filter :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS
   filter :status
 
 end
