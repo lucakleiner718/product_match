@@ -3,10 +3,10 @@ class Suggestion
   WEIGHTS = {
     color: 5,
     size: 2,
-    title: 5,
-    price: 2
+    title: 5
   }
   GENDER_WEIGHT = 5
+  PRICE_WEIGHT  = 2
   STYLE_CODE_WEIGHT = 10
   EXCLUDE_SOURCES = [
     'lordandtaylor.com'
@@ -209,22 +209,32 @@ class Suggestion
   end
 
   def price_similarity(suggested)
-    suggested_prices = [suggested.price, suggested.price_sale].compact.uniq
-    product_prices = [product.price, product.price_sale].compact.uniq
+    return 0 if suggested.price.blank? && product.price.blank?
+
+    @params_amount += PRICE_WEIGHT
+
+    return 0 if suggested.price.blank? || product.price.blank?
+
+    suggested_price = suggested.price_m
+    suggested_price_sale = suggested.price_sale_m
+
+    product_price = product.price_m
+    product_price_sale = product.price_sale_m
+
+    suggested_prices = [suggested_price, suggested_price_sale].compact.map(&:to_i).uniq
+    product_prices = [product_price, product_price_sale].compact.map(&:to_i).uniq
     ratio =
       if (suggested_prices & product_prices).size > 0
         1
-      elsif suggested.price.present? && product.price.present?
-        diff = (suggested.price.to_i - product.price.to_i).abs / product.price.to_f
+      else
+        diff = (suggested_prices.min - product_prices.min).abs / product_price.to_f
         diff = 1 if diff > 1
         diff = 1 - diff
 
         diff
-      else
-        0
       end
 
-    ratio * WEIGHTS[:price]
+    ratio * PRICE_WEIGHT
   end
 
   def gender_similarity(suggested)

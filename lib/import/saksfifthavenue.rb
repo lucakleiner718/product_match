@@ -29,7 +29,9 @@ class Import::Saksfifthavenue < Import::Base
     html = Nokogiri::HTML(resp.body)
 
     cxt = V8::Context.new
-    js = html.css('script:contains("var mlrs")').first.text
+    script = html.css('script:contains("var mlrs")').first
+    return unless script
+    js = script.text
     cxt.eval(js)
 
     d = cxt['mlrs']['response']['body']['main_products'].first

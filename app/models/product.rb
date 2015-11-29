@@ -96,9 +96,9 @@ class Product < ActiveRecord::Base
   def display_price
     if self.price.present?
       if self.price_sale.present? && self.price_sale < self.price
-        "#{self.price_sale} (#{self.price})"
+        "#{self.price_sale_m} (#{self.price_m})"
       else
-        self.price
+        self.price_m
       end
     else
       'N/A'
@@ -114,6 +114,20 @@ class Product < ActiveRecord::Base
       product_upc.destroy
       ProductSuggestionsWorker.perform_async self.id
     end
+  end
+
+  def price_m(exchange=true)
+    return nil unless self.price
+    resp = Money.new(self.price.to_f*100, self.price_currency || 'USD')
+    resp = resp.exchange_to("USD") if exchange
+    resp
+  end
+
+  def price_sale_m(exchange=true)
+    return nil unless self.price_sale
+    resp = Money.new(self.price_sale.to_f*100, self.price_sale_currency || self.price_currency || 'USD')
+    resp = resp.exchange_to("USD") if exchange
+    resp
   end
 
   private

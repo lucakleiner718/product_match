@@ -41,7 +41,6 @@ class BrandCollectDataWorker
           const = product_source.source_id.titleize
           begin
             Module.const_get("Import::#{const}").perform
-
             true
           rescue NameError => e
             if e.message =~ /wrong constant name/
