@@ -1,5 +1,7 @@
 class Import::Filson < Import::Base
 
+  # platform = magento
+
   def baseurl; 'http://www.filson.com'; end
   def brand_name; 'Filson'; end
 

@@ -1,5 +1,7 @@
 class Import::Bymalenebirger < Import::Platform::Demandware
 
+  # platform = demandware
+
   def baseurl; 'http://www.bymalenebirger.com'; end
   def subdir; 'BMB-DK'; end
   def lang; 'da_DK'; end
