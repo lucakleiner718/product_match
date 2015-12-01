@@ -1,5 +1,7 @@
 class Import::Splendid < Import::Base
 
+  # platform=unknown02
+
   def baseurl; 'http://www.splendid.com'; end
   def brand_name; 'Splendid'; end
 

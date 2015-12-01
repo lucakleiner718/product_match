@@ -37,6 +37,7 @@ class Import::Base
 
   def prepare_items items, check_upc_rule: :full
     items.map do |item|
+      strip_data(item)
       normalize_title(item)
       normalize_color(item)
       prepare_prices(item)
@@ -46,6 +47,12 @@ class Import::Base
       check_source(item)
     end
     convert_brand(items)
+  end
+
+  def strip_data(item)
+    item.each do |k, v|
+      item[k] = v.strip if v.is_a?(String)
+    end
   end
 
   def check_source(item)
