@@ -53,11 +53,6 @@ class Import::Saksfifthavenue < Import::Base
     end
 
     price_sale = d['price']['on_sale'] && d['price']['sale_price'] ? d['price']['sale_price'] : nil
-    price_sale_currency = nil
-    if price_sale
-      price_sale = price_sale.sub('&#36;', '').sub('&#163;', '').sub('&nbsp;', '')
-      price_sale_currency = price_sale =~ /GBP/ ? 'GBP' : 'USD'
-    end
 
     product_name = d['short_description']
     style_code = d['product_id']
@@ -82,7 +77,6 @@ class Import::Saksfifthavenue < Import::Base
         price: price,
         price_currency: price_currency,
         price_sale: price_sale,
-        price_sale_currency: price_sale_currency,
         color: color,
         size: size,
         upc: upc,

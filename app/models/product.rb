@@ -87,7 +87,7 @@ class Product < ActiveRecord::Base
 
   def price_sale_m(exchange=true)
     return nil unless self.price_sale
-    resp = Money.new(self.price_sale.to_f*100, self.price_sale_currency || self.price_currency || 'USD')
+    resp = Money.new(self.price_sale.to_f*100, self.price_currency || 'USD')
     resp = resp.exchange_to("USD") if exchange
     resp
   end

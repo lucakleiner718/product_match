@@ -9,17 +9,18 @@ class Import::Bymalenebirger < Import::Platform::Demandware
   def brand_name_default; 'By Malene Birger'; end
   def url_prefix_country; 'dk'; end
   def url_prefix_lang; 'da'; end
+  def currency; 'DKK'; end
 
   def perform
     [
       'nyheder', 'inspiration', 'shop-by-look', 'accessories-1', 'sko-1', 'tasker-2'
     ].each do |url_part|
-      log url_part
       urls = []
       size = 50
 
       while true
         url = "#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=infinite"
+        log url
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -27,6 +28,7 @@ class Import::Bymalenebirger < Import::Platform::Demandware
         break if products.size == 0
 
         urls.concat products
+        break if urls.size == urls.uniq.size
       end
 
       urls = process_products_urls urls
@@ -93,6 +95,7 @@ class Import::Bymalenebirger < Import::Platform::Demandware
         title: product_name,
         category: category,
         price: price,
+        price_currency: currency,
         price_sale: price_sale,
         color: color,
         size: size,
@@ -100,7 +103,7 @@ class Import::Bymalenebirger < Import::Platform::Demandware
         url: color_url,
         image: image_url,
         style_code: product_id,
-        gender: gender
+        gender: gender,
       }
     end
 

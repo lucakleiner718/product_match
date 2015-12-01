@@ -93,7 +93,6 @@ class Import::Oscardelarenta < Import::Base
         price: price,
         price_currency: currency,
         price_sale: price_sale,
-        price_sale_currency: currency,
         color: color,
         size: size,
         upc: upc,

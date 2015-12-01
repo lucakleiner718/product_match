@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151126180711) do
+ActiveRecord::Schema.define(version: 20151201122622) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -163,7 +163,6 @@ ActiveRecord::Schema.define(version: 20151126180711) do
     t.text     "additional_images_local", default: [],                 array: true
     t.boolean  "in_store",                default: false
     t.string   "price_currency"
-    t.string   "price_sale_currency"
   end
 
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree
