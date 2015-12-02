@@ -69,6 +69,13 @@ class Import::Base
     if item[:price_sale].present? && item[:price_sale] == item[:price]
       item[:price_sale] = nil
     end
+
+    item[:price_currency] ||= nil
+
+    if item[:price] =~ /^\$/
+      item[:price].sub!(/^\$/, '')
+      item[:price_currency] = "USD"
+    end
   end
 
   def check_upc(item, check_upc_rule=:full)
@@ -114,6 +121,7 @@ class Import::Base
   end
 
   def build_url url
+    url.sub!(/^\/\//, 'http://')
     url = "#{baseurl}#{'/' if url[0] != '/'}#{url}" if url[0,4] != 'http'
     url
   end

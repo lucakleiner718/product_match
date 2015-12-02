@@ -19,5 +19,10 @@ module Clockwork
   every(1.day, 'DailyStatWorker', at: "23:50") { DailyStatWorker.perform_async }
   every(1.hour, 'BrandCollectDataWorker') { BrandCollectDataWorker.spawn }
   # every(1.hour, 'PopulateProductUpcWorker') { PopulateProductUpcWorker.spawn }
+  every(1.day, 'RegenerateSuggestions', at: '03:00') do
+    Brand.in_use.pluck(:id).each do |brand_id|
+      ProductSuggestionsGeneratorWorker.perform_async brand_id, delete_exists: true
+    end
+  end
 
 end
