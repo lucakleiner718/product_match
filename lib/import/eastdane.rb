@@ -1,22 +1,12 @@
-class Import::Eastdane < Import::Base
+class Import::Eastdane < Import::Platform::Bop
+
+  def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-eastdan474-amazonpadsedgoogle_usd_no_sku_upc.csv'; end
+  def csv_col_sep; "\t"; end
+  def source; 'eastdane'; end
 
   def self.perform rewrite: false, update_file: true, url: nil
     instance = self.new
     instance.perform rewrite: rewrite, update_file: update_file, url: url
-  end
-
-  def get_file update_file=true, url=nil
-    filename = "tmp/sources/eastdane.csv"
-
-    url ||= 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-eastdan474-amazonpadsedgoogle_usd_no_sku_upc.csv'
-
-    if !File.exists?(filename) || (update_file && File.mtime(filename) < 3.hours.ago)
-      body = Curl.get(url).body
-      body.force_encoding('UTF-8')
-      File.write filename, body
-    end
-
-    filename
   end
 
   def perform rewrite: false, update_file: false, url: nil
@@ -24,12 +14,12 @@ class Import::Eastdane < Import::Base
       Product.where(source: source).delete_all
     end
 
-    filename = get_file update_file, url
+    filename = get_file(url, update_file)
 
     created_ids = []
     updated_ids = []
 
-    SmarterCSV.process(filename, col_sep: "\t", chunk_size: 2_000) do |rows|
+    process_batch(filename) do |rows|
       items = prepare_data rows
 
       products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
@@ -42,17 +32,7 @@ class Import::Eastdane < Import::Base
         (r[:source_id].in?(source_ids) ? to_update : to_create) << r
       end
 
-      if to_create.size > 0
-        keys = to_create.first.keys
-        keys += [:match, :created_at, :updated_at]
-        tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
-        sql = "INSERT INTO products
-                (#{keys.join(',')})
-                VALUES #{to_create.map{|r| "(#{r.values.concat([true, tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
-                RETURNING id"
-        resp = Product.connection.execute sql
-        created_ids.concat resp.map{|r| r['id'].to_i}
-      end
+      created_ids += process_create(to_create)
 
       to_update.each do |row|
         product = products[row[:source_id]]
@@ -79,9 +59,9 @@ class Import::Eastdane < Import::Base
   end
 
   def prepare_data rows
-    items = []
+    results = []
     rows.each do |r|
-      items << {
+      results << {
         source: source,
         source_id: r[:id],
         style_code: r[:item_group_id],
@@ -102,15 +82,10 @@ class Import::Eastdane < Import::Base
       }
     end
 
-    prepare_items(items)
+    prepare_items(results)
 
-    Brand.where(id: items.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
+    Brand.where(id: results.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
 
-    items
+    results
   end
-
-  def source
-    'eastdane'
-  end
-
 end
