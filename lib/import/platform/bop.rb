@@ -64,7 +64,7 @@ class Import::Platform::Bop < Import::Base
                 VALUES #{to_create.map{|r| "(#{r.values.concat([true, tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
                 RETURNING id"
       resp = Product.connection.execute sql
-      created_ids.concat resp.map{|r| r['id'].to_i}
+      resp.map{|r| r['id'].to_i}
     else
       []
     end
