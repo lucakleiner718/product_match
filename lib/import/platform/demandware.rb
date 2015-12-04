@@ -24,4 +24,20 @@ class Import::Platform::Demandware < Import::Base
     json
   end
 
+  def build_url url
+    if url !~ /^http/
+      url_parts = []
+      url_parts << baseurl
+      if url[0] != '/'
+        url_parts << url_prefix_country
+        url_parts << url_prefix_lang
+      end
+      url_parts << url
+
+      url_parts.compact.join('/')
+    else
+      super url
+    end
+  end
+
 end

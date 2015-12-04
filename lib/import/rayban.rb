@@ -1,8 +1,10 @@
 class Import::Rayban < Import::Base
 
+  # platform = wcsstore
+
   def baseurl; 'http://www.ray-ban.com'; end
   def brand; 'Ray-Ban'; end
-  def country; 'usa'; end
+  def url_prefix_country; 'usa'; end
 
   def perform
     urls = []
@@ -11,7 +13,7 @@ class Import::Rayban < Import::Base
       'sunglasses/men-s/plp', 'sunglasses/women-s/plp', 'sunglasses/junior/plp',
       'eyeglasses/men-s/plp', 'eyeglasses/women-s/plp', 'eyeglasses/junior/plp'
     ].each do |cat_link|
-      urls += LoadLinks.new("#{country}/#{cat_link}", self).grab
+      urls += LoadLinks.new("#{url_prefix_country}/#{cat_link}", self).grab
     end
 
     urls = process_products_urls(urls)
@@ -73,8 +75,22 @@ class Import::Rayban < Import::Base
     results
   end
 
-  class LoadLinks
+  def build_url url
+    if url !~ /^http/
+      url_parts = []
+      url_parts << baseurl
+      if url[0] != '/'
+        url_parts << url_prefix_country
+      end
+      url_parts << url
 
+      url_parts.compact.join('/')
+    else
+      super url
+    end
+  end
+
+  class LoadLinks
     def initialize start_url, parent
       @urls = []
       @start_url = start_url
@@ -106,7 +122,5 @@ class Import::Rayban < Import::Base
         load_category viewmore_link.attr('href')
       end
     end
-
   end
-
 end
