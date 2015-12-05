@@ -65,7 +65,7 @@ class ProductsController < ApplicationController
       @products.each do |pr|
         csv << [
           pr.title, pr.brand.try(:name), pr.source, pr.size, pr.color, pr.price, pr.price_sale,
-          pr.style_code, (pr.upc || pr.ean), pr.retailer, pr.category
+          pr.style_code, pr.upc, pr.retailer, pr.category
         ]
       end
     end

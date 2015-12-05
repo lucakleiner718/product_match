@@ -287,6 +287,7 @@ GEM
       activesupport (>= 3.2, < 5)
     highline (1.7.8)
     hitimes (1.2.3)
+    honeybadger (2.3.1)
     htmlentities (4.3.4)
     i18n (0.7.0)
     inflecto (0.0.2)
@@ -521,6 +522,7 @@ DEPENDENCIES
   faraday_middleware
   fog
   god
+  honeybadger (~> 2.0)
   htmlentities
   jbuilder (~> 2.0)
   jquery-rails
