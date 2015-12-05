@@ -49,7 +49,9 @@ class Import::Aliceandolivia < Import::Base
     return false if page =~ /404 Page/i
 
     cxt = V8::Context.new
-    orig_js = html.css('script:contains("skuInfos")').first.text
+    script_sku = html.css('script:contains("skuInfos")').first
+    return unless script_sku
+    orig_js = script_sku.text
     js_add = init_js(vars: ['optionsSorter'],
       funcs: ['Social', 'optionRenderer', 'ajaxWithoutAuth', 'optionChangeHandler', 'simpleProductOptions'])
     js = "#{js_add};js_site_var = {context_path: ''};$ = function(){};$.cookie = function(){};#{orig_js}"
