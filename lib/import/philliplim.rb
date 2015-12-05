@@ -50,7 +50,13 @@ class Import::Philliplim < Import::Base
     js_add = init_js(vars: ['optionsSorter'],
       funcs: ['Social', 'optionRenderer', 'ajaxWithoutAuth', 'optionChangeHandler', 'simpleProductOptions'])
     js = "#{js_add};js_site_var = {context_path: ''};$ = function(){};$.cookie = function(){};#{orig_js}"
-    cxt.eval(js)
+
+    begin
+      cxt.eval(js)
+    rescue => e
+      Honeybadger.notify e
+      return false
+    end
 
     product_name = html.css('.product-content .product-content-head h2').first.text.strip
 
@@ -79,7 +85,7 @@ class Import::Philliplim < Import::Base
         end
       end
 
-      images = color_images[color]
+      images = [] + color_images[color]
       main_image = images.shift
       style_code = cxt['skus']['productId']
       source_id = item['itemId']
