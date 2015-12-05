@@ -10,7 +10,7 @@ class Import::Platform::Bop < Import::Base
   def get_file url=nil, update_file=true
     url ||= default_file
     extension = url.match(/\.([a-z]+)$/)[1]
-    filename = "tmp/sources/#{self.class.name.downcase}.#{extension}"
+    filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
 
     if !File.exists?(filename) || (update_file && File.mtime(filename) < 3.hours.ago)
       body = Curl.get(url).body
@@ -27,7 +27,7 @@ class Import::Platform::Bop < Import::Base
         yield rows
       end
     elsif filename =~ /\.xml$/
-      puts 'start process file'
+      puts "start process file #{filename}"
       columns = %w|item_group_id id title description product_type google_product_category link image_link
         condition availability price sale_price brand gender color size material shipping
         additional_image_link additional_image_link1 additional_image_link2 additional_image_link3

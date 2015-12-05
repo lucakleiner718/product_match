@@ -1,6 +1,6 @@
 class Import::Eastdane < Import::Platform::Bop
 
-  def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-eastdan474-amazonpadsedgoogle_usd_no_sku_upc.csv'; end
+  def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-eastdan474-eastdane_kiere_upc_xml.xml'; end
   def csv_col_sep; "\t"; end
   def source; 'eastdane'; end
 
