@@ -1,5 +1,7 @@
 class Import::Veronicabeard < Import::Base
 
+  # platform = unknown3
+
   def baseurl; 'https://www.veronicabeard.com'; end
   def brand_name; 'Veronica Beard'; end
 

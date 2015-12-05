@@ -1,26 +1,19 @@
-class Import::Aliceandolivia < Import::Base
+class Import::Philliplim < Import::Base
 
   # platform = unknown3
 
-  def baseurl; 'http://www.aliceandolivia.com'; end
-  def brand_name; 'Alice + Olivia'; end
-  IMAGE_PREFIX = "https://s3.amazonaws.com/aliceandolivia-java/images/skus/"
+  def baseurl; 'http://www.31philliplim.com'; end
+  def brand_name; '3.1 Phillip Lim'; end
+  IMAGE_PREFIX = "https://s3.amazonaws.com/philliplim-java/images/skus/"
 
   def perform
     [
-      12, 14, 16, 17,
-      25, 26,
-      30, 32, 33, 34, 35, 36,
-      41,
-      56, 57, 58, 59,
-      62, 63, 65,
-      80,
-      184
+      6, 14, 15, 87, 21, 53, 118, 23, 24, 102, 31, 54, 29, 32, 33, 143, 137
     ].each do |category_id|
       page_number = 1
       per_page = 15
       while true
-        url = URI.decode "search/?wt=json&start=#{(page_number-1) * per_page}&rows=#{per_page}&sort=cat_product_sequence_#{category_id}_i+asc&q=attr_cat_id%3A#{category_id}&facet=true&facet.mincount=1&facet.sort=count&facet.field=facet_size&facet.field=facet_color"
+        url = URI.decode "search/?wt=json&start=#{(page_number-1) * per_page}&rows=#{per_page}&sort=cat_product_sequence_#{category_id}_i+asc&q=attr_cat_id%3A#{category_id}"
         log url
 
         json_str = get_request(url).body
@@ -59,9 +52,20 @@ class Import::Aliceandolivia < Import::Base
     js = "#{js_add};js_site_var = {context_path: ''};$ = function(){};$.cookie = function(){};#{orig_js}"
     cxt.eval(js)
 
-    product_name = html.css('.single-product-description h1').first.text
+    product_name = html.css('.product-content .product-content-head h2').first.text.strip
 
-    cxt['skusInfo']['skuInfos'].each do |item|
+    color_images = {}
+    cxt['color_images'].each do |k,v|
+      color_images[k] ||= []
+      v.each do |image_name, sizes|
+        if image_name =~ /product_/i
+          color_images[k] << "#{IMAGE_PREFIX}#{sizes['IMG_2000']}"
+        end
+      end
+    end
+
+    cxt['skus']['skuInfos'].each do |item|
+      upc = item['skuCode']
       price = item['listPrice']
       price_sale = item['price']
 
@@ -75,13 +79,10 @@ class Import::Aliceandolivia < Import::Base
         end
       end
 
-      images = item['images'].select{|el| el['sizeCode'] == 'IMG_768_1024'}
-                 .sort_by{|e| e['imageTag']}
-                 .map{|el| "#{IMAGE_PREFIX}#{el['filename']}"}
+      images = color_images[color]
       main_image = images.shift
-      style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
-
-      binding.pry
+      style_code = cxt['skus']['productId']
+      source_id = item['itemId']
 
       results << {
         title: product_name,
@@ -90,13 +91,12 @@ class Import::Aliceandolivia < Import::Base
         price_sale: price_sale,
         color: color,
         size: size,
-        upc: item['skuCode'],
+        upc: upc,
         url: url,
         image: main_image,
         additional_images: images,
         style_code: style_code,
-        gender: :Female,
-        source_id: item['itemId']
+        source_id: source_id
       }
     end
 
