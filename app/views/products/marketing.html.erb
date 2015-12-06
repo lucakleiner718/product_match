@@ -22,6 +22,15 @@
       </tbody>
     </table>
   </div>
+  <div class="col-sm-3 col-sm-offset-4">
+    <h3>Current server time</h3>
+    <time class='label label-primary'
+          style="font-size: 110%;"
+          id="current-datetime" timezone-offset="<%= Time.zone.utc_offset %>"
+          datetime="<%= Time.now.in_time_zone.to_i %>">
+      <%= Time.now.in_time_zone.strftime('%b %d %Y %H:%M:%S') %>
+    </time>
+  </div>
 </div>
 
 <div class="row">

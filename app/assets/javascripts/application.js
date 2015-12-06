@@ -16,7 +16,9 @@
 //= require jquery.zoom
 //= require bootstrap
 //= require select2
+
+//= require tools
 //= require products
 //= require stat_chart
 //= require chart_general
-// require_tree .
+//= require marketing
