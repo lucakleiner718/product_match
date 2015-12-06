@@ -1,18 +1,17 @@
-class Import::Herschelsupply < Import::Platform::Shopify
+class Import::Spiritualgangster < Import::Platform::Shopify
 
-  def baseurl; 'http://shop.herschelsupply.com'; end
-  def brand_name; 'Herschel Supply Co.'; end
-  def source; 'herschelsupply.com'; end
+  def baseurl; 'http://spiritualgangster.com'; end
+  def brand_name; 'Spiritual Gangster'; end
 
   def perform
     page_no = 1
     while true
-      url = "collections/all?page=#{page_no}"
-      log url
-      page = get_request(url)
+      page_url = "collections/all?page=#{page_no}"
+      log page_url
+      page = get_request(page_url)
       html = Nokogiri::HTML(page.body)
 
-      urls = html.css('.product-row .product li a').map{|a| a.attr('href')}
+      urls = html.css('.thumbnail a').map{|a| a.attr('href')}
       break if urls.size == 0
 
       urls.each do |url|
@@ -37,10 +36,14 @@ class Import::Herschelsupply < Import::Platform::Shopify
     return false if page =~ /404 Page/i
 
     cxt = V8::Context.new
-    orig_js = html.css('script:contains("Shopify.product =")').first.text
-    js = %|Shopify = { product: {} };| + orig_js
+    js_script =  html.css('script:contains("Shopify.OptionSelectors")').first
+    return unless js_script
+    orig_js = js_script.text
+
+    js = orig_js.sub(/^\s+#{Regexp.quote " // <![CDATA["}\s+#{Regexp.quote "$(function() {"}\s+/, '').sub(/\s+#{Regexp.quote "});"}\s+#{Regexp.quote "// ]]>"}\s+$/, '')
+    js = %|$ = function(func){console = {log: function(){}}; return typeof(func) == 'function' ? func() : func}; selectCallback_new = ''; Shopify = { linkOptionSelectors: function(){}, OptionSelectors: function(){ Shopify.product = arguments } };selectCallback = function(){};| + js
     cxt.eval(js)
-    product_data = cxt['Shopify']['product']
+    product_data = cxt['Shopify']['product'][1]['product']
 
     style_code = product_data['id']
     product_name = product_data['title']
@@ -52,7 +55,7 @@ class Import::Herschelsupply < Import::Platform::Shopify
     product_data.variants.each do |variant|
       source_id = variant['id'].to_i.to_s
       color = variant['option2']
-      size = variant['option3']
+      size = variant['option1']
       item_price = variant['price'] || price
       # weight = variant['weight']
       sku = variant['sku']

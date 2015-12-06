@@ -1,6 +1,4 @@
-class Import::Fahertybrand < Import::Base
-
-  # platform = shopify
+class Import::Fahertybrand < Import::Platform::Shopify
 
   def baseurl; 'http://fahertybrand.com'; end
   def brand_name; 'Faherty'; end
