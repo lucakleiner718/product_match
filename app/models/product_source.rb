@@ -36,4 +36,8 @@ class ProductSource < ActiveRecord::Base
     self.period / 1.day.to_i if self.period && self.period > 0
   end
 
+  def period_hours
+    self.period / 1.hour.to_i if self.period && self.period > 0
+  end
+
 end

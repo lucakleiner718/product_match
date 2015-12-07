@@ -10,8 +10,8 @@ ActiveAdmin.register ProductSource do
     column :brand
     column 'Regular update' do |it|
       if it.period && it.period > 0
-        if it.period > 0 && it.period < 1
-          "#{it.period * 24} hour(s)"
+        if it.period < 24*60*60
+          "#{it.period_hours} hour(s)"
         else
           "#{it.period_days} day(s)"
         end
