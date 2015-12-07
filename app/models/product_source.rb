@@ -23,7 +23,7 @@ class ProductSource < ActiveRecord::Base
   end
 
   after_commit on: :create do
-    BrandCollectDataWorker.perform_async self.id
+    BrandCollectDataWorker.perform_async self.id if self.period > 0
   end
 
   belongs_to :brand
