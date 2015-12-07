@@ -51,7 +51,7 @@ module Xml
     end
 
     def inner_xml
-      @node.inner_xml.strip
+      @node.inner_xml.is_a?(String) ? @node.inner_xml.strip : @node.inner_xml
     end
 
     def is_start?
