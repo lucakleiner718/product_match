@@ -3,10 +3,11 @@ class Import::Saksfifthavenue < Import::Base
   def baseurl; 'http://www.saksfifthavenue.com'; end
 
   def perform
-    resp = get_request 'main/ShopByBrand.jsp?tre=sbdnav3'
+    resp = get_request 'main/ShopByBrand.jsp'
     html = Nokogiri::HTML(resp.body)
     brands_links = html.css('.designer-list li a').map{|a| a.attr('href').sub(/\?.*/, '')}
-    brands_links.each do |link|
+    puts "brands_links: #{brands_links.size}"
+    brands_links.shuffle.each do |link|
       urls = []
       while true
         resp = get_request "#{link}?Nao=#{urls.size}"
@@ -17,22 +18,28 @@ class Import::Saksfifthavenue < Import::Base
 
         urls.concat products
       end
-      urls.each {|u| process_url u }
+      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
       log "spawned #{urls.size} urls"
     end
   end
 
   def process_url original_url
-    url = URI.decode(original_url).sub(/FOLDER<>folder_id=\d+\&/, '')
+    product_id = URI.decode(original_url).match(/PRODUCT<>prd_id=(\d+)/) && $1
+    if product_id
+      url = build_url("main/ProductDetail.jsp?PRODUCT<>prd_id=#{product_id}")
+    else
+      url = original_url
+    end
 
     resp = get_request url
     html = Nokogiri::HTML(resp.body)
 
-    cxt = V8::Context.new
     script = html.css('script:contains("var mlrs")').first
     return unless script
     js = script.text
-    cxt.eval(js)
+    cxt = {'mlrs' => JSON.parse(js.sub(/^\s+var mlrs =/, '')) }
+    # cxt = V8::Context.new
+    # cxt.eval(js)
 
     d = cxt['mlrs']['response']['body']['main_products'].first
     colors = d['colors']['colors'].inject({}){|obj, e| obj[e['color_id']] = e['label']; obj}
