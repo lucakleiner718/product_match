@@ -90,12 +90,13 @@ class Import::Canadagoose < Import::Platform::Demandware
         url: color_url,
         image: image_url,
         style_code: product_id,
-        gender: gender
+        gender: gender,
+        brand: brand_name_default,
       }
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
 
 end

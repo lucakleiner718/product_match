@@ -144,7 +144,6 @@ class Import::Toryburch < Import::Platform::Demandware
     end
 
     prepare_items(results)
-    process_results(results, brand_name)
+    process_results_batch(results)
   end
-
 end

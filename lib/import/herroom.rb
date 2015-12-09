@@ -78,15 +78,6 @@ class Import::Herroom < Import::Base
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
-  def process_results results
-    results.each do |row|
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.save
-    end
-  end
-
 end

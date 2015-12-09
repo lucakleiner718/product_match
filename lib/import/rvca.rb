@@ -102,9 +102,7 @@ class Import::Rvca < Import::Base
       }
     end
 
-
     prepare_items(results)
     process_results_batch(results)
   end
-
 end

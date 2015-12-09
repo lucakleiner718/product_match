@@ -111,29 +111,13 @@ class Import::Anyahindmarch < Import::Platform::Demandware
           size: size,
           upc: upc,
           url: url,
-          image: image_url
+          image: image_url,
+          brand: brand_name_default
         }
       end
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
-  def process_results results, brand_name=nil
-    brand = Brand.get_by_name(brand_name)
-    if !brand && brand_name_default
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name if brand_name
-      brand.save if brand.changed?
-    end
-
-    results.each do |row|
-      product = Product.where(source: source, upc: row[:upc]).first_or_initialize
-      product.attributes = row
-      product.brand_id = brand.id if brand
-      product.save
-    end
-  end
-
 end

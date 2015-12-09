@@ -112,12 +112,12 @@ class Import::Vince < Import::Platform::Venda
         url: url,
         image: image,
         style_code: style_code,
-        gender: gender
+        gender: gender,
+        brand: brand_name_default,
       }
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
 end

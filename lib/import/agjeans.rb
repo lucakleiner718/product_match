@@ -130,5 +130,4 @@ class Import::Agjeans < Import::Base
     prepare_items(results)
     process_results_batch(results)
   end
-
 end

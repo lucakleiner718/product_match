@@ -1,17 +1,6 @@
 class Import::Popshops < Import::Base
 
-  BRANDS = {
-    51539 => 'Current/Elliott',
-    29555 => 'Eberjey',
-    25282 => 'Joie',
-    172832 => 'Honeydew Intimates',
-    706936 => 'Michael Kors',
-    85340 => 'Kate Spade',
-    75499 => 'Tory Burch',
-    710349 => 'Michele Watches',
-    1916908 => 'Kate Spade Watches',
-    54558 => 'Michele'
-  }
+  def source; 'popshops'; end
 
   CATEGORIES = {
     3000 => 'Clothing & Accessories',
@@ -25,7 +14,7 @@ class Import::Popshops < Import::Base
     4480 => 'Jewelry',
     4540 => 'Bracelets',
     11000 => 'Miscellaneous',
-    33184 => 'Unisex Watches"',
+    33184 => 'Unisex Watches',
   }
 
   URL = {
@@ -45,7 +34,6 @@ class Import::Popshops < Import::Base
 
   def perform brand_id: nil, rewrite: false, category_id: nil
     raise unless brand_id
-    @affected_brands = []
 
     if rewrite
       Product.where(source: source, brand_id: brand.id).delete_all
@@ -77,7 +65,6 @@ class Import::Popshops < Import::Base
 
       process_to_create to_create
       process_to_update to_update
-      # process_brands_suggestions
 
       page += 1
     end
@@ -128,7 +115,8 @@ class Import::Popshops < Import::Base
         sku: nil,
         category: nil,
         description: r.attr('description'),
-        retailer: nil
+        retailer: nil,
+        price_currency: nil
       }
 
       if r.attr('category')
@@ -153,6 +141,7 @@ class Import::Popshops < Import::Base
         item[:color] ||= offer.attr('description').match(/Color: ([^\.\,]+)(\.|,)/)[1] rescue nil
         item[:sku] ||= offer.attr('sku')
         item[:retailer] = @merchants[offer.attr('merchant')] if offer.attr('merchant')
+        item[:price_currency] = offer.attr('currency_iso')
       end
 
       if item[:upc].blank?
@@ -172,8 +161,6 @@ class Import::Popshops < Import::Base
       item[:retailer] = normalize_retailer(item[:retailer]) if item[:retailer]
 
       results << item
-
-      @affected_brands << brand unless @affected_brands.include?(brand)
     end
 
     prepare_items(results)
@@ -203,18 +190,4 @@ class Import::Popshops < Import::Base
       count: count
     }
   end
-
-  def process_brands_suggestions
-    @affected_brands.each do |brand_name|
-      brand = Brand.get_by_name(brand_name)
-      if brand
-        ProductSuggestionsGeneratorWorker.perform_async brand.id
-      end
-    end
-  end
-
-  def source
-    'popshops'
-  end
-
 end

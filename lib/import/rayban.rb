@@ -72,7 +72,6 @@ class Import::Rayban < Import::Base
 
     prepare_items(results)
     process_results_batch(results)
-    results
   end
 
   def build_url url

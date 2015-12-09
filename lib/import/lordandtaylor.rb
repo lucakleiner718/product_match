@@ -114,19 +114,6 @@ class Import::Lordandtaylor < Import::Base
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
-  def process_results results
-    results.each do |row|
-      if row[:source_id]
-        product = Product.where(source: source, source_id: row[:source_id]).first_or_initialize
-      else
-        product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      end
-      product.attributes = row
-      product.save
-    end
-  end
-
 end

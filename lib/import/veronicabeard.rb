@@ -74,15 +74,6 @@ class Import::Veronicabeard < Import::Base
     end
 
     prepare_items(results)
-    process_results(results)
+    process_results_batch(results)
   end
-
-  def process_results results
-    results.each do |row|
-      product = Product.where(source: source, source_id: row[:source_id], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      product.save
-    end
-  end
-
 end

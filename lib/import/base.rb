@@ -1,6 +1,10 @@
 class Import::Base
 
-  def normalize_brand brand_name
+  def brand_name_default
+    
+  end
+
+  def normalize_brand(brand_name)
     replacements = ['Michele', 'Current/Elliott', 'Alice + Olivia']
     replacements.each do |replacement|
       brand_name = replacement if brand_name.to_s.downcase == replacement.downcase
@@ -101,6 +105,8 @@ class Import::Base
 
   def convert_brand items
     brands_names = items.map{|it| it[:brand].to_s.sub(/\A"/, '').sub(/"\z/, '')}.uniq.select{|it| it.present?}
+    brand_names << brand_name_default if brand_namse.size == 0 && brand_name_default
+
     exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"').gsub('{', '\{').gsub('}', '\}')}.join(',')}}")
     brands = brands_names.map do |brand_name|
       brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
@@ -215,14 +221,13 @@ class Import::Base
     new_rows.join
   end
 
-  def process_results_batch results
+  def process_results_batch(results)
     to_update = []
     to_create = []
-    created_ids = []
-    updated_ids = []
 
     if results.size == results.select{|r| r[:source_id].present?}.size
-      products = Product.where(source: source, source_id: results.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
+      products = Product.where(source: source, source_id: results.map{|r| r[:source_id]})
+                   .group_by{|pr| pr.source_id}
       results.each do |r|
         exists = products[r[:source_id]]
         if exists
@@ -235,6 +240,17 @@ class Import::Base
       products = Product.where(source: source, style_code: results.map{|r| r[:style_code]}.uniq).to_a
       results.each do |r|
         exists = products.find{|pr| r[:style_code] == pr.style_code && r[:color] == pr.color && r[:size] == pr.size}
+        if exists
+          to_update << [r, exists]
+        else
+          to_create << r
+        end
+      end
+    elsif results.size == results.select{|r| r[:upc].present?}.size
+      products = Product.where(source: source, upc: results.map{|r| r[:upc]}.uniq)
+                   .group_by{|pr| pr.upc}
+      results.each do |r|
+        exists = products[r[:upc]]
         if exists
           to_update << [r, exists]
         else
@@ -254,7 +270,6 @@ class Import::Base
                 VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
                 RETURNING id"
       resp = Product.connection.execute sql
-      created_ids.concat resp.map{|r| r['id'].to_i}
     end
 
     to_update.each do |row|
@@ -263,9 +278,6 @@ class Import::Base
       product.delete :upc if product[:upc].blank?
       exist.attributes = product
       exist.save if exist.changed?
-
-      updated_ids << exist.id
     end
   end
-
 end
