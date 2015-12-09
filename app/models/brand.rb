@@ -75,7 +75,7 @@ class Brand < ActiveRecord::Base
       FROM product_selects AS ps
       LEFT JOIN products AS pr ON pr.id=ps.product_id
       WHERE ps.decision IN ('nothing', 'no-size', 'no-color', 'similar') AND pr.brand_id=#{self.id}
-            AND pr.match=#{true}
+            AND pr.match=#{true} AND pr.in_store=#{true} AND pr.upc IS NULL
     ").to_a.first['amount'].to_i
 
     amounts_uniq = con.execute("
@@ -108,8 +108,12 @@ class Brand < ActiveRecord::Base
       WHERE products.brand_id=#{self.id} AND products.match=#{true}
     ").to_a.first['count'].to_i
 
-    suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES}).where(percentage: 100).pluck(:product_id).uniq.size
-    suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product).where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES}).where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+    suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product)
+                          .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
+                          .where(percentage: 100).pluck(:product_id).uniq.size
+    suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product)
+                           .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
+                           .where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
 
     new_match_today = Product.matching.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).where(match: true).size
     new_match_week = Product.matching.where('created_at >= ?', now.monday).where(brand_id: self.id).where(match: true).size
