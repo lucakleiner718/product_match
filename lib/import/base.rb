@@ -105,7 +105,7 @@ class Import::Base
 
   def convert_brand items
     brands_names = items.map{|it| it[:brand].to_s.sub(/\A"/, '').sub(/"\z/, '')}.uniq.select{|it| it.present?}
-    brand_names << brand_name_default if brand_namse.size == 0 && brand_name_default
+    brands_names << brand_name_default if brands_names.size == 0 && brand_name_default
 
     exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"').gsub('{', '\{').gsub('}', '\}')}.join(',')}}")
     brands = brands_names.map do |brand_name|
@@ -229,7 +229,7 @@ class Import::Base
       products = Product.where(source: source, source_id: results.map{|r| r[:source_id]})
                    .group_by{|pr| pr.source_id}
       results.each do |r|
-        exists = products[r[:source_id]]
+        exists = products[r[:source_id]].try(:first)
         if exists
           to_update << [r, exists]
         else
@@ -250,7 +250,7 @@ class Import::Base
       products = Product.where(source: source, upc: results.map{|r| r[:upc]}.uniq)
                    .group_by{|pr| pr.upc}
       results.each do |r|
-        exists = products[r[:upc]]
+        exists = products[r[:upc]].try(:first)
         if exists
           to_update << [r, exists]
         else
@@ -269,7 +269,7 @@ class Import::Base
                 (#{keys.join(',')})
                 VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
                 RETURNING id"
-      resp = Product.connection.execute sql
+      Product.connection.execute sql
     end
 
     to_update.each do |row|

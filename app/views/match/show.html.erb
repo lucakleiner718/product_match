@@ -27,6 +27,12 @@
             <% end %>
           </ul>
         </div>
+        <div class="clearfix"></div>
+        <% if @products_left %>
+          <div class="products-left pull-right" style="padding: 10px 0;">
+            Left: <%= @products_left %>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>

@@ -41,6 +41,8 @@ class MatchController < ApplicationController
         products_ids = products_ids.where('product_suggestions.percentage > ?', 50)
       end
 
+      @products_left = products_ids.uniq.size
+
       products_ids = products_ids.order('source_id, title, color')
       product_id = products_ids.first.try(:id)
     end
