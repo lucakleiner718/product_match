@@ -43,9 +43,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
     puts "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
-    resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
-      http.follow_location = true
-    end
+    resp = get_request("#{product_id}.html")
     return false if resp.response_code != 200
 
     url = resp.last_effective_url
