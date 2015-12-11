@@ -64,9 +64,8 @@ class Import::Base
   end
 
   def process_gender(item)
-    if item[:gender].blank?
-      item[:gender] = process_title_for_gender(item[:title])
-    end
+    item[:gender] = process_title_for_gender(item[:title]) if item[:gender].blank?
+    item[:gender] = process_category_for_gender(item[:category]) if item[:gender].blank?
   end
 
   def prepare_prices(item)
@@ -139,10 +138,18 @@ class Import::Base
     send_typhoeus_get(url)
   end
 
-  def process_title_for_gender title
+  def process_title_for_gender(title)
     if title.downcase =~ /^women's\s/
       'Female'
     elsif title.downcase =~ /^men's\s/
+      'Male'
+    end
+  end
+
+  def process_category_for_gender(category)
+    if category.downcase =~ /\swomen('s)?\s/ || category.downcase =~ /\swomen('s)?$/ || category.downcase =~ /^women('s)?\s/
+      'Female'
+    elsif category.downcase =~ /\smen('s)?\s/ || category.downcase =~ /\smen('s)?$/ || category.downcase =~ /^men('s)?\s/
       'Male'
     end
   end

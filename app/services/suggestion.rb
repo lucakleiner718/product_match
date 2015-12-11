@@ -26,6 +26,8 @@ class Suggestion
 
     return false unless product.brand.try(:name)
 
+    load_kinds
+
     if rewrite
       ProductSuggestion.where(product_id: product.id).delete_all
     end
@@ -37,7 +39,7 @@ class Suggestion
 
   private
 
-  attr_reader :product, :rewrite
+  attr_reader :product, :rewrite, :kinds
 
   def process_related_products
     related_products = build_related_products
@@ -253,8 +255,26 @@ class Suggestion
     rp = Product.not_matching.where('products.source NOT IN (?)', EXCLUDE_SOURCES)
            .where(brand_id: brand.id).with_upc
 
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, '').split(/\s/).map{|el| el.downcase.strip}
-                    .select{|el| el.size > 2} - ['the', '&', 'and', 'womens']
+    title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, ' ').split(/\s/)
+                    .select{|el| el.strip.present? }
+                    .map{|el| el.downcase.strip}
+                    .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
+
+    kinds.each do |(name, synonyms)|
+      to_search = []
+      synonyms.each do |synonym|
+        if (synonym.split & title_parts).size > 0
+          to_search += synonyms
+          break
+        end
+      end
+
+      to_search.uniq!
+      if to_search.size > 0
+        rp = rp.where(to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+      end
+    end
+
     rp = rp.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
 
     rp = rp.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
@@ -280,6 +300,10 @@ class Suggestion
         end
       end
     end
+  end
+
+  def load_kinds
+    @kinds = YAML.load_file('config/products_kinds.yml')
   end
 
 end

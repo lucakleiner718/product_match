@@ -1,123 +1,142 @@
-- pants:
-  - pant
-  - trousers
-  - jeans
-  - chinos
-  - leggings
-  - legging
-  - stilt
+jackets:
+  - jacket
+  - parka
+  - vest
+  - blazer
+  - cardigan
+  - coat
+  - peacoat
+  - poncho
 
-# shoes
-- flats
-- wedge
-- plimsole
-- espadrilles
-- flip flop
-- pump:
-  - pumps
-- ankle-wrap platform
-- boots:
+top:
+  - blouse
+  - cami
+  - camisole
+  - dickey
+  - polo
+  - pullover
+  - shell
+  - shirt
+  - tank
+  - tee
+  - top
+  - tunic
+
+sweater:
+  - sweater
+  - sweatshirt
+  - vee
+  - turtleneck
+  - hoodie
+  - duster
+
+dresses:
+  - dress
+  - gown
+  - jumpsuit
+  - minidress
+  - robe
+  - romper
+  - shirtdress
+  - slip
+  - slipdress
+
+pants:
+  - chinos
+  - pant
+  - pants
+  - jeans
+  - joggers
+  - legging
+  - leggings
+  - stilt
+  - trouser
+  - trousers
+
+skirt:
+  - miniskirt
+
+shorts:
+  - short
+  - briefs
+
+shoes:
+  - ankle-wrap platform
+  - boots
   - boot
+  - bootie
   - booties
-  - booties
+  - chukka
+  - chukkas
+  - clog
+  - clogs
+  - creeper
+  - creepers
+  - espadrilles
+  - flats
+  - flip flop
+  - mule
+  - loafer
+  - oxford
+  - oxfords
+  - plimsole
+  - pump
+  - pumps
+  - sandal
+  - sandals
+  - shoe
   - shoes
   - sneaker
   - sneakers
-  - sandal
-  - sandals
-  - mule
-  - oxford
-  - oxfords
+  - wedge
 
-# accessories
-- belt
-- watch
-- sunglasses
-- neckle:
+accessories:
+  - belt
+  - watch
+  - sunglasses
+  - neckle
   - necklace
-- earrings
+  - earrings
   - earring set
-- bracelet
-- scarf
-- ring
-- headband
+  - bracelet
+  - scarf
+  - ring
+  - headband
 
-# bags
-- backpack
-- bag
-- card case
-- clutch
-- keychain
-- passport holder
-- pouch
-- travel kit
-- tote
-- wallet
+bags:
+  - backpack
+  - bag
+  - card case
+  - clutch
+  - keychain
+  - passport holder
+  - pouch
+  - travel kit
+  - tote
+  - wallet
 
-# underware
-- chemise
-- thong:
+underwear:
+  - bandeau
+  - bikini top
+  - bikini bottom
+  - bikini bottoms
   - bottoms
+  - bra
+  - bralette
+  - briefs
+  - chemise
   - lace
   - panties
-- bralette:
-  - bra
-- bikini top
-- bikini bottom:
-  - bikini bottoms
-- robe
-- sleepshirt
+  - robe
+  - sleepshirt
+  - thong
+  - socks
 
-# dresses
-- dress:
-  - shirtdress
-  - gown
-  - slipdress
-  - minidress
-- robe
-- romper
-- jumpsuit
+bodysuit:
+  - body suit
 
-# jacket
-- jacket
-- parka
-- vest
-- blazer
-
-# top
-- top
-- tee
-- tank
-- blouse
-- shirt
-- cami
-- camisole
-- polo
-- tunic
-- pullover
-
-# sweater
-- sweater
-- sweatshirt
-- vee
-
-# hats
-- fedora
-- hat
-- cap
-- beanie
-
-# other
-- dickey
-- skirt:
-  - miniskirt
-- coat:
-  - peacoat
-- slip
-- cardigan
-- poncho
-- shorts:
-    - short
-- bodysuit:
-    - body suit
-- turtleneck
+hats:
+  - fedora
+  - hat
+  - cap
+  - beanie
