@@ -156,7 +156,7 @@ class Import::Base
   end
 
   def process_products_urls urls
-    urls.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
+    urls.compact.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
   end
 
   def self.perform *args

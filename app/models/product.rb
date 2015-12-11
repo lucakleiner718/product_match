@@ -58,9 +58,9 @@ class Product < ActiveRecord::Base
   def display_price
     if self.price.present?
       if self.price_sale.present? && self.price_sale < self.price
-        "#{self.price_sale_m} (#{self.price_m})"
+        "$#{self.price_sale_m} ($#{self.price_m})"
       else
-        self.price_m
+        "$#{self.price_m}"
       end
     else
       'N/A'
