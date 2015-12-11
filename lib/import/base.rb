@@ -135,20 +135,8 @@ class Import::Base
   def get_request url
     url = build_url(url)
 
-    retries = 0
-    begin
-      Curl.get(url) do |http|
-        http.enable_cookies = true
-        http.follow_location = true
-        http.max_redirects = 10
-        http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
-        # http.verbose = true
-      end
-    rescue Curl::Err::PartialFileError, Curl::Err::HostResolutionError => e
-      retries += 1
-      retry if retries < 6
-      raise e
-    end
+    # send_curl_get(url)
+    send_typhoeus_get(url)
   end
 
   def process_title_for_gender title
@@ -286,5 +274,32 @@ class Import::Base
       resp = http.head(url)
       Time.parse(resp['last-modified'])
     end
+  end
+
+  private
+
+  def send_curl_get(url)
+    retries = 0
+    begin
+      Curl.get(url) do |http|
+        # http.enable_cookies = true
+        http.follow_location = true
+        http.max_redirects = 10
+        # http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
+        # http.verbose = true
+      end
+    rescue Curl::Err::PartialFileError, Curl::Err::HostResolutionError => e
+      retries += 1
+      retry if retries < 6
+      raise e
+    end
+  end
+
+  def send_typhoeus_get(url)
+    Typhoeus.get(url,
+      followlocation: true,
+      # verbose: true,
+      maxredirs: 10,
+    )
   end
 end
