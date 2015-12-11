@@ -5,17 +5,28 @@ class Import::Platform::Bop < Import::Base
 
   def csv_col_sep; ','; end
 
+  def self.perform url
+    instance = self.new
+    instance.perform url
+  end
+
+  def perform url
+    raise Exception, "Should be overriden by parent class"
+  end
+
   private
 
-  def get_file url=nil, update_file=true
+  def get_file(url=nil)
     url ||= default_file
     extension = url.match(/\.([a-z]+)$/)[1]
     filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
 
-    if !File.exists?(filename) || (update_file && File.mtime(filename) < 3.hours.ago)
+    @file_updated = false
+    if !File.exists?(filename) || (url_mtime(url) > File.mtime(filename))
       body = Curl.get(url).body
       body.force_encoding('UTF-8')
       File.write filename, body
+      @file_updated = true
     end
 
     filename

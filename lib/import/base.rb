@@ -280,4 +280,11 @@ class Import::Base
       exist.save if exist.changed?
     end
   end
+
+  def url_mtime(url)
+    Net::HTTP.start(URI(url).host) do |http|
+      resp = http.head(url)
+      Time.parse(resp['last-modified'])
+    end
+  end
 end

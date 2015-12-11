@@ -20,7 +20,8 @@ class BrandCollectDataWorker
             product_source: product_source
           true
         when 'shopbop'
-          Import::Shopbop.perform url: product_source.source_id, update_file: true
+          resp = Import::Shopbop.perform product_source.source_id
+          return false unless resp
           Product.where(source: :shopbop).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
             ProductSuggestionsWorker.perform_async pid
           end
@@ -29,7 +30,8 @@ class BrandCollectDataWorker
           ExportShopbopWorker.perform_async 'current'
           true
         when 'eastdane'
-          Import::Eastdane.perform url: product_source.source_id, update_file: true
+          resp = Import::Eastdane.perform product_source.source_id
+          return false unless resp
           Product.where(source: :eastdane).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
             ProductSuggestionsWorker.perform_async pid
           end

@@ -1,19 +1,11 @@
 class Import::Shopbop < Import::Platform::Bop
 
-  def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-shopbop_kiere_upc_xml.xml'; end
+  def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'; end
   def source; 'shopbop'; end
 
-  def self.perform rewrite: false, update_file: true, url: nil
-    instance = self.new
-    instance.perform rewrite: rewrite, update_file: update_file, url: url
-  end
-
-  def perform rewrite: false, update_file: false, url: nil
-    if rewrite
-      Product.where(source: source).delete_all
-    end
-
-    filename = get_file url, update_file
+  def perform url
+    filename = get_file(url)
+    return false unless @file_updated
 
     created_ids = []
     updated_ids = []
