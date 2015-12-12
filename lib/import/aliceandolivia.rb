@@ -81,6 +81,8 @@ class Import::Aliceandolivia < Import::Base
       main_image = images.shift
       style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
 
+      upc = item['skuCode'].sub(/x\z/, '')
+
       results << {
         title: product_name,
         brand: brand_name,
@@ -88,7 +90,7 @@ class Import::Aliceandolivia < Import::Base
         price_sale: price_sale,
         color: color,
         size: size,
-        upc: item['skuCode'],
+        upc: upc,
         url: url,
         image: main_image,
         additional_images: images,

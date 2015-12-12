@@ -91,7 +91,7 @@ class Import::Popshops < Import::Base
       row.delete :size if row[:size].blank?
       row.delete :color if row[:color].blank?
       product.attributes = row
-      product.save if product.changed?
+      product.save! if product.changed?
     end
   end
 

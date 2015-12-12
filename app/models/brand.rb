@@ -51,7 +51,7 @@ class Brand < ActiveRecord::Base
     bs = self.build_brand_stat unless bs
     bs.attributes = built_stat
     bs.touch(:updated_at) unless bs.new_record?
-    bs.save
+    bs.save!
   end
 
   def build_stat
@@ -158,7 +158,7 @@ class Brand < ActiveRecord::Base
     names = Brand.where(id: brands_ids).pluck(:name, :synonyms).flatten
     self.synonyms += names
     self.synonyms = self.synonyms.uniq - [self.name]
-    self.save
+    self.save!
 
     # remove old brands
     Brand.where(id: brands_ids).destroy_all

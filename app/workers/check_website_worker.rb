@@ -10,7 +10,7 @@ class CheckWebsiteWorker
       platform, url = Parser::Platform.detect(request_url)
       website.platform = platform || 'n/a'
       website.url = url || 'n/a'
-      website.save
+      website.save! if website.changed?
     end
   end
 
@@ -22,7 +22,7 @@ class CheckWebsiteWorker
       website = Website.new unless website
       if website.platform.blank? || (website.platform == 'n/a' && force)
         website.provided_url = url
-        website.save if website.changed?
+        website.save! if website.changed?
 
         CheckWebsiteWorker.perform_async website.id, force
       end

@@ -34,7 +34,7 @@ class Import::Shopbop < Import::Platform::Bop
           ProcessImportUrlWorker.perform_async self.class.name, 'update_product_page', product.id
         end
 
-        product.save if product.changed?
+        product.save! if product.changed?
 
         updated_ids << product.id
       end
@@ -80,7 +80,7 @@ class Import::Shopbop < Import::Platform::Bop
       product.price_sale = sale_price
     end
 
-    product.save if product.changed?
+    product.save! if product.changed?
   end
 
   private

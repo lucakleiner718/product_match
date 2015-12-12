@@ -164,7 +164,7 @@ class Import::Linksynergy < Import::Base
       row.delete :size unless row[:size].present?
       row.delete :color unless row[:color].present?
       product.attributes = row
-      product.save if product.changed?
+      product.save! if product.changed?
     end
   end
 

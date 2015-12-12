@@ -87,6 +87,7 @@ class Import::Base
     end
 
     item.delete :ean
+    item[:upc] = nil if item[:upc].present? && item[:upc] !~ /\A\d+\z/
     # if check_upc_rule.to_sym == :full && item[:upc].present?
     #   item[:upc] = (GTIN.process(item[:upc]) || nil)
     # end
@@ -191,7 +192,7 @@ class Import::Base
     if !brand && brand_name_default
       brand = Brand.where(name: brand_name_default).first
       brand.synonyms.push brand_name if brand_name
-      brand.save if brand.changed?
+      brand.save! if brand.changed?
     end
 
     results.each do |row|
@@ -204,7 +205,7 @@ class Import::Base
         product.brand_id = brand.id
         product.brand_name = brand.name
       end
-      product.save
+      product.save!
     end
   end
 
@@ -273,7 +274,7 @@ class Import::Base
 
       product.delete :upc if product[:upc].blank?
       exist.attributes = product
-      exist.save if exist.changed?
+      exist.save! if exist.changed?
     end
   end
 

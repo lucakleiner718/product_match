@@ -30,7 +30,7 @@ class Import::Eastdane < Import::Platform::Bop
         product = products[row[:source_id]]
         row.delete :upc if row[:upc].blank?
         product.attributes = row
-        product.save if product.changed?
+        product.save! if product.changed?
 
         updated_ids << product.id
       end

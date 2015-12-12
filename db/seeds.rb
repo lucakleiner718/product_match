@@ -12,7 +12,7 @@ if Brand.count == 0
   ['Current/Elliott', 'Eberjey', 'Joie', 'Honeydew Intimates'].each do |brand_name|
     brand = Brand.where(name: brand_name).first_or_initialize
     brand.in_use = true
-    brand.save
+    brand.save!
   end
 end
 

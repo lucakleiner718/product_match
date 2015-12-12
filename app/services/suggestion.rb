@@ -64,7 +64,7 @@ class Suggestion
         if ps
           ps.percentage = percentage
           ps.upc_patterns = upc_patterns
-          ps.save if ps.changed?
+          ps.save! if ps.changed?
         else
           to_create << {
             product_id: product.id, suggested_id: suggested.id, percentage: percentage,
