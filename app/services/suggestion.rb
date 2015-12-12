@@ -101,32 +101,43 @@ class Suggestion
   end
 
   def title_similarity(suggested)
+    if product.title.blank?
+      return 1
+    elsif suggested.title.blank?
+      return 0
+    end
+
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|el| el.size > 2}
-    title_parts -= ['the', '&', 'and', 'womens']
+    title_parts -= ['the', 'and', 'womens', 'mens']
 
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
 
-    multiplier = [
-      ['panty'], ['short'], ['boot', ['booties']], ['sneaker']
-    ]
-    multiplier.each do |ar|
-      ar[1] ||= []
-      ar[1] << ar[0].pluralize
-      if (title_parts & ar).size > 0 && (suggested_title_parts & ar)
-        title_parts -= ar
-        suggested_title_parts -= ar
-
-        title_parts << ar.first
-        suggested_title_parts << ar.first
+    kinds.each do |(name, synonyms)|
+      group = []
+      synonyms.each do |synonym|
+        if (synonym.split & title_parts).size > 0 && (synonym.split & suggested_title_parts).size > 0
+          group += synonyms
+          break
+        end
+      end
+      group.uniq!
+      if group.size > 0
+        title_parts -= group
+        suggested_title_parts -= group
       end
     end
 
     title_parts.uniq!
     suggested_title_parts.uniq!
 
-    title_parts_size = title_parts.size
+    ratio =
+      if title_parts.size > 0
+        (title_parts & suggested_title_parts).size / title_parts.size.to_f
+      else
+        1
+      end
 
-    (title_parts_size > 0 ? title_parts.select{|item| item.in?(suggested_title_parts)}.size / title_parts_size.to_f : 1) * WEIGHTS[:title]
+    ratio * WEIGHTS[:title]
   end
 
   def color_similarity(suggested)
@@ -253,7 +264,7 @@ class Suggestion
     brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
 
     rp = Product.not_matching.where('products.source NOT IN (?)', EXCLUDE_SOURCES)
-           .where(brand_id: brand.id).with_upc
+           .where(brand_id: brand.id).with_upc.where.not(title: nil)
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, ' ').split(/\s/)
                     .select{|el| el.strip.present? }
@@ -276,7 +287,9 @@ class Suggestion
       end
     end
 
-    rp = rp.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+    # if title_parts.size > 0
+    #   rp = rp.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+    # end
 
     rp = rp.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
                    AND p1.upc=products.upc AND p1.id != products.id
