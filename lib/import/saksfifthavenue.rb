@@ -18,7 +18,7 @@ class Import::Saksfifthavenue < Import::Base
 
         urls.concat products
       end
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+      process_in_batch(urls)
       log "spawned #{urls.size} urls"
     end
   end
@@ -38,8 +38,6 @@ class Import::Saksfifthavenue < Import::Base
     return unless script
     js = script.text
     cxt = {'mlrs' => JSON.parse(js.sub(/^\s+var mlrs =/, '')) }
-    # cxt = V8::Context.new
-    # cxt.eval(js)
 
     d = cxt['mlrs']['response']['body']['main_products'].first
     colors = d['colors']['colors'].inject({}){|obj, e| obj[e['color_id']] = e['label']; obj}

@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   post 'match/select/:product_id' => 'match#select', as: :match_select
 
   require 'sidekiq/web'
+  require 'sidekiq/pro/web'
   if Rails.env.production?
     authenticate :user do
       mount Sidekiq::Web, at: "/sidekiq"

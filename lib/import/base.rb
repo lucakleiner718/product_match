@@ -147,6 +147,7 @@ class Import::Base
   end
 
   def process_category_for_gender(category)
+    return unless category
     if category.downcase =~ /\swomen('s)?\s/ || category.downcase =~ /\swomen('s)?$/ || category.downcase =~ /^women('s)?\s/
       'Female'
     elsif category.downcase =~ /\smen('s)?\s/ || category.downcase =~ /\smen('s)?$/ || category.downcase =~ /^men('s)?\s/
@@ -308,5 +309,21 @@ class Import::Base
       # verbose: true,
       maxredirs: 10,
     )
+  end
+
+  def process_in_batch(urls)
+    batch.jobs do
+      urls.each do |url|
+        ProcessImportUrlWorker.perform_async(self.class.name, 'process_url', url)
+      end
+    end
+  end
+
+  def batch
+    unless @batch
+      @batch = Sidekiq::Batch.new
+      @batch.description = "#{self.class.name}"
+    end
+    @batch
   end
 end

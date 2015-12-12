@@ -272,6 +272,7 @@ class Suggestion
       to_search.uniq!
       if to_search.size > 0
         rp = rp.where(to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+        title_parts -= to_search
       end
     end
 

@@ -55,14 +55,20 @@ gem 'kaminari'
 gem 'bootstrap-kaminari-views'
 gem 'activeadmin', github: 'activeadmin'
 gem 'devise'
-gem 'sidekiq', '~> 3.5.0'
+
+gem 'sidekiq', '~> 4.0'
+source "https://058b026d:dbdee804@gems.contribsys.com/" do
+  gem 'sidekiq-pro', '~> 3.0'
+end
 gem 'sidekiq-failures', '~> 0.4.5'
-# gem 'sidekiq-statistic'
 gem 'sidekiq-unique-jobs', '~> 3.0'
-gem 'sinatra', require: false # Web interface of Sidekiq processes
-gem 'god'
+
 gem 'redis', '~> 3.2.1'
 gem 'redis-rails'
+gem 'redis-namespace'
+
+gem 'sinatra', require: false # Web interface of Sidekiq processes
+gem 'god'
 gem 'clockwork'
 gem 'dotenv'
 gem 'dotenv-deployment', require: 'dotenv/deployment'

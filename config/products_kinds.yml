@@ -1,18 +1,8 @@
-jackets:
-  - jacket
-  - parka
-  - vest
-  - blazer
+tops:
   - cardigan
-  - coat
-  - peacoat
-  - poncho
-
-top:
   - blouse
-  - cami
-  - camisole
   - dickey
+  - henley
   - polo
   - pullover
   - shell
@@ -21,14 +11,47 @@ top:
   - tee
   - top
   - tunic
-
-sweater:
   - sweater
   - sweatshirt
   - vee
   - turtleneck
   - hoodie
   - duster
+  - crop top
+  - guayabera
+  - guernsey
+  - halterneck
+  - jersey
+  - twinset
+
+trousers and shorts:
+  - bell-bottoms
+  - chaps
+  - jodhpurs
+  - overall
+  - pedal pushers
+  - sweatpants
+  - windpants
+  - chinos
+  - pant
+  - pants
+  - jeans
+  - joggers
+  - legging
+  - leggings
+  - stilt
+  - trouser
+  - trousers
+  - short
+
+skirts:
+  - skirt
+  - miniskirt
+  - microskirt
+  - sarong
+  - skort
+  - tutu
+  - wrap
 
 dresses:
   - dress
@@ -40,27 +63,62 @@ dresses:
   - shirtdress
   - slip
   - slipdress
+  - coatdress
+  - formal wear
+  - frock
+  - jumper
+  - sundress
 
-pants:
-  - chinos
-  - pant
-  - pants
-  - jeans
-  - joggers
-  - legging
-  - leggings
-  - stilt
-  - trouser
-  - trousers
+outerwear:
+  - jacket
+  - parka
+  - vest
+  - blazer
+  - coat
+  - peacoat
+  - poncho
+  - hoodie
+  - apron
+  - british warm
+  - cagoule
+  - cape
+  - chesterfield
+  - gilet
+  - overcoat
+  - paletot
+  - raincoat
+  - robe
+  - shawl
+  - shrug
+  - waistcoat
+  - windbreaker
 
-skirt:
-  - miniskirt
-
-shorts:
-  - short
+underwear:
+  - cami
+  - camisole
+  - bandeau
+  - bottoms
+  - bra
+  - bralette
   - briefs
+  - chemise
+  - lace
+  - panties
+  - robe
+  - sleepshirt
+  - thong
+  - bodysuit
+  - body suit
+  - undershirt
+  - diaper
+  - slip
+  - underpants
+  - boxer briefs
+  - boxer shorts
+  - playsuit
+  - teddy
 
-shoes:
+footwear:
   - ankle-wrap platform
   - boots
   - boot
@@ -89,6 +147,47 @@ shoes:
   - sneaker
   - sneakers
   - wedge
+  - hosiery
+  - spats
+  - slipper
+  - sock
+  - socks
+  - stocking
+
+headwear:
+  - fedora
+  - hat
+  - cap
+  - beanie
+  - beret
+  - helmet
+  - hood
+  - toque
+  - turban
+  - veil
+
+nightwear:
+  - babydoll
+  - blanket sleeper
+  - negligee
+  - nightgown
+  - nightshirt
+  - pajamas
+
+swimwear:
+  - bikini
+  - bikini top
+  - bikini bottom
+  - bikini bottoms
+  - boardshorts
+  - dry suit
+  - monokini
+  - rash guard
+  - square leg suit
+  - swim briefs
+  - swim diaper
+  - trunks
+  - wetsuit
 
 accessories:
   - belt
@@ -102,6 +201,25 @@ accessories:
   - scarf
   - ring
   - headband
+  - bandana
+  - bow tie
+  - coin purse
+  - cufflink
+  - cummerbund
+  - gaiters
+  - glasses
+  - gloves
+  - headband
+  - handkerchief
+  - muff
+  - necktie
+  - pocketwatch
+  - sash
+  - scarf
+  - suspenders
+  - umbrella
+  - wallet
+  - wristwatch
 
 bags:
   - backpack
@@ -113,30 +231,5 @@ bags:
   - pouch
   - travel kit
   - tote
-  - wallet
-
-underwear:
-  - bandeau
-  - bikini top
-  - bikini bottom
-  - bikini bottoms
-  - bottoms
-  - bra
-  - bralette
-  - briefs
-  - chemise
-  - lace
-  - panties
-  - robe
-  - sleepshirt
-  - thong
-  - socks
-
-bodysuit:
-  - body suit
-
-hats:
-  - fedora
-  - hat
-  - cap
-  - beanie
+  - handbag
+  - purse
