@@ -3,9 +3,14 @@ class Import::Shopbop < Import::Platform::Bop
   def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'; end
   def source; 'shopbop'; end
 
-  def perform url
+  def self.perform url=nil
+    instance = self.new
+    instance.perform url
+  end
+
+  def perform url=nil
     filename = get_file(url)
-    return false unless @file_updated
+    # return false unless @file_updated
 
     created_ids = []
     updated_ids = []

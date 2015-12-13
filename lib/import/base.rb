@@ -82,12 +82,12 @@ class Import::Base
   end
 
   def check_upc(item, check_upc_rule=:full)
-    if item[:ean].present?
-      item[:upc] = item[:ean] if item[:upc].blank?
+    if item[:ean].present? && item[:upc].blank?
+      item[:upc] = item[:ean]
     end
 
     item.delete :ean
-    item[:upc] = nil if item[:upc].present? && item[:upc] !~ /\A\d+\z/
+    item[:upc] = nil if item[:upc].blank? || item[:upc] !~ /\A\d+\z/
     # if check_upc_rule.to_sym == :full && item[:upc].present?
     #   item[:upc] = (GTIN.process(item[:upc]) || nil)
     # end
