@@ -44,6 +44,7 @@ trousers and shorts:
   - trousers
   - short
   - shorts
+  - sweats
 
 skirts:
   - skirt
@@ -71,26 +72,27 @@ dresses:
   - sundress
 
 outerwear:
-  - jacket
-  - parka
-  - vest
-  - blazer
-  - coat
-  - peacoat
-  - poncho
-  - hoodie
+  - anorak
   - apron
+  - blazer
   - british warm
   - cagoule
   - cape
   - chesterfield
+  - coat
   - gilet
+  - hoodie
+  - jacket
   - overcoat
   - paletot
+  - parka
   - raincoat
+  - peacoat
+  - poncho
   - robe
   - shawl
   - shrug
+  - vest
   - waistcoat
   - windbreaker
 
