@@ -9,7 +9,7 @@ class Import::Monicavinader < Import::Base
       url = build_url("shop?all=true&page=#{page_no}")
       log url
       resp = get_request(url)
-      break if resp.last_effective_url.sub(/\&$/, '') != url
+      break if resp.effective_url.sub(/\&$/, '') != url
       html = Nokogiri::HTML(resp.body)
 
       urls = html.css('.product-catalogue__item a.product-listing__link')
@@ -29,7 +29,7 @@ class Import::Monicavinader < Import::Base
     resp = get_request(original_url)
     return false if resp.response_code != 200
 
-    url = resp.last_effective_url
+    url = resp.effective_url
 
     page = resp.body
     html = Nokogiri::HTML(page)

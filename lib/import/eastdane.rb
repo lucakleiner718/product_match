@@ -4,9 +4,9 @@ class Import::Eastdane < Import::Platform::Bop
   def csv_col_sep; "\t"; end
   def source; 'eastdane'; end
 
-  def perform url
+  def perform url, force=false
     filename = get_file(url)
-    return false unless @file_updated
+    return false if !@file_updated && !force
 
     created_ids = []
     updated_ids = []

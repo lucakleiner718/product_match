@@ -36,7 +36,7 @@ class Import::Canadagoose < Import::Platform::Demandware
     resp = get_request("#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{product_id}.html")
     return false if resp.response_code != 200
 
-    url = resp.last_effective_url
+    url = resp.effective_url
 
     page = resp.body
     html = Nokogiri::HTML(page)

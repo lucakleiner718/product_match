@@ -3,14 +3,9 @@ class Import::Shopbop < Import::Platform::Bop
   def default_file; 'http://customfeeds.easyfeed.goldenfeeds.com/1765/custom-feed-sb-ed-shopbop638-amazonpadssbgoogle_usd_with_sku.csv'; end
   def source; 'shopbop'; end
 
-  def self.perform url=nil
-    instance = self.new
-    instance.perform url
-  end
-
-  def perform url=nil
+  def perform url=nil, force=false
     filename = get_file(url)
-    # return false unless @file_updated
+    return false if !@file_updated && !force
 
     created_ids = []
     updated_ids = []
@@ -39,7 +34,15 @@ class Import::Shopbop < Import::Platform::Bop
           ProcessImportUrlWorker.perform_async self.class.name, 'update_product_page', product.id
         end
 
-        product.save! if product.changed?
+        begin
+          product.save! if product.changed?
+        rescue => e
+          Honeybadger.notify e, context: {
+              product: product.attributes
+            }
+          raise e
+        end
+
 
         updated_ids << product.id
       end

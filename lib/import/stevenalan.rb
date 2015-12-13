@@ -39,7 +39,7 @@ class Import::Stevenalan < Import::Platform::Demandware
     resp = get_request("#{baseurl}/#{product_id}.html")
     return false if resp.response_code != 200
 
-    url = resp.last_effective_url
+    url = resp.effective_url
 
     page = resp.body
     return false if page =~ /PAGE NOT FOUND/i

@@ -5,12 +5,12 @@ class Import::Platform::Bop < Import::Base
 
   def csv_col_sep; ','; end
 
-  def self.perform url=nil
+  def self.perform url=nil, force=false
     instance = self.new
-    instance.perform url
+    instance.perform url, force
   end
 
-  def perform url=nil
+  def perform url=nil, force=false
     raise Exception, "Should be overriden by parent class"
   end
 

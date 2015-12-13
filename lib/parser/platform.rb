@@ -60,7 +60,7 @@ class Parser::Platform
         end
       end
 
-    [platform, resp.last_effective_url]
+    [platform, resp.effective_url]
   rescue Curl::Err::HostResolutionError, Curl::Err::SSLPeerCertificateError,
     Curl::Err::TooManyRedirectsError, Curl::Err::RecvError, Curl::Err::TimeoutError,
     Curl::Err::SSLConnectError, Curl::Err::UnsupportedProtocolError, Curl::Err::ConnectionFailedError,
