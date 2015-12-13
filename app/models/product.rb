@@ -16,7 +16,7 @@ class Product < ActiveRecord::Base
   scope :without_upc, -> { where(upc: [nil, '']) }
   scope :with_upc, -> { where.not(upc: [nil, '']) }
 
-  validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
+  # validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
 
   after_update do
     if self.source.in?(Product::MATCHED_SOURCES) && self.upc_changed? && self.upc_was.nil?

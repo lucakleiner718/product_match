@@ -23,7 +23,7 @@ class Import::Platform::Bop < Import::Base
 
     @file_updated = false
     if !File.exists?(filename) || (url_mtime(url) > File.mtime(filename))
-      body = Curl.get(url).body
+      body = get_request(url).body
       body.force_encoding('UTF-8')
       File.write filename, body
       @file_updated = true

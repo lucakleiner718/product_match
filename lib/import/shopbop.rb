@@ -34,15 +34,7 @@ class Import::Shopbop < Import::Platform::Bop
           ProcessImportUrlWorker.perform_async self.class.name, 'update_product_page', product.id
         end
 
-        begin
-          product.save! if product.changed?
-        rescue => e
-          Honeybadger.notify e, context: {
-              product: product.attributes
-            }
-          raise e
-        end
-
+        product.save! if product.changed?
 
         updated_ids << product.id
       end
@@ -108,8 +100,8 @@ class Import::Shopbop < Import::Platform::Bop
         google_category: r[:google_product_category],
         url: r[:link],
         image: r[:image_link],
-        price: r[:price],
-        price_sale: r[:sale_price],
+        price: r[:price].to_s,
+        price_sale: r[:sale_price].to_s,
         color: r[:color],
         size: r[:size],
         upc: (r[:gtin] || r[:ean]),

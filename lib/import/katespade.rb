@@ -17,7 +17,7 @@ class Import::Katespade < Import::Platform::Demandware
     ].each do |url_part|
       log url_part
       url = "#{baseurl}/#{url_part}"
-      resp = Curl.get(url)
+      resp = get_request(url)
       html = Nokogiri::HTML(resp.body)
       elements = html.css('#search-result-items li.grid-tile:not(.oas-tile) .product-tile:not(.product-set-tile)')
       products = elements.select { |item| item.css('.product-price').size == 1 }
@@ -27,16 +27,14 @@ class Import::Katespade < Import::Platform::Demandware
 
       product_set = elements.select { |item| item.css('.product-set-price').size == 1 }
       product_set.each do |item|
-        resp2 = Curl.get(item.css('.product-image a').first.attr('href')) do |http|
-          http.follow_location = true
-        end
+        resp2 = get_request(item.css('.product-image a').first.attr('href'))
         html2 = Nokogiri::HTML(resp2.body)
         urls.concat html2.css('.product-set-list .product-set-item').map{|e| e.css('a.item-name').first.attr('href')}
       end
 
       urls = process_products_urls urls
 
-      urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Katespade', 'process_url', u }
+      urls.each {|u| ProcessImportUrlWorker.new.perform'Import::Katespade', 'process_url', u }
       log "spawned #{urls.size} urls"
     end
   end
@@ -45,9 +43,7 @@ class Import::Katespade < Import::Platform::Demandware
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
-    resp = Curl.get("#{baseurl}/#{product_id}.html") do |http|
-      http.follow_location = true
-    end
+    resp = get_request("#{baseurl}/#{product_id}.html")
     return false if resp.response_code != 200
 
     url = resp.effective_url
@@ -75,11 +71,7 @@ class Import::Katespade < Import::Platform::Demandware
       image_url = color.attr('data-pimage')
 
       color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&#{color_param}=#{color_id}&format=ajax"
-      detail_color_page = Curl.get(color_link) do |http|
-        http.headers['Referer'] = url
-        http.headers['X-Requested-With'] = 'XMLHttpRequest'
-        http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-      end
+      detail_color_page = get_request(color_link)
       color_html = Nokogiri::HTML(detail_color_page.body)
       sizes = color_html.css('.product-variations .size li:not(.unselectable):not(.visually-hidden) a').select{|r| r.text != '' }
 
@@ -91,12 +83,7 @@ class Import::Katespade < Import::Platform::Demandware
           link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&dwvar_#{product_id}_size=#{size_value}&#{color_param}=#{color_id}&format=ajax"
           puts link
 
-          size_page = Curl.get(link) do |http|
-            http.headers['Referer'] = url
-            http.headers['X-Requested-With'] = 'XMLHttpRequest'
-            http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-          end
-
+          size_page = get_request(link)
           next if size_page.response_code != 200
 
           size_html = Nokogiri::HTML(size_page.body)

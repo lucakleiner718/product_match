@@ -43,7 +43,7 @@ class Import::Popshops < Import::Base
     while page <= 100 do
       url = build_url(brand: brand_id, category: category_id, page: page)
 
-      resp = Curl.get(url)
+      resp = get_request(url)
       body = resp.body
       @xml = Nokogiri::XML(body)
 
@@ -175,7 +175,7 @@ class Import::Popshops < Import::Base
   def self.get_info brand_id
     url = self.new.build_url(brand: brand_id, count: 1)
 
-    resp = Curl.get(url)
+    resp = get_request(url)
     body = resp.body
     xml = Nokogiri::XML(body)
 

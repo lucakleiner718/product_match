@@ -21,7 +21,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
       urls = []
       while true
         url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
-        resp = Curl.get(url)
+        resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('#search-result-items .product-tile')
@@ -79,11 +79,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
       image_url = "http://i1.adis.ws/i/Marc_Jacobs/#{product_id_param}_#{color_id}_MAIN?w=340&h=510"
 
       color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{color_param}=#{color_id}&format=ajax"
-      detail_color_page = Curl.get(color_link) do |http|
-        http.headers['Referer'] = url
-        http.headers['X-Requested-With'] = 'XMLHttpRequest'
-        http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-      end
+      detail_color_page = get_request(color_link)
       color_html = Nokogiri::HTML(detail_color_page.body)
       sizes = color_html.css('#va-size option').select{|r| r.attr('value') != ''}
 
@@ -96,12 +92,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
           link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{size_param}=#{size_value}&#{color_param}=#{color_id}&format=ajax"
           puts link
 
-          size_page = Curl.get(link) do |http|
-            http.headers['Referer'] = url
-            http.headers['X-Requested-With'] = 'XMLHttpRequest'
-            http.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-          end
-
+          size_page = get_request(link)
           next if size_page.response_code != 200
 
           size_html = Nokogiri::HTML(size_page.body)
