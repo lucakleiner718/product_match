@@ -104,7 +104,7 @@ class MatchController < ApplicationController
     if last_match
       if last_match.decision == 'found'
         ProductUpc.where(product_id: last_match.product_id).destroy_all
-        Product.find(last_match.product_id).update_attributes upc: nil, match: true
+        Product.find(last_match.product_id).update! upc: nil, match: true
         ProductSuggestionsWorker.new.perform last_match.product_id
         last_match.destroy
       elsif last_match.decision == 'nothing'

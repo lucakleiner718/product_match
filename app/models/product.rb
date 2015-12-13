@@ -16,7 +16,7 @@ class Product < ActiveRecord::Base
   scope :without_upc, -> { where(upc: [nil, '']) }
   scope :with_upc, -> { where.not(upc: [nil, '']) }
 
-  validates :upc, format: { with: /\A\d+\z/ }
+  validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
 
   after_update do
     if self.source.in?(Product::MATCHED_SOURCES) && self.upc_changed? && self.upc_was.nil?
@@ -73,7 +73,7 @@ class Product < ActiveRecord::Base
     product_upc = ProductUpc.find_by(product_id: self.id)
 
     if product_upc
-      self.update_columns match: true, upc: nil
+      self.update! match: true, upc: nil
       ProductSelect.find(product_upc.product_select_id).destroy
       product_upc.destroy
       ProductSuggestionsWorker.perform_async self.id

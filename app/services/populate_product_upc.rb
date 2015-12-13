@@ -27,7 +27,7 @@ class PopulateProductUpc
 
     ActiveRecord::Base.transaction do
       # update product with new upc
-      product.update_columns upc: gtin, match: false
+      product.update! upc: gtin, match: false
 
       # create new record about upc update
       ProductUpc.create product_id: product.id, selected_id: selected.id, product_select_id: product_select.id, upc: gtin

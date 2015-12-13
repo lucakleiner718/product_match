@@ -195,37 +195,57 @@ swimwear:
 # accessories
 sunglasses:
   - sunglasses
+  - glasses
+  - spectacles
+  - eyeglasses
+  - glass
+  - spectacle
+  - specs
 
-accessories:
-  - belt
-  - watch
-  - neckle
-  - necklace
+bracelet:
+  - bracelet
+
+earrings:
   - earrings
   - earring set
-  - bracelet
-  - scarf
+
+necklace:
+  - neckle
+  - necklace
+
+rings:
   - ring
-  - headband
+  - rings
+
+umbrella:
+  - umbrella
+
+watch:
+  - pocketwatch
+  - watch
+  - wristwatch
+
+accessories other:
   - bandana
+  - belt
   - bow tie
   - coin purse
   - cufflink
   - cummerbund
   - gaiters
-  - glasses
   - gloves
   - headband
   - handkerchief
   - muff
   - necktie
-  - pocketwatch
+  - tie
+  - cravat
+  - neckcloth
+  - overlay
   - sash
   - scarf
   - suspenders
-  - umbrella
   - wallet
-  - wristwatch
 
 bags:
   - backpack
