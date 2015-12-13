@@ -190,10 +190,13 @@ swimwear:
   - trunks
   - wetsuit
 
+# accessories
+sunglasses:
+  - sunglasses
+
 accessories:
   - belt
   - watch
-  - sunglasses
   - neckle
   - necklace
   - earrings
@@ -247,4 +250,3 @@ bags:
   - gripsack
   - kitbag
   - saddlebag
-  
