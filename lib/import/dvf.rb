@@ -46,6 +46,8 @@ class Import::Dvf < Import::Platform::Demandware
     page = resp.body
     html = Nokogiri::HTML(page)
 
+    return false if html.css('#error-page').size > 0
+
     # in case we have link with upc instead of inner uuid of product
     url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
     product_id = url.match(product_id_pattern)[1]
