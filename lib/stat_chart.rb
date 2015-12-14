@@ -31,7 +31,7 @@ class StatChart
       SELECT count(*), EXTRACT(YEAR FROM created_at)::text || '-' || EXTRACT(WEEK FROM created_at)::text AS created_week
       FROM products
       WHERE source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
-            AND (upc is null OR upc = '')
+            AND (upc is null OR upc = '') AND created_at > '#{2.months.ago.utc}'
       GROUP BY created_week
     ")
     chart[:added_without_upc] =
@@ -44,7 +44,7 @@ class StatChart
     matched = ProductUpc.connection.execute("
       SELECT count(*), EXTRACT(YEAR FROM created_at)::text || '-' || EXTRACT(WEEK FROM created_at)::text AS created_week
       FROM product_upcs
-      WHERE created_at > '#{timeframe.ago}'
+      WHERE created_at > '#{2.months.ago.utc}'
       GROUP BY created_week
     ")
     chart[:matched] =
