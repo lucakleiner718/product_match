@@ -9,7 +9,6 @@ class DeleteProductImageWorker
     )
 
     directory = connection.directories.get('upc-images')
-    binding.pry
     file = directory.files.create(key: filename, public: true)
     file.body = image_contents
     file.save

@@ -49,11 +49,7 @@ class Import::Rayban < Import::Base
     url_data = url.match(/\/([^\/%]+)%20([A-Z]+)%20([^-]+)-/i)
     # style_code = html.css('#schemaOrgModel').first.text
     style_code = url_data[1]
-    # begin
-      gender = {'male' => 'Male', 'female' => 'Female', 'men' => 'Male'}[url_data[2].downcase]
-    # rescue => e
-    #   binding.pry
-    # end
+    gender = {'male' => 'Male', 'female' => 'Female', 'men' => 'Male'}[url_data[2].downcase]
 
     results = [{
       title: product_name,
