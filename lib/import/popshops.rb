@@ -41,7 +41,7 @@ class Import::Popshops < Import::Base
 
     page = 1
     while page <= 100 do
-      url = build_url(brand: brand_id, category: category_id, page: page)
+      url = build_url_params(brand: brand_id, category: category_id, page: page)
 
       resp = get_request(url)
       body = resp.body
@@ -167,13 +167,13 @@ class Import::Popshops < Import::Base
     results
   end
 
-  def build_url params = {}
+  def build_url_params(params = {})
     url_params = {}.merge(URL[:params]).merge(params)
     "#{URL[:base]}?#{url_params.map{|k,v| "#{k}=#{v}"}.join('&')}"
   end
 
   def self.get_info brand_id
-    url = self.new.build_url(brand: brand_id, count: 1)
+    url = self.new.build_url_params(brand: brand_id, count: 1)
 
     resp = get_request(url)
     body = resp.body
