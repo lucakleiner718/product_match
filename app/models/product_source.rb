@@ -6,7 +6,7 @@ class ProductSource < ActiveRecord::Base
   validates_uniqueness_of :source_id, scope: :source_name
 
   scope :outdated, -> {
-    where('period > 0').where("collected_at < now() - INTERVAL '1 day' * (period / #{1.day.to_i}) OR collected_at IS NULL")
+    where('period > 0').where("collected_at < to_timestamp(#{Time.now.utc.to_i} - period) OR collected_at IS NULL")
   }
 
   before_save do
