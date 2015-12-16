@@ -10,22 +10,28 @@ class Import::Barneys < Import::Platform::Demandware
     resp = get_request("on/demandware.store/Sites-BNY-Site/default/Designers-ShowJson")
     json = JSON.parse(resp.body)
     brands_links = json.map{|a| a['url'].sub(/^\//, '')}
+    brands_links_size = brands_links.size
 
     page_size = 96
     timestamp = Time.now.to_i
 
-    brands_links.each do |brand_link|
+    brands_links.shuffle.each_with_index do |brand_link, index|
       query_params = URI(brand_link).query.split('&').inject({}){|obj, el| k,v = el.split('='); obj[k] = v; obj}
       urls = []
       page_no = 1
       while true
         url = "barneys-new-york?prefn1=brand&prefn2=productAccess&sz=#{page_size}&start=#{(page_no-1) * page_size}&format=page-element&prefv1=#{query_params['prefv1']}&prefv2=isPublic&_=#{timestamp}"
-        log url
-
-        resp = get_request(url)
+        while true
+          log "[URL] #{url}"
+          resp = get_request(url)
+          log "[EURL] #{resp.effective_url}"
+          break if resp.response_code != 403
+          log "Sleep"
+          sleep 5
+        end
         html = Nokogiri::HTML(resp.body)
 
-        links = html.css('.product-tile .product-image .thumb-link').map{|a| a.attr('href')}
+        links = html.css('.product-tile .product-image a.thumb-link').map{|a| a.attr('href')}
         break if links.size == 0 || (urls & links).size == links.size
 
         urls += links
@@ -36,13 +42,14 @@ class Import::Barneys < Import::Platform::Demandware
 
       urls = process_products_urls(urls)
       urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      log "[#{index}/#{brands_links_size}] spawned #{urls.size} urls"
     end
   end
 
   def process_url(url)
     log "Processing url: #{url}"
     resp = get_request(url)
+    raise "Blocked" if resp.response_code == 403
     return false if resp.response_code != 200
 
     page = resp.body
@@ -121,5 +128,14 @@ class Import::Barneys < Import::Platform::Demandware
 
   def normalize_json(str)
     str.gsub(/\/\/.*/, '').gsub(/{\s+([a-z])/i, '{\1').gsub(/\s}/, '}').gsub(/,\s+/, ',').gsub(/\[\s+/, '[').gsub(/\s+\]/, ']').gsub(/:\s+"/m, ':"').gsub(/([a-z]+):\s*([{\["])/im, '"\1":\2').gsub('},}', '}}')
+  end
+
+  def get_request(url)
+    resp = super(url)
+    if resp.response_code == 403
+      urls = ['sinatra-proxy-dl', 'dlproxy1', 'dlproxy2', 'dlproxy3', 'dlproxy4']
+      resp = super("http://#{urls.sample}.herokuapp.com/?url=#{build_url(url)}")
+    end
+    resp
   end
 end
