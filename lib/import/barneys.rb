@@ -130,7 +130,9 @@ class Import::Barneys < Import::Platform::Demandware
   private
 
   def normalize_json(str)
-    str.gsub(/\/\/.*/, '').gsub(/{\s+([a-z])/i, '{\1').gsub(/\s}/, '}').gsub(/,\s+/, ',').gsub(/\[\s+/, '[').gsub(/\s+\]/, ']').gsub(/:\s+"/m, ':"').gsub(/([a-z]+):\s*([{\["])/im, '"\1":\2').gsub('},}', '}}')
+    str.gsub(/\/\/.*/, '').gsub(/{\s+([a-z])/i, '{\1').gsub(/\s}/, '}').gsub(/,\s+/, ',')
+      .gsub(/\[\s+/, '[').gsub(/\s+\]/, ']').gsub(/:\s+"/m, ':"')
+      .gsub(/([a-z]+):\s*([{\["])/im, '"\1":\2').gsub('},}', '}}').gsub(/\\\"/, '"')
   end
 
   def get_request(url)
