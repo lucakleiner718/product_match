@@ -134,7 +134,7 @@ class Import::Barneys < Import::Platform::Demandware
     resp = super(url)
     if resp.response_code == 403
       urls = ['sinatra-proxy-dl', 'dlproxy1', 'dlproxy2', 'dlproxy3', 'dlproxy4']
-      resp = super("http://#{urls.sample}.herokuapp.com/?url=#{build_url(url)}")
+      resp = super("http://#{urls.sample}.herokuapp.com/", params: {url: build_url(url)})
     end
     resp
   end

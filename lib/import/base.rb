@@ -132,11 +132,11 @@ class Import::Base
     url
   end
 
-  def get_request url
+  def get_request url, params={}
     url = build_url(url)
 
     # send_curl_get(url)
-    send_typhoeus_get(url)
+    send_typhoeus_get(url, params)
   end
 
   def process_title_for_gender(title)
@@ -304,11 +304,12 @@ class Import::Base
     end
   end
 
-  def send_typhoeus_get(url)
+  def send_typhoeus_get(url, params={})
     Typhoeus.get(url,
       followlocation: true,
       # verbose: true,
       maxredirs: 10,
+      params: params
     )
   end
 
