@@ -1,28 +1,33 @@
 tops:
   - cardigan
+  - crop top
+  - body
+  - bodysuit
   - blouse
   - dickey
+  - duster
+  - guayabera
+  - guernsey
+  - halterneck
   - henley
+  - hoodie
+  - jersey
   - polo
+  - popover
   - pullover
+  - leotard
   - shell
   - shirt
   - tank
   - tee
   - top
   - tunic
+  - turtleneck
+  - turtle neck
+  - twinset
   - sweater
   - sweatshirt
   - vee
-  - turtleneck
-  - hoodie
-  - duster
-  - crop top
-  - guayabera
-  - guernsey
-  - halterneck
-  - jersey
-  - twinset
 
 trousers and shorts:
   - bell-bottoms
@@ -106,6 +111,7 @@ underwear:
   - briefs
   - chemise
   - lace
+  - leotard
   - panties
   - robe
   - sleepshirt
@@ -128,7 +134,6 @@ footwear:
   - bootie
   - booties
   - chukka
-  - chukkas
   - clog
   - clogs
   - creeper
