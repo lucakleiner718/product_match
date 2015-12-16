@@ -95,6 +95,9 @@ class Import::Barneys < Import::Platform::Demandware
     category = categories.join(' > ')
 
     images = html.css('#product-image-carousel .item figure img').map{|img| img.attr('src')}
+    if images.size == 0
+      images = html.css('.product-primary-image img').map{|img| img.attr('src')}
+    end
     main_image = images.shift
 
     digitalData_json['product']['SkuInfo'].each do |item|
@@ -134,7 +137,7 @@ class Import::Barneys < Import::Platform::Demandware
     resp = super(url)
     if resp.response_code == 403
       urls = ['sinatra-proxy-dl', 'dlproxy1', 'dlproxy2', 'dlproxy3', 'dlproxy4']
-      resp = super("http://#{urls.sample}.herokuapp.com/", params: {url: build_url(url)})
+      resp = super("http://#{urls.sample}.herokuapp.com/", url: build_url(url))
     end
     resp
   end
