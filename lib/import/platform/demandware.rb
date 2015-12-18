@@ -7,7 +7,7 @@ class Import::Platform::Demandware < Import::Base
   def brand_name_default; nil; end
 
   def get_json product_id
-    data_url = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/#{lang}/Product-GetVariants?pid=#{product_id}&format=json"
+    data_url = internal_url("Product-GetVariants", pid: "#{product_id}&format=json")
     data_resp = get_request(data_url)
     body = data_resp.body.strip
     return false if body.blank?
@@ -40,4 +40,15 @@ class Import::Platform::Demandware < Import::Base
     end
   end
 
+  def internal_url(request, params={})
+    url = "on/demandware.store/Sites-#{subdir}-Site/#{lang}/#{request}"
+    if params.size > 0
+      url += "?#{params.inject([]){|ar, (k,v)| ar << "#{k}=#{v}"; ar}.join('&')}"
+    end
+    "#{baseurl}/#{url}"
+  end
+
+  def self.process_category(url)
+    self.new.process_category(url)
+  end
 end

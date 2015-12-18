@@ -13,9 +13,8 @@ class Suggestion
   ]
   SIMILARITY_MIN = 40
 
-  def initialize(product_id, rewrite=false)
+  def initialize(product_id)
     @product = Product.find(product_id)
-    @rewrite = rewrite
   end
 
   def build
@@ -27,33 +26,20 @@ class Suggestion
     return false unless product.brand.try(:name)
 
     load_kinds
-
-    if rewrite
-      ProductSuggestion.where(product_id: product.id).delete_all
-    end
-
-    to_create = process_related_products
-    create_items(to_create)
-    to_create.size
+    process_related_products
   end
 
   private
 
-  attr_reader :product, :rewrite, :kinds
+  attr_reader :product, :kinds
 
   def process_related_products
     related_products = build_related_products
 
-    if rewrite
-      exists = {}
-    else
-      exists = ProductSuggestion.where(
-        product_id: product.id,
-        suggested_id: related_products.map(&:id)
-      ).inject({}){|obj, el| obj["#{el.product_id}_#{el.suggested_id}"] = el; obj}
-    end
+    exists = ProductSuggestion.where(product_id: product.id).index_by{|el| el.suggested_id}
 
     to_create = []
+    actual_list = []
 
     upc_patterns = product.upc_patterns
 
@@ -61,6 +47,8 @@ class Suggestion
       percentage = similarity_to(suggested, upc_patterns)
       ps = exists["#{product.id}_#{suggested.id}"]
       if percentage && percentage > SIMILARITY_MIN
+        actual_list << suggested.id
+
         if ps
           ps.percentage = percentage
           ps.upc_patterns = upc_patterns
@@ -76,7 +64,13 @@ class Suggestion
       end
     end
 
-    to_create
+    not_actual = exists.map(&:suggested_id) - actual_list
+    if not_actual.size > 0
+      ProductSuggestion.where(product_id: product.id, suggested_id: not_actual).delete_all
+    end
+
+    create_items(to_create)
+    to_create.size
   end
 
   def similarity_to(suggested, upc_patterns)
@@ -179,7 +173,7 @@ class Suggestion
 
       basic_sizes = [
         ['2xs', 'xxs', 'xxsmall', 'xxsml'],
-        ['xs', 'xsmall', 'xsml'],
+        ['xs', 'xsmall', 'xsml', 'extra small'],
         ['petite', 'p'],
         ['small', 's'],
         ['medium', 'm'],

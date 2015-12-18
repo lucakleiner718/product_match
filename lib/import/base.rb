@@ -134,8 +134,6 @@ class Import::Base
 
   def get_request url, params={}
     url = build_url(url)
-
-    # send_curl_get(url)
     send_typhoeus_get(url, params)
   end
 
@@ -287,23 +285,6 @@ class Import::Base
 
   private
 
-  def send_curl_get(url)
-    retries = 0
-    begin
-      Curl.get(url) do |http|
-        # http.enable_cookies = true
-        http.follow_location = true
-        http.max_redirects = 10
-        # http.useragent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
-        # http.verbose = true
-      end
-    rescue Curl::Err::PartialFileError, Curl::Err::HostResolutionError => e
-      retries += 1
-      retry if retries < 6
-      raise e
-    end
-  end
-
   def send_typhoeus_get(url, params={})
     Typhoeus.get(url,
       followlocation: true,
@@ -316,6 +297,7 @@ class Import::Base
   def process_in_batch(urls)
     batch.jobs do
       urls.each do |url|
+        spawn_url('url', url)
         ProcessImportUrlWorker.perform_async(self.class.name, 'process_url', url)
       end
     end
@@ -327,5 +309,9 @@ class Import::Base
       @batch.description = "#{self.class.name}"
     end
     @batch
+  end
+
+  def spawn_url(kind, url)
+    ProcessImportUrlWorker.perform_async(self.class.name, "process_#{kind}", url)
   end
 end

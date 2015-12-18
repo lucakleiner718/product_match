@@ -158,6 +158,7 @@ footwear:
   - wedge
   - hosiery
   - spats
+  - slides
   - slipper
   - slippers
   - sock
@@ -216,6 +217,8 @@ bracelet:
 earrings:
   - earrings
   - earring set
+  - stud
+  - studs
 
 necklace:
   - neckle
@@ -233,12 +236,17 @@ watch:
   - watch
   - wristwatch
 
+cufflink:
+  - cufflink
+  - cufflinks
+  - stud
+  - studs
+
 accessories other:
   - bandana
   - belt
   - bow tie
   - coin purse
-  - cufflink
   - cummerbund
   - gaiters
   - gloves
@@ -259,24 +267,25 @@ bags:
   - backpack
   - bag
   - card case
-  - clutch
-  - keychain
-  - passport holder
-  - pouch
-  - travel kit
-  - tote
-  - handbag
-  - purse
-  - case
-  - satchel
-  - knapsack
-  - pack
-  - haversack
-  - valise
-  - suitcase
-  - trunk
-  - portmanteau
   - carpetbag
+  - case
+  - clutch
   - gripsack
+  - handbag
+  - haversack
+  - keychain
   - kitbag
+  - knapsack
+  - passport holder
+  - pack
+  - portmanteau
+  - pouch
+  - purse
   - saddlebag
+  - satchel
+  - suitcase
+  - tote
+  - travel kit
+  - trunk
+  - valise
+  - weekender
