@@ -51,7 +51,7 @@ class Import::Saksoff5th < Import::Platform::Demandware
       colors << {
         title: a.attr('title'),
         image: a.attr('data-lgimg').match(/'url':'([^']+)'/) && $1,
-        pattern: a.attr('href').match(/dwvar_#{product_id}_color=([^&]+)/) && $1
+        # pattern: a.attr('href').match(/dwvar_#{product_id}_color=([^&]+)/) && $1
       }
     end
 
@@ -59,7 +59,8 @@ class Import::Saksoff5th < Import::Platform::Demandware
     html.css('.swatches.size .emptyswatch a').each do |a|
       sizes << {
         title: a.attr('title'),
-        pattern: a.attr('href').match(/dwvar_#{product_id}_size=([^&]+)/) && $1
+        # pattern: a.attr('href').match(/dwvar_#{product_id}_size=([^&]+)/) && $1
+        # pattern: a.attr('title')
       }
     end
 
@@ -73,12 +74,14 @@ class Import::Saksoff5th < Import::Platform::Demandware
 
     colors.each do |color|
       sizes.each do |size|
-        resp = get_request internal_url('Product-Variation', pid: '0400088509018',
-            "dwvar_#{product_id}_size": size[:pattern], "dwvar_#{product_id}_color": color[:pattern],
+        resp = get_request(internal_url('Product-Variation', pid: product_id,
+            "dwvar_#{product_id}_size": size[:title], "dwvar_#{product_id}_color": color[:title],
             format: :ajax
-        )
+        ))
         html = Nokogiri::HTML(resp.body)
         upc = html.css('#pid').first.attr('value')
+
+        next if upc.to_s == product_id.to_s
 
         results << {
           title: product_name,

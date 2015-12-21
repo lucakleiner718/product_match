@@ -6,13 +6,17 @@ class GTIN
   end
 
   # @return correct upc (can be modified) or false if upc is wrong
-  def self.process input
-    instance = self.new input
+  def self.process(input)
+    instance = self.new(input)
     instance.process
   end
 
   def process
-    valid_gtin? ? gtin : false
+    if valid_gtin?
+      gtin
+    else
+      false
+    end
   end
 
   private
@@ -42,7 +46,12 @@ class GTIN
         return false
     end
 
-    numbers[-1].to_i == (10 - checksum % 10)%10
+    last_digit = (10 - checksum % 10)%10
+    valid = numbers[-1].to_i == last_digit
+    unless valid
+      puts "Last digit should be #{last_digit} instead of #{numbers[-1].to_i}"
+    end
+    valid
   end
 
 end

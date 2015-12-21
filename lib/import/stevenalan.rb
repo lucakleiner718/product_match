@@ -1,5 +1,7 @@
 class Import::Stevenalan < Import::Platform::Demandware
 
+  # platform = demandware
+
   def baseurl; 'http://www.stevenalan.com'; end
   def subdir; 'stevenalan'; end
   def lang; 'default'; end
@@ -43,11 +45,9 @@ class Import::Stevenalan < Import::Platform::Demandware
     html = Nokogiri::HTML(page)
 
     product_id_param = product_id.gsub('_', '__').gsub('.', '%2e')
-
     results = []
 
     product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip
-
     category = nil
 
     images = html.css('.attribute .color a').inject({}) do |obj, a|

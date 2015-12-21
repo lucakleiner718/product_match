@@ -8,14 +8,12 @@ class Import::Rayban < Import::Base
 
   def perform
     urls = []
-
     [
       'sunglasses/men-s/plp', 'sunglasses/women-s/plp', 'sunglasses/junior/plp',
       'eyeglasses/men-s/plp', 'eyeglasses/women-s/plp', 'eyeglasses/junior/plp'
     ].each do |cat_link|
       urls += LoadLinks.new("#{url_prefix_country}/#{cat_link}", self).grab
     end
-
     spawn_products_urls(urls)
   end
 
