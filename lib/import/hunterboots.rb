@@ -13,6 +13,7 @@ class Import::Hunterboots < Import::Base
       'kids-new-arrivals', 'kids-boots-wellingtons', 'kids-welly-accessories', 'kids-gifting', 'kids-collections',
     ].each do |url_part|
       page_no = 1
+      cat_urls = []
       while true
         url = "#{url_part}/?page=#{page_no}"
         log url
@@ -21,11 +22,12 @@ class Import::Hunterboots < Import::Base
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
-        links = html.css('.category-product a.category-product-block__image-link').map{|a| a.attr('href')}
-        break if links.size == 0 || (urls & links).size == links.size
-        urls += links
+        links = html.css('.category-product a.category-product-block__image-link').map{|a| a.attr('href')}.uniq
+        break if links.size == 0 || (cat_urls & links).size == links.size
+        cat_urls += links
         page_no += 1
       end
+      urls += cat_urls
 
       log "total #{urls.size}/#{urls.uniq.size} urls"
     end
