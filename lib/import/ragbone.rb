@@ -6,14 +6,14 @@ class Import::Ragbone < Import::Platform::Demandware
   def brand_name_default; 'Rag & Bone'; end
 
   def perform
+    urls = []
     [
       'womens', 'mens', 'sale'
     ].each do |url_part|
-      log url_part
       size = 60
-      urls = []
       while true
         url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
+        log(url)
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
@@ -26,15 +26,11 @@ class Import::Ragbone < Import::Platform::Demandware
           url
         end
       end
-
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
     end
+    spawn_products_urls(urls)
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 

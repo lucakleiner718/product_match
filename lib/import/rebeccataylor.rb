@@ -29,13 +29,11 @@ class Import::Rebeccataylor < Import::Platform::Venda
         pagenum += 1
       end
 
-      urls = urls.map{|url| build_url(url)}.uniq
-
-      spawn_products_urls urls
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url url
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request url
     return false if resp.response_code != 200

@@ -26,14 +26,11 @@ class Import::Dogeared < Import::Platform::Demandware
         urls += products
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]

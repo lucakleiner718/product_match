@@ -16,13 +16,10 @@ class Import::Rayban < Import::Base
       urls += LoadLinks.new("#{url_prefix_country}/#{cat_link}", self).grab
     end
 
-    urls = process_products_urls(urls)
-
-    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
-  def process_url url
+  def process_product(url)
     url = URI.encode(url)
     log "Processing url: #{url}"
     resp = get_request url

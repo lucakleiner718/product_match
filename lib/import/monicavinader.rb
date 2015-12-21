@@ -16,15 +16,12 @@ class Import::Monicavinader < Import::Base
                    .map{|a| a.attr('href')}.select{|l| l.present?}
       break if urls.size == 0
 
-      urls = process_products_urls(urls)
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
       page_no += 1
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200

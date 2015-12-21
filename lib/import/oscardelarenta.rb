@@ -30,7 +30,7 @@ class Import::Oscardelarenta < Import::Base
         break if urls.size == 0
 
         urls.each do |url|
-          process_url(url.match(/\/([a-z0-9\-]+)$/i) && $1 || url)
+          process_product(url.match(/\/([a-z0-9\-]+)$/i) && $1 || url)
         end
 
         page_number += 1
@@ -40,7 +40,7 @@ class Import::Oscardelarenta < Import::Base
     end
   end
 
-  def process_url(url)
+  def process_product(url)
     url = build_url url
     log "Processing url: #{url}"
     resp = get_request(url)

@@ -1,6 +1,7 @@
 class Import::Agjeans < Import::Base
 
-  # platform=unknown02
+  # platform = unknown02
+  # platform-pattern - category url has /store/productslist.aspx
 
   def baseurl; 'http://www.agjeans.com'; end
   def brand_name; 'AG'; end
@@ -21,10 +22,11 @@ class Import::Agjeans < Import::Base
     end
     urls = urls.uniq.reject{|url| url =~ /\.m4v$/}
     log "uniq urls #{urls.size}"
-    urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+    urls.each {|url| spawn_url('product', url) }
+    spawn_products_urls(urls)
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200

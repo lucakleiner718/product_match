@@ -7,10 +7,9 @@ class Import::Barneys < Import::Platform::Demandware
   def product_id_pattern; /(\d+)\.html$/i; end
 
   def perform
-    resp = get_request("on/demandware.store/Sites-BNY-Site/default/Designers-ShowJson")
+    resp = get_request(internal_url("Designers-ShowJson"))
     json = JSON.parse(resp.body)
     brands_links = json.map{|a| a['url'].sub(/^\//, '')}
-    brands_links_size = brands_links.size
 
     page_size = 96
     timestamp = Time.now.to_i
@@ -40,13 +39,11 @@ class Import::Barneys < Import::Platform::Demandware
         break if links.size < page_size
       end
 
-      urls = process_products_urls(urls)
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "[#{index}/#{brands_links_size}] spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url(url)
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     raise "Blocked" if resp.response_code == 403

@@ -1,5 +1,7 @@
 class Import::Canadagoose < Import::Platform::Demandware
 
+  # platform = demandware
+
   def baseurl; 'http://www.canada-goose.com'; end
   def subdir; 'CanadaGooseCA'; end
   def lang; 'default'; end
@@ -8,13 +10,9 @@ class Import::Canadagoose < Import::Platform::Demandware
   def url_prefix_country; 'ca'; end
   def url_prefix_lang; 'en'; end
 
-  def get_products_urls
+  def perform
     urls = []
-    [
-      'men/parkas', 'men/lightweight', 'men/shells', 'men/accessories',
-      'women/parkas', 'women/lightweight', 'women/shells', 'women/accessories',
-      'kids/youth', 'kids/kids', 'kids/baby-%26-toddler'
-    ].each do |url_part|
+    categories.each do |url_part|
       log "Process: #{url_part}"
 
       url = "#{baseurl}/#{url_prefix_country}/#{url_prefix_lang}/#{url_part}/"
@@ -22,14 +20,21 @@ class Import::Canadagoose < Import::Platform::Demandware
       html = Nokogiri::HTML(resp.body)
 
       links = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
-
-      urls += process_products_urls links
+      urls += links
     end
 
-    urls
+    spawn_products_urls(urls)
   end
 
-  def process_url original_url
+  def categories
+    [
+      'men/parkas', 'men/lightweight', 'men/shells', 'men/accessories',
+      'women/parkas', 'women/lightweight', 'women/shells', 'women/accessories',
+      'kids/youth', 'kids/kids', 'kids/baby-%26-toddler'
+    ]
+  end
+
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -40,12 +45,6 @@ class Import::Canadagoose < Import::Platform::Demandware
 
     page = resp.body
     html = Nokogiri::HTML(page)
-
-    # canonical_url = html.css('link[rel="canonical"]').first.attr('href')
-    # canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
-    # if canonical_url != url
-    #   product_id = canonical_url.match(product_id_pattern)[1]
-    # end
 
     product_id_param = product_id
 

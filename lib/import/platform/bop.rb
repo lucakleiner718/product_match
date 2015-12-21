@@ -1,4 +1,3 @@
-require 'open-uri'
 require 'xml_parser'
 
 class Import::Platform::Bop < Import::Base

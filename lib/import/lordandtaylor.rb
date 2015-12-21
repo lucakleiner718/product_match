@@ -39,11 +39,11 @@ class Import::Lordandtaylor < Import::Base
         end
       end
 
-      spawn_products_urls urls
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200

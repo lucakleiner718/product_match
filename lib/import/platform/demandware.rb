@@ -47,8 +47,4 @@ class Import::Platform::Demandware < Import::Base
     end
     "#{baseurl}/#{url}"
   end
-
-  def self.process_category(url)
-    self.new.process_category(url)
-  end
 end

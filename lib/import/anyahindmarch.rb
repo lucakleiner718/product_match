@@ -13,10 +13,10 @@ class Import::Anyahindmarch < Import::Platform::Demandware
       'Wedding/For-The-Bride-and-Groom', 'Wedding/Honeymoon-and-Travel', 'Wedding/Gifts-for-the-Bridal-Party',
       'Wedding/Planning-and-Organising', 'Clutches'
     ]
+    urls = []
     categories.uniq.each do |category_url|
-      log category_url
+      log(category_url)
       size = 20
-      urls = []
       while true
         category_url = "#{baseurl}/#{category_url}" if category_url !~ /^http/
         url = "#{category_url}?sz=#{size}&start=#{urls.size}&format=ajaxscroll"
@@ -29,15 +29,11 @@ class Import::Anyahindmarch < Import::Platform::Demandware
 
         urls += products
       end
-
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
     end
+    spawn_products_urls(urls)
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     if original_url =~ product_id_pattern
       product_id = original_url.match(product_id_pattern)[1]
@@ -56,14 +52,6 @@ class Import::Anyahindmarch < Import::Platform::Demandware
     html = Nokogiri::HTML(page)
 
     return false if html.css('.notfounddesc').size == 1
-
-    # in case we have link with upc instead of inner uuid of product
-    # canonical_url = html.css('link[rel="canonical"]').first.attr('href') if html.css('link[rel="canonical"]').size == 1
-    # if canonical_url && canonical_url != url
-    #   product_id = url.match(product_id_pattern)[1]
-    #   url = "#{baseurl}#{url}" if url !~ /^http/
-    # end
-    # product_id_param = product_id
 
     results = []
     product_name = html.css('#pdpMain .productinfo .productname').first.text.strip

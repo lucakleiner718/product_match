@@ -1,4 +1,3 @@
-require 'open-uri'
 class Import::Helmutlang < Import::Platform::Demandware
 
   def baseurl; 'https://www.helmutlang.com'; end
@@ -10,25 +9,28 @@ class Import::Helmutlang < Import::Platform::Demandware
     [
       'womens-all/all-items,default,sc.html', 'mens-all/mens-all,default,sc.html', 'fragrance/fragrance,default,pg.html',
     ].each do |url_part|
-      log url_part
-      url = "#{baseurl}/#{url_part}"
-      resp = open(url)
-      html = Nokogiri::HTML(resp.read)
-
-      urls = html.css('#search a').map{|a| a.attr('href').sub(/\?.*/, '')}.select{|a| a =~ /[A-Z0-9]+,default,pd\.html$/}
-
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      process_category(url_part)
     end
   end
 
-  def process_url original_url
+  def process_category(url)
+    log url
+    resp = get_request(url)
+    html = Nokogiri::HTML(resp.body)
+
+    urls = html.css('#search a').map{|a| a.attr('href').sub(/\?.*/, '')}.select{|a| a =~ /[A-Z0-9]+,default,pd\.html$/}
+
+    urls = process_products_urls urls
+
+    urls.each {|url| spawn_url('product', url) }
+    log "spawned #{urls.size} urls"
+  end
+
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1].split(',').first
 
-    resp = get_request original_url
+    resp = get_request(original_url)
     return false if resp.response_code != 200
 
     url = original_url

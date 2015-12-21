@@ -30,18 +30,13 @@ class Import::Hunterboots < Import::Base
       log "total #{urls.size}/#{urls.uniq.size} urls"
     end
 
-    urls = process_products_urls urls
-    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
-  def process_url(original_url)
-    log "Processing url: #{original_url}"
-    resp = get_request(original_url)
+  def process_product(url)
+    log "Processing url: #{url}"
+    resp = get_request(url)
     return false if resp.response_code != 200
-
-    url = original_url
 
     page = resp.body
     html = Nokogiri::HTML(page)

@@ -29,14 +29,11 @@ class Import::Herveleger < Import::Platform::Demandware
         urls += products
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
 
     # format like: http://www.herveleger.com/Carmen-Woodgrain-Foil-Bandage-Dress/HUN6W073-F6K,default,pd.html"

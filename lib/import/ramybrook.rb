@@ -1,6 +1,6 @@
 class Import::Ramybrook < Import::Base
 
-  #platform = magento
+  # platform = magento
 
   def baseurl; 'http://www.ramybrook.com'; end
   def brand; 'Ramy Brook'; end
@@ -19,14 +19,10 @@ class Import::Ramybrook < Import::Base
 
       urls += links
     end
-
-    urls = process_products_urls(urls)
-
-    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
-  def process_url(url)
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200

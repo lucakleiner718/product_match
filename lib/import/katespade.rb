@@ -32,14 +32,11 @@ class Import::Katespade < Import::Platform::Demandware
         urls.concat html2.css('.product-set-list .product-set-item').map{|e| e.css('a.item-name').first.attr('href')}
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.new.perform'Import::Katespade', 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -70,7 +67,7 @@ class Import::Katespade < Import::Platform::Demandware
 
       image_url = color.attr('data-pimage')
 
-      color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&#{color_param}=#{color_id}&format=ajax"
+      color_link = internal_url('Product-Variation', pid: product_id, "#{color_param}": color_id, format: :ajax)
       detail_color_page = get_request(color_link)
       color_html = Nokogiri::HTML(detail_color_page.body)
       sizes = color_html.css('.product-variations .size li:not(.unselectable):not(.visually-hidden) a').select{|r| r.text != '' }
@@ -80,7 +77,7 @@ class Import::Katespade < Import::Platform::Demandware
           size_name = item.text.strip
           size_value = item.attr('href').match(/dwvar_#{product_id}_size=([^&]+)/i)[1]
 
-          link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id}&dwvar_#{product_id}_size=#{size_value}&#{color_param}=#{color_id}&format=ajax"
+          link = internal_url('Product-Variation', pid: product_id, "dwvar_#{product_id}_size": size_value, "#{color_param}": color_id, format: :ajax)
           puts link
 
           size_page = get_request(link)

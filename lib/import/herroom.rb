@@ -23,14 +23,11 @@ class Import::Herroom < Import::Base
         urls.concat brand_page_html.css('table tr td.borderz .img-holder a').map{|l| l.attr('href')}
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls #{url_part}"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200

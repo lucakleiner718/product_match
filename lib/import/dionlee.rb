@@ -10,21 +10,17 @@ class Import::Dionlee < Import::Base
     ].each do |url_part|
       log url_part
 
-      urls = []
       resp = get_request(url_part)
       html = Nokogiri::HTML(resp.body)
 
-      products = html.css('.productItem li > a')
-      next if products.size == 0
+      urls = html.css('.productItem li > a').map{|a| a.attr('href')}
+      next if urls.size == 0
 
-      urls = process_products_urls products.map{|a| a.attr('href')}
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url url
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200

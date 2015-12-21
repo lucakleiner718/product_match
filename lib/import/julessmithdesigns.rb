@@ -15,14 +15,14 @@ class Import::Julessmithdesigns < Import::Platform::Shopify
       break if urls.size == 0
 
       urls.each do |url|
-        process_url(url)
+        process_product(url)
       end
 
       page_no += 1
     end
   end
 
-  def process_url(url)
+  def process_product(url)
     url = build_url url
     log "Processing url: #{url}"
     resp = get_request(url)

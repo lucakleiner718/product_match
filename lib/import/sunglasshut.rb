@@ -15,11 +15,10 @@ class Import::Sunglasshut < Import::Base
       urls += LoadLinks.new(brand_link, self).grab
     end
 
-    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
-  def process_url url
+  def process_product(url)
     url = URI.encode(url)
     log "Processing url: #{url}"
     resp = get_request url

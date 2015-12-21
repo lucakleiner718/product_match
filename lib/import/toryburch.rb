@@ -40,14 +40,11 @@ class Import::Toryburch < Import::Platform::Demandware
         break if url_part.in? ['accessories/the-wallet-guide', 'watches']
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url, allow_spawn=true
+  def process_product(original_url, allow_spawn=true)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -103,7 +100,8 @@ class Import::Toryburch < Import::Platform::Demandware
 
     if allow_spawn && html.css('.subproduct').size > 0
       html.css('.subproduct').map{|el| el.attr('id').match(/product-(.*)/)[1]}.each do |subproduct_id|
-        ProcessImportUrlWorker.perform_async self.class.name, 'process_url', "#{baseurl}/#{subproduct_id}.html", false
+        url = "#{baseurl}/#{subproduct_id}.html"
+        spawn_url('product', url, false)
       end
     end
 

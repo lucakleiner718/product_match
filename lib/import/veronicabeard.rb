@@ -4,6 +4,7 @@ class Import::Veronicabeard < Import::Base
 
   def baseurl; 'https://www.veronicabeard.com'; end
   def brand_name; 'Veronica Beard'; end
+  def image_prefix; "https://s3.amazonaws.com/veronicabeard-java/images/skus/"; end
 
   def perform
     start = 0
@@ -20,14 +21,12 @@ class Import::Veronicabeard < Import::Base
       start += rows_amount
 
       rows.each do |row|
-        process_row row
+        process_product(row)
       end
     end
   end
 
-  def process_row row
-    image_prefix = "https://s3.amazonaws.com/veronicabeard-java/images/skus/"
-
+  def process_product(row)
     product_name = row['product_name_t']
     url = build_url row['page_name_s']
 
@@ -58,7 +57,6 @@ class Import::Veronicabeard < Import::Base
       results << {
         title: product_name,
         brand: brand_name,
-        # category: category,
         price: item_price,
         price_sale: item_price_sale,
         color: color,

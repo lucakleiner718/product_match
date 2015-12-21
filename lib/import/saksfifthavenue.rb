@@ -6,7 +6,6 @@ class Import::Saksfifthavenue < Import::Base
     resp = get_request 'main/ShopByBrand.jsp'
     html = Nokogiri::HTML(resp.body)
     brands_links = html.css('.designer-list li a').map{|a| a.attr('href').sub(/\?.*/, '')}
-    puts "brands_links: #{brands_links.size}"
     brands_links.shuffle.each do |link|
       urls = []
       while true
@@ -16,14 +15,14 @@ class Import::Saksfifthavenue < Import::Base
         products = html.css('.image-container-large a[id^=image-url]').map{|a| a.attr('href')}
         break if products.size == 0
 
-        urls.concat products
+        urls += products
       end
-      process_in_batch(urls)
-      log "spawned #{urls.size} urls"
+
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     product_id = URI.decode(original_url).match(/PRODUCT<>prd_id=(\d+)/) && $1
     if product_id
       url = build_url("main/ProductDetail.jsp?PRODUCT<>prd_id=#{product_id}")

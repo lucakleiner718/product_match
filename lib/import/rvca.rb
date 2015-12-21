@@ -16,12 +16,10 @@ class Import::Rvca < Import::Base
       urls += category_page_html.css('.products-list .product-wrapper a.product-image').map{|l| l.attr('href')}
       log "urls amount #{urls.size}"
     end
-    urls = process_products_urls(urls)
-    log "uniq urls #{urls.size}"
-    urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
+    spawn_products_urls(urls)
   end
 
-  def process_url url
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200

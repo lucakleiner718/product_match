@@ -6,6 +6,8 @@ class Import::Marcjacobs < Import::Platform::Demandware
   def brand_name_default; 'Marc Jacobs'; end
 
   def perform
+    urls = []
+
     [
       'women/featured', 'women/ready-to-wear', 'women/bags-wallets', 'women/shoes', 'women/accessories',
       'women/jewelry', 'women/sunglasses',
@@ -16,30 +18,25 @@ class Import::Marcjacobs < Import::Platform::Demandware
       'men/sunglasses',
       'sale'
     ].each do |url_part|
-      log url_part
       size = 60
-      urls = []
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
+        url = "#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
+        log(url)
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('#search-result-items .product-tile')
+                     .map{|item| item.css('.product-image a').first.attr('href')}
         break if products.size == 0
 
-        urls += products.map do |item|
-          item.css('.product-image a').first.attr('href')
-        end
+        urls += products
       end
-
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async 'Import::Marcjacobs', 'process_url', u }
-      log "spawned #{urls.size} urls"
     end
+
+    spawn_products_urls(urls)
   end
 
-  def process_url original_url
+  def process_product(original_url)
     puts "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -78,7 +75,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
 
       image_url = "http://i1.adis.ws/i/Marc_Jacobs/#{product_id_param}_#{color_id}_MAIN?w=340&h=510"
 
-      color_link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{color_param}=#{color_id}&format=ajax"
+      color_link = internal_url('Product-Variation', pid: product_id_param, "#{color_param}": color_id, format: :ajax)
       detail_color_page = get_request(color_link)
       color_html = Nokogiri::HTML(detail_color_page.body)
       sizes = color_html.css('#va-size option').select{|r| r.attr('value') != ''}
@@ -89,9 +86,7 @@ class Import::Marcjacobs < Import::Platform::Demandware
           size_param = "dwvar_#{product_id_param}_size"
           size_value = item.attr('value').match(/#{size_param}=([^&]+)/i)[1]
 
-          link = "#{baseurl}/on/demandware.store/Sites-#{subdir}-Site/default/Product-Variation?pid=#{product_id_param}&#{size_param}=#{size_value}&#{color_param}=#{color_id}&format=ajax"
-          puts link
-
+          link = internal_url('Product-Variation', pid: product_id_param, "#{size_param}": size_value, "#{color_param}": color_id, format: :ajax)
           size_page = get_request(link)
           next if size_page.response_code != 200
 

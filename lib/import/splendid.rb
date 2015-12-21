@@ -20,12 +20,11 @@ class Import::Splendid < Import::Base
       category_page_html = Nokogiri::HTML(category_page)
       urls.concat category_page_html.css('.product-list .item .pic a.product-link').map{|l| l.attr('href')}
 
-      urls.each {|u| ProcessImportUrlWorker.new.perform self.class.name, 'process_url', u }
-      log "spawned #{urls.size}"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     resp = get_request(original_url)
     return false if resp.response_code != 200

@@ -154,10 +154,6 @@ class Import::Base
     end
   end
 
-  def self.process_url *args
-    self.new.process_url *args
-  end
-
   def log str
     Rails.logger.debug str
   end
@@ -166,45 +162,26 @@ class Import::Base
     urls.compact.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
   end
 
-  def self.perform *args
-    instance = self.new *args
-    instance.perform
+  def self.perform(*args)
+    self.new(*args).perform
+  end
+
+  def self.process_product(url, *args)
+    self.new.process_product(url, *args)
+  end
+
+  def self.process_category(url, *args)
+    self.new.process_category(url, *args)
   end
 
   def perform
-    urls = get_products_urls
-    spawn_products_urls urls
+
   end
 
-  def get_products_urls
-    []
-  end
-
-  def spawn_products_urls urls
-    urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
+  def spawn_products_urls(urls)
+    urls = process_products_urls(urls)
+    process_in_batch(urls)
     log "spawned #{urls.size} urls"
-  end
-
-  def process_results results, brand_name=nil
-    brand = Brand.get_by_name(brand_name)
-    if !brand && brand_name_default
-      brand = Brand.where(name: brand_name_default).first
-      brand.synonyms.push brand_name if brand_name
-      brand.save! if brand.changed?
-    end
-
-    results.each do |row|
-      next if (row[:upc].present? && row[:upc] !~ /\A\d{12,}\z/) ||
-        row[:color].blank? || row[:size].blank?
-
-      product = Product.where(source: source, style_code: row[:style_code], color: row[:color], size: row[:size]).first_or_initialize
-      product.attributes = row
-      if brand
-        product.brand_id = brand.id
-        product.brand_name = brand.name
-      end
-      product.save!
-    end
   end
 
   def init_js(vars: [], funcs: [])
@@ -297,8 +274,7 @@ class Import::Base
   def process_in_batch(urls)
     batch.jobs do
       urls.each do |url|
-        spawn_url('url', url)
-        ProcessImportUrlWorker.perform_async(self.class.name, 'process_url', url)
+        spawn_url('product', url)
       end
     end
   end
@@ -311,7 +287,7 @@ class Import::Base
     @batch
   end
 
-  def spawn_url(kind, url)
-    ProcessImportUrlWorker.perform_async(self.class.name, "process_#{kind}", url)
+  def spawn_url(kind, url, *args)
+    ProcessImportUrlWorker.perform_async(self.class.name, "process_#{kind}", url, *args)
   end
 end

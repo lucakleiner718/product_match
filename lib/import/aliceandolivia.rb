@@ -30,7 +30,7 @@ class Import::Aliceandolivia < Import::Base
         break if rows.size == 0
 
         rows.each do |row|
-          process_url build_url(row['page_name_s'])
+          process_product(build_url(row['page_name_s']))
         end
 
         page_number += 1
@@ -38,7 +38,7 @@ class Import::Aliceandolivia < Import::Base
     end
   end
 
-  def process_url(url)
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200

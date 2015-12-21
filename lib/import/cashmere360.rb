@@ -9,8 +9,8 @@ class Import::Cashmere360 < Import::Base
     urls = []
     [
       'new-arrivals',
-      '360cashmere', #'360cashmere/sweaters', '360cashmere/tops', '360cashmere/accessories-360',
-      'skull-cashmere', #'skull-cashmere/sweaters', 'skull-cashmere/accessories', 'skull-cashmere/cannabis',
+      '360cashmere',
+      'skull-cashmere',
       'skull-baby',
       'mens',
       'christian-benner-x-skull-cashmere',
@@ -40,13 +40,10 @@ class Import::Cashmere360 < Import::Base
       urls += cat_urls
     end
 
-    urls = process_products_urls(urls)
-
-    process_in_batch(urls)
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
-  def process_url(url)
+  def process_product(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200

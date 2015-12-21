@@ -25,14 +25,11 @@ class Import::Stevenalan < Import::Platform::Demandware
         urls.concat products
       end
 
-      urls = process_products_urls urls
-
-      urls.each {|u| ProcessImportUrlWorker.perform_async self.class.name, 'process_url', u }
-      log "spawned #{urls.size} urls"
+      spawn_products_urls(urls)
     end
   end
 
-  def process_url original_url
+  def process_product(original_url)
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
@@ -44,12 +41,6 @@ class Import::Stevenalan < Import::Platform::Demandware
     page = resp.body
     return false if page =~ /PAGE NOT FOUND/i
     html = Nokogiri::HTML(page)
-
-    # canonical_url = html.css('link[rel="canonical"]').first.attr('href')
-    # canonical_url = "#{baseurl}#{canonical_url}" if canonical_url !~ /^http/
-    # if canonical_url != url
-    #   product_id = canonical_url.match(product_id_pattern)[1]
-    # end
 
     product_id_param = product_id.gsub('_', '__').gsub('.', '%2e')
 
