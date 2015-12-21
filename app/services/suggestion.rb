@@ -64,7 +64,7 @@ class Suggestion
       end
     end
 
-    not_actual = exists.map(&:suggested_id) - actual_list
+    not_actual = exists.values.uniq.map(&:suggested_id) - actual_list
     if not_actual.size > 0
       ProductSuggestion.where(product_id: product.id, suggested_id: not_actual).delete_all
     end
