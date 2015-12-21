@@ -6,6 +6,22 @@ class Import::Distinctivedecor < Import::Base
   def baseurl; 'http://www.distinctive-decor.com'; end
 
   def perform
+    grab_from_categoeries
+  end
+
+  def grab_from_categoeries
+    urls = []
+    [
+      'swell-water-bottles-25oz.html', 'swell-water-bottles-17oz.html', 'swell-water-bottles-9oz.html'
+    ].each do |cat|
+      resp = get_request(cat)
+      html = Nokogiri::HTML(resp.body)
+      urls += html.css('table td center a').map{|a| a.attr('href')}
+    end
+    spawn_products_urls(urls)
+  end
+
+  def grab_from_search
     urls = []
     page_no = 1
     while true
