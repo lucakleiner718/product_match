@@ -57,6 +57,8 @@ class Parser::Platform
           :emerchant
         elsif resp.body =~ /\/sites\/all\themes/ || resp.body =~ /content\=\"Drupal/
           :drupal
+        elsif resp.body =~ /lib\.store\.yahoo\.net/
+          :aabaco
         end
       end
 

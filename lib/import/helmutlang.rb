@@ -13,17 +13,13 @@ class Import::Helmutlang < Import::Platform::Demandware
     end
   end
 
-  def process_category(url)
-    log url
-    resp = get_request(url)
+  def process_category(category_url)
+    log(category_url)
+    resp = get_request(category_url)
     html = Nokogiri::HTML(resp.body)
 
     urls = html.css('#search a').map{|a| a.attr('href').sub(/\?.*/, '')}.select{|a| a =~ /[A-Z0-9]+,default,pd\.html$/}
-
-    urls = process_products_urls urls
-
-    urls.each {|url| spawn_url('product', url) }
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
   def process_product(original_url)

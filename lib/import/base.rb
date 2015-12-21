@@ -178,9 +178,13 @@ class Import::Base
 
   end
 
-  def spawn_products_urls(urls)
-    urls = process_products_urls(urls)
-    process_in_batch(urls)
+  def spawn_products_urls(urls, process_urls=true)
+    urls = process_products_urls(urls) if process_urls
+    if Rails.env.production?
+      process_in_batch(urls)
+    else
+      urls.each{|url| spawn_url('product', url)}
+    end
     log "spawned #{urls.size} urls"
   end
 
@@ -288,6 +292,10 @@ class Import::Base
   end
 
   def spawn_url(kind, url, *args)
-    ProcessImportUrlWorker.perform_async(self.class.name, "process_#{kind}", url, *args)
+    if Rails.env.production?
+      ProcessImportUrlWorker.perform_async(self.class.name, "process_#{kind}", url, *args)
+    else
+      ProcessImportUrlWorker.new.perform(self.class.name, "process_#{kind}", url, *args)
+    end
   end
 end

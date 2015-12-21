@@ -45,8 +45,8 @@ class Suggestion
 
     related_products.find_each do |suggested|
       percentage = similarity_to(suggested, upc_patterns)
-      ps = exists["#{product.id}_#{suggested.id}"]
       if percentage && percentage > SIMILARITY_MIN
+        ps = exists[suggested.id]
         actual_list << suggested.id
 
         if ps
@@ -254,8 +254,7 @@ class Suggestion
   end
 
   def build_related_products
-    brand_name = product.brand.try(:name)
-    brand = Brand.get_by_name(brand_name) || Brand.create(name: brand_name)
+    brand = product.brand
 
     rp = Product.not_matching.where('products.source NOT IN (?)', EXCLUDE_SOURCES)
            .where(brand_id: brand.id).with_upc.where.not(title: nil)

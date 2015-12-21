@@ -31,9 +31,7 @@ class Import::Saksoff5th < Import::Platform::Demandware
       page_no += 1
     end
 
-    urls = process_products_urls urls
-    process_in_batch(urls)
-    log "spawned #{urls.size} urls"
+    spawn_products_urls(urls)
   end
 
   def process_product(original_url)

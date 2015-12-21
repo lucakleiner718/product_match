@@ -21,8 +21,7 @@ class Import::Agjeans < Import::Base
       log "urls amount #{urls.size}"
     end
     urls = urls.uniq.reject{|url| url =~ /\.m4v$/}
-    log "uniq urls #{urls.size}"
-    urls.each {|url| spawn_url('product', url) }
+
     spawn_products_urls(urls)
   end
 

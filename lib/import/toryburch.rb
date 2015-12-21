@@ -48,8 +48,8 @@ class Import::Toryburch < Import::Platform::Demandware
     log "Processing url: #{original_url}"
     product_id = original_url.match(product_id_pattern)[1]
 
-    resp = get_request("#{baseurl}/#{product_id}.html")
-    return false if resp.response_code != 200
+    resp = get_request("#{product_id}.html")
+    return false unless resp.success?
 
     url = resp.effective_url
 
@@ -100,7 +100,7 @@ class Import::Toryburch < Import::Platform::Demandware
 
     if allow_spawn && html.css('.subproduct').size > 0
       html.css('.subproduct').map{|el| el.attr('id').match(/product-(.*)/)[1]}.each do |subproduct_id|
-        url = "#{baseurl}/#{subproduct_id}.html"
+        url = build_url("#{subproduct_id}.html")
         spawn_url('product', url, false)
       end
     end
