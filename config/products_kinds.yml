@@ -243,25 +243,31 @@ cufflink:
   - stud
   - studs
 
+cases:
+  - iphone case
+  - table case
+  - computer case
+
 accessories other:
   - bandana
   - belt
   - bow tie
   - coin purse
+  - cravat
   - cummerbund
   - gaiters
   - gloves
   - headband
   - handkerchief
   - muff
-  - necktie
-  - tie
-  - cravat
   - neckcloth
+  - necktie
+  - pony holder
   - overlay
   - sash
   - scarf
   - suspenders
+  - tie
   - wallet
 
 bags:

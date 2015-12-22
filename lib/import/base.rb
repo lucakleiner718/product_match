@@ -15,7 +15,7 @@ class Import::Base
   def normalize_title item
     if item[:title].present?
       item[:title] = item[:title].to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
-                       .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'')
+                       .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'').gsub('&amp;', '&')
     end
   end
 
@@ -126,13 +126,13 @@ class Import::Base
     items
   end
 
-  def build_url url
+  def build_url(url)
     url.sub!(/^\/\//, 'http://')
     url = "#{baseurl}#{'/' if url[0] != '/'}#{url}" if url[0,4] != 'http'
     url
   end
 
-  def get_request url, params={}
+  def get_request(url, params={})
     url = build_url(url)
     send_typhoeus_get(url, params)
   end
