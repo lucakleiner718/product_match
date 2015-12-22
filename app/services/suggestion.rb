@@ -102,7 +102,7 @@ class Suggestion
     end
 
     title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^\-0-9a-z]/i, '')}.select{|el| el.size > 2}
-    title_parts -= ['the', 'and', 'womens', 'mens']
+    title_parts -= %w(the and womens mens)
 
     suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
 

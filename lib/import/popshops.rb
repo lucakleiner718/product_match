@@ -158,8 +158,6 @@ class Import::Popshops < Import::Base
         item[:color] = mpn[1]
       end
 
-      item[:retailer] = normalize_retailer(item[:retailer]) if item[:retailer]
-
       results << item
     end
 

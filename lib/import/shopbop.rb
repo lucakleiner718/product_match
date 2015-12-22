@@ -111,7 +111,7 @@ class Import::Shopbop < Import::Platform::Bop
       }
     end
 
-    prepare_items(results, check_upc_rule: :simple)
+    prepare_items(results)
 
     Brand.where(id: results.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
 

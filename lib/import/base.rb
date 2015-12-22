@@ -12,15 +12,12 @@ class Import::Base
     brand_name
   end
 
-  def normalize_title item
+  def normalize_title(item)
+    item[:title] = item[:title].encode("UTF-8", invalid: :replace, replace: '')
     if item[:title].present?
       item[:title] = item[:title].to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
                        .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'').gsub('&amp;', '&')
     end
-  end
-
-  def normalize_retailer retailer
-    retailer
   end
 
   def baseurl
@@ -39,7 +36,7 @@ class Import::Base
     1_000
   end
 
-  def prepare_items items, check_upc_rule: :full
+  def prepare_items(items, check_upc_rule: false)
     items.map do |item|
       strip_data(item)
       normalize_title(item)
@@ -81,16 +78,16 @@ class Import::Base
     end
   end
 
-  def check_upc(item, check_upc_rule=:full)
+  def check_upc(item, check_upc_rule)
     if item[:ean].present? && item[:upc].blank?
       item[:upc] = item[:ean]
     end
 
     item.delete :ean
     item[:upc] = nil if item[:upc].blank? || item[:upc] !~ /\A\d+\z/
-    # if check_upc_rule.to_sym == :full && item[:upc].present?
-    #   item[:upc] = (GTIN.process(item[:upc]) || nil)
-    # end
+    if check_upc_rule && item[:upc].present?
+      item[:upc] = (GTIN.process(item[:upc]) || nil)
+    end
   end
 
   def prepare_additional_images item

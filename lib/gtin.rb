@@ -7,31 +7,19 @@ class GTIN
     prepare_number
   end
 
-  # @return correct upc (can be modified) or false if upc is wrong
   def self.process(input)
-    instance = self.new(input)
-    instance.process
+    self.new(input).process
   end
 
   def process
-    if valid_gtin?
-      gtin
-    else
-      false
-    end
+    valid? ? gtin : false
   end
 
-  private
-
-  attr_reader :gtin
-
-  def prepare_number
-    @gtin = @gtin.to_s.gsub(/[\D]+/, "")
-    @gtin = @gtin[1,13] if @gtin.size == 14 && @gtin[0] == '0'
-    @gtin = @gtin[1,12] if @gtin.size == 13 && @gtin[0] == '0'
+  def self.valid?(input)
+    self.new(input).valid?
   end
 
-  def valid_gtin?
+  def valid?
     numbers = gtin.to_s.gsub(/[\D]+/, "").split(//)
 
     checksum = 0
@@ -51,9 +39,22 @@ class GTIN
     last_digit = (10 - checksum % 10)%10
     valid = numbers[-1].to_i == last_digit
     unless valid
-      puts "Last digit should be #{last_digit} instead of #{numbers[-1].to_i}"
+      log("Last digit should be #{last_digit} instead of #{numbers[-1].to_i}")
     end
     valid
   end
 
+  private
+
+  attr_reader :gtin
+
+  def prepare_number
+    @gtin = @gtin.to_s.gsub(/[\D]+/, "")
+    @gtin = @gtin[1,13] if @gtin.size == 14 && @gtin[0] == '0'
+    @gtin = @gtin[1,12] if @gtin.size == 13 && @gtin[0] == '0'
+  end
+
+  def log(str)
+    defined?(Rails) && Rails.logger ? Rails.logger.debug(str) : nil
+  end
 end
