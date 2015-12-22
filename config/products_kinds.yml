@@ -141,6 +141,7 @@ footwear:
   - espadrilles
   - flats
   - flip flop
+  - hosiery
   - mule
   - loafer
   - loafers
@@ -155,8 +156,6 @@ footwear:
   - shoes
   - sneaker
   - sneakers
-  - wedge
-  - hosiery
   - spats
   - slides
   - slipper
@@ -164,6 +163,8 @@ footwear:
   - sock
   - socks
   - stocking
+  - wedge
+  - wedges
 
 headwear:
   - fedora

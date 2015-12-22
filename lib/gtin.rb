@@ -1,5 +1,7 @@
 class GTIN
 
+  REGEXP = /\A\d+\z/
+
   def initialize(gtin)
     @gtin = gtin
     prepare_number

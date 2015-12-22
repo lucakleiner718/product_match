@@ -101,7 +101,9 @@ class Import::Marcjacobs < Import::Platform::Demandware
           end
 
           upc = size_html.css('#pid').first.attr('value')
-          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ /^\d+$/
+
+          next if upc == product_id
+          raise Exception.new("Wrong UPC -> #{upc}") if upc !~ GTIN::REGEXP
 
           results << {
             title: product_name,
