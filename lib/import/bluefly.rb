@@ -53,7 +53,7 @@ class Import::Bluefly < Import::Base
 
     brand = html.css('h1.product-brand').first.text.strip
 
-    binding.pry unless brand
+    binding.pry if !brand && Rails.env.development?
     raise "No Brand" unless brand
 
     data.each do |upc, row|

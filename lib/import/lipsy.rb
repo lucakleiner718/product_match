@@ -81,7 +81,7 @@ class Import::Lipsy < Import::Base
       brand = html.css(".nav-column li a[href*=\"/store/brands/#{brand_slug}\"]").map{|a| a.text}.first
     end
 
-    binding.pry unless brand
+    binding.pry if !brand && Rails.env.development?
     raise "No Brand" unless brand
 
     data.each do |source_id, row|

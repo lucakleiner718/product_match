@@ -42,7 +42,6 @@ class Suggestion
     actual_list = []
 
     upc_patterns = product.upc_patterns
-    binding.pry
 
     related_products.find_each do |suggested|
       percentage = similarity_to(suggested, upc_patterns)
