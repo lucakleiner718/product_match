@@ -9,7 +9,7 @@ class ProductSuggestionsGeneratorWorker
     options.symbolize_keys!
 
     brand = Brand.find(brand_id)
-    products = Product.matching.where(match: true).without_upc.where(brand_id: brand.id)
+    products = Product.matching.where(in_store: true, match: true).without_upc.where(brand_id: brand.id)
 
     in_batch(brand) do
       products.find_each do |product|

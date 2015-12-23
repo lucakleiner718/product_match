@@ -1,4 +1,5 @@
 tops:
+  - caftan
   - cardigan
   - crop top
   - body
@@ -101,6 +102,13 @@ outerwear:
   - waistcoat
   - windbreaker
 
+tights:
+  - tights
+  - pantyhose
+  - leotard
+  - tricot
+  - maillot
+
 underwear:
   - cami
   - camisole
@@ -187,6 +195,7 @@ nightwear:
   - pajamas
 
 swimwear:
+  - bandeau
   - bikini
   - bikini top
   - bikini bottom
@@ -199,6 +208,7 @@ swimwear:
   - square leg suit
   - swim briefs
   - swim diaper
+  - swimsuit
   - trunks
   - wetsuit
 
@@ -269,10 +279,12 @@ accessories other:
   - suspenders
   - tie
   - wallet
+  - key leash
 
 bags:
   - backpack
   - bag
+  - briefcase
   - card case
   - carpetbag
   - case
