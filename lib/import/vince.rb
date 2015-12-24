@@ -89,9 +89,19 @@ class Import::Vince < Import::Platform::Venda
     end
     category = categories.join(' > ')
 
+    colors_images = {}
+    sc = html.css('script:contains("imageSwap")').first.text
+    sc.scan(/imageSwap = {[^;]+};/m).each do |image_swap|
+      color = image_swap.scan(/{\s+"param":\s"([^"]+)"/).first.first
+      imgs = image_swap.scan(/imageSwap = {[^;]+};/m).last.scan(/imgM: \[([^\]]+)\]/m).first.first
+                 .split(',').map{|img| img.gsub(/\s|"/, '')}.select{|img| img.present?}
+
+      colors_images[color] = imgs
+    end
+
     image_url_mask = "#{baseurl}/content/ebiz/vince/invt/{{style_code}}/{{style_code}}{{color}}setmedium.jpg"
-    colors_images = page.scan(/Venda\.Attributes\.SwatchURL\["([A-Za-z\s\-]+)"\]\s=\s"http:\/\/www\.vince\.com\/content\/ebiz\/vince\/invt\/[a-z0-9]+\/[a-z0-9]+(.*)setswatch\.jpg";/)
-    colors_images = colors_images.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
+    colors_images2 = page.scan(/Venda\.Attributes\.SwatchURL\["([A-Za-z\s\-]+)"\]\s=\s"http:\/\/www\.vince\.com\/content\/ebiz\/vince\/invt\/[a-z0-9]+\/[a-z0-9]+(.*)setswatch\.jpg";/)
+    colors_images2 = colors_images2.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
 
     json.each do |row|
       options = row[1]
@@ -101,7 +111,10 @@ class Import::Vince < Import::Platform::Venda
       size = options['atr2']
       style_code = options['atrdssku']
 
-      image = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images[color])}/).first
+      images = [] + colors_images[color]
+      images = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images2[color])}/) if images.size == 0
+
+      image = images.shift
       raise "No image" unless image
 
       results << {
@@ -113,6 +126,7 @@ class Import::Vince < Import::Platform::Venda
         upc: upc,
         url: url,
         image: image,
+        additional_images: images,
         style_code: style_code,
         gender: gender,
         brand: brand_name_default,
