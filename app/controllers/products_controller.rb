@@ -3,7 +3,7 @@ class ProductsController < ApplicationController
   before_filter :authorize
 
   def root
-    redirect_to products_path
+    redirect_to products_statistic_path
   end
 
   def index
