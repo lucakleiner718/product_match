@@ -7,4 +7,8 @@ class ProductUpc < ActiveRecord::Base
   validates :product_select_ids, presence: true
   validates :upc, presence: true
 
+  def selected
+    Product.where(id: self.selected_ids)
+  end
+
 end

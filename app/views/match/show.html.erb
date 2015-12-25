@@ -9,7 +9,7 @@
         <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
         <%= link_to 'Brand statistic', products_statistic_path(brand_id: @brand.id), class: 'btn btn-default pull-right', target: :_blank %>
         <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
-        <%= link_to 'Undo previous match', match_undo_path(brand_id: @brand.id), class: 'btn btn-default select-action pull-right', remote: true, method: :post %>
+        <%= link_to 'Undo previous match', match_undo_path(brand_id: @brand.id), class: 'btn btn-default select-action pull-right', remote: true, method: :post if @last_match %>
         <div style="height: 2px; width: 1px; clear: both;">&nbsp;</div>
         <% show_formats = {
           all: 'All',
@@ -37,25 +37,26 @@
     </div>
   </div>
 
-  <% if @product.upc.present? && product_upc = ProductUpc.find_by!(product_id: @product.id) %>
-    <% product = product_upc.selected %>
+  <% if @selected_products %>
     <h2>This product already matched with:</h2>
     <div class="row">
-      <div class="col-sm-3 col-xs-6">
-        <div class="thumbnail" data-id="<%= product.id %>">
-          <strong><%= product.title %></strong></br>
-          <em>Color:</em> <%= product.color %></br>
-          <em>Size:</em> <%= product.size %></br>
-          <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
-          <!--<em>Category:</em> <%= product.category %></br>-->
-          <em>Source:</em> <%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></br>
-          <em>UPC:</em> <%= product.upc %></br>
+      <% @selected_products.each do |product| %>
+        <div class="col-sm-3 col-xs-6">
+          <div class="thumbnail" data-id="<%= product.id %>">
+            <strong><%= product.title %></strong></br>
+            <em>Color:</em> <%= product.color %></br>
+            <em>Size:</em> <%= product.size %></br>
+            <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
+            <!--<em>Category:</em> <%= product.category %></br>-->
+            <em>Source:</em> <%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></br>
+            <em>UPC:</em> <%= product.upc %></br>
 
-          <div style="margin: 5px 0;">
-            <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank %>
+            <div style="margin: 5px 0;">
+              <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank %>
+            </div>
           </div>
         </div>
-      </div>
+      <% end %>
     </div>
   <% else %>
     <div class="row">
@@ -81,5 +82,4 @@
 
 <% else %>
   <%= render 'no_products' %>
-
 <% end %>

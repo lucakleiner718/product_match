@@ -66,6 +66,17 @@ class MatchController < ApplicationController
 
       @brand = @product.brand unless @brand
     end
+
+    if !@product && @brand
+      BrandStatWorker.perform_async(@brand.id)
+    end
+
+    @last_match = ProductSelect.joins(:product).where(user: current_user.id, products: { brand_id: params[:brand_id]})
+                   .where('product_selects.created_at > ?', 1.hour.ago).exists?
+
+    if @product && @product.upc.present? && product_upc = ProductUpc.find_by!(product_id: @product.id)
+      @selected_products = product_upc.selected
+    end
   end
 
   def select
