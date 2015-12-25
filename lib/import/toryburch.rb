@@ -69,7 +69,7 @@ class Import::Toryburch < Import::Platform::Demandware
     product_name = nil
     brand_name = nil
 
-    category = html.css('#breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
+    category = html.css('#breadcrumb a').map{|el| el.text.strip}.inject([]){|ar, el| el == 'Home' ? '' : ar << el; ar}.join(' > ')
 
     colors = {}
     script = html.css('script:contains("new app.Product"):contains("variations")').first.text
@@ -122,7 +122,15 @@ class Import::Toryburch < Import::Platform::Demandware
       color = colors[color_id]
       size = v['attributes']['size']
       color_url = "#{url}?dwvar_#{product_id}_color=#{color_id}"
-      image_url = "http://s7d5.scene7.com/is/image/ToryBurchLLC/TB_#{product_id}_#{color_id}_A?fit=constrain,1&wid=500&hei=700&fmt=jpg"
+
+      images = []
+      ['', 'A', 'B', 'C', 'D', 'E', 'F'].each do |letter|
+        image_url = "http://s7d5.scene7.com/is/image/ToryBurchLLC/TB_#{product_id}_#{color_id}#{letter.present? ? "_#{letter}" : ''}?fit=constrain,1&wid=500&hei=700&fmt=jpg"
+        resp_img = get_request(image_url)
+        # 9190 bytes is the size of default image
+        images << image_url if resp_img.success? && resp_img.body.size != 9190
+      end
+      main_image = images.shift
 
       results << {
         title: product_name,
@@ -133,7 +141,8 @@ class Import::Toryburch < Import::Platform::Demandware
         size: size,
         upc: upc,
         url: color_url,
-        image: image_url,
+        image: main_image,
+        additional_images: images,
         style_code: product_id,
         brand: brand_name
       }

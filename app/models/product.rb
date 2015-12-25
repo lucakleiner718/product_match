@@ -29,7 +29,7 @@ class Product < ActiveRecord::Base
   after_destroy do
     images = [self.image_local] + self.additional_images_local
     images.compact.each do |image|
-      DeleteProductImage.perform_async image
+      DeleteProductImage.perform_async(image)
     end
   end
 
@@ -97,6 +97,6 @@ class Product < ActiveRecord::Base
   private
 
   def image_local_update
-    ImageLocalWorker.perform_async self.id if Rails.env.production?
+    ImageLocalWorker.perform_async(self.id) if Rails.env.production?
   end
 end

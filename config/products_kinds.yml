@@ -260,9 +260,13 @@ cases:
   - table case
   - computer case
 
+belt:
+  - belt
+  - strap
+  - thong
+
 accessories other:
   - bandana
-  - belt
   - bow tie
   - coin purse
   - cravat
