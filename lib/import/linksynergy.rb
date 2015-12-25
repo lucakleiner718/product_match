@@ -113,8 +113,8 @@ class Import::Linksynergy < Import::Base
       (r[:source_id].in?(@exists_products.map(&:source_id)) ? to_update : to_create) << r
     end
 
-    process_to_create to_create
-    process_to_update to_update if @update
+    process_to_create(to_create)
+    process_to_update(to_update) if @update
   end
 
   def prepare_data rows
@@ -157,7 +157,7 @@ class Import::Linksynergy < Import::Base
     end
   end
 
-  def process_to_update to_update
+  def process_to_update(to_update)
     to_update.each do |row|
       product = @exists_products.select{|pr| pr.source_id == row[:source_id]}.first
       row.delete :upc unless row[:upc].present?

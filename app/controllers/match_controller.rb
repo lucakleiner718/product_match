@@ -69,38 +69,14 @@ class MatchController < ApplicationController
   end
 
   def select
-    if params[:decision] == 'found' && params[:selected_id]
-      product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
-      if product_suggestion
-        ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
-        PopulateProductUpc.perform params[:product_id]
-      end
-    elsif params[:decision] == 'nothing'
-      product = Product.find(params[:product_id])
-      same_products_options = Product.where(source: product.source, style_code: product.style_code).pluck(:id)
-      same_products_options.each do |product_id|
-        ProductSelect.create(user_id: current_user.id, product_id: product_id, decision: params[:decision])
-      end
-    elsif params[:decision] == 'no-color'
-      product = Product.find(params[:product_id])
-      same_products_options = Product.where(source: product.source, style_code: product.style_code, color: product.color).pluck(:id)
-      same_products_options.each do |product_id|
-        ProductSelect.create(user_id: current_user.id, product_id: product_id, decision: params[:decision])
-      end
-    elsif params[:decision] == 'no-size'
-      ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], decision: params[:decision])
-    elsif params[:decision] == 'similar' && params[:selected_id]
-      product_suggestion = ProductSuggestion.where(product_id: params[:product_id], suggested_id: params[:selected_id]).first
-      if product_suggestion
-        ProductSelect.create(user_id: current_user.id, product_id: params[:product_id], selected_id: params[:selected_id], selected_percentage: product_suggestion.percentage, decision: params[:decision])
-      end
-    end
-
+    MatchProcessor.new(current_user.id, params[:product_id], params[:decision],
+      params[:selected_id]).process
     render json: {}
   end
 
   def undo
-    last_match = ProductSelect.joins(:product).where(user: current_user.id, products: { brand_id: params[:brand_id]}).where('product_selects.created_at > ?', 1.hour.ago).order(created_at: :desc).first
+    last_match = ProductSelect.joins(:product).where(user: current_user.id, products: { brand_id: params[:brand_id]})
+                   .where('product_selects.created_at > ?', 1.hour.ago).order(created_at: :desc).first
     if last_match
       if last_match.decision == 'found'
         ProductUpc.where(product_id: last_match.product_id).destroy_all

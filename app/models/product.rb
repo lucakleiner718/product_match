@@ -70,7 +70,7 @@ class Product < ActiveRecord::Base
   end
 
   def cancel_upc
-    product_upc = ProductUpc.find_by(product_id: self.id)
+    product_upc = ProductUpc.find_by!(product_id: self.id)
 
     if product_upc
       self.update! match: true, upc: nil

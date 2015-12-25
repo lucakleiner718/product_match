@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <% if @product.upc.present? && product_upc = ProductUpc.where(product_id: @product.id).first %>
+  <% if @product.upc.present? && product_upc = ProductUpc.find_by!(product_id: @product.id) %>
     <% product = product_upc.selected %>
     <h2>This product already matched with:</h2>
     <div class="row">

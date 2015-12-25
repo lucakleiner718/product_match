@@ -8,7 +8,7 @@ RSpec.describe Suggestion do
 
     context 'when product is present' do
       before do
-        create(:shopbop_product_suggestion, brand_id: product.brand_id)
+        create(:shopbop_product_suggestion)
       end
 
       it 'should generate suggestions' do
