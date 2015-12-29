@@ -264,10 +264,12 @@ ORDER BY t.found_count desc, avg_similarity desc
   end
 
   def authorize
-    if current_user.manager? && !params[:action].in?(['statistic', 'marketing'])
-      redirect_to(products_statistic_path) unless current_user.is_admin?
-    elsif current_user.regular? && !params[:action].in?(['match', 'match_select'])
-      redirect_to(match_path)
+    if current_user.admin?
+      true
+    elsif current_user.manager? && ['statistic', 'marketing', 'statistic_export'].exclude?(params[:action])
+      redirect_to(products_statistic_path, alert: "You don't have access to this page")
+    elsif current_user.regular? && ['match', 'match_select'].exclude?(params[:action])
+      redirect_to(match_path, alert: "You don't have access to this page")
     end
   end
 

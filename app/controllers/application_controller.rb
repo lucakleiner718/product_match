@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
 
   def authenticate_admin_user!
-    return false unless authenticate_user! || current_user.is_admin?
+    return false unless authenticate_user! || current_user.admin?
     true
   end
 

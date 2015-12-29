@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
 
   ROLES = %w(manager admin)
 
-  def is_admin?
+  def admin?
     self.role == 'admin'
   end
 

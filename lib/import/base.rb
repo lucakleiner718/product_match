@@ -13,9 +13,9 @@ class Import::Base
   end
 
   def normalize_title(item)
-    item[:title] = item[:title].encode("UTF-8", invalid: :replace, replace: '')
     if item[:title].present?
-      item[:title] = item[:title].to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
+      item[:title] = item[:title].encode("UTF-8", invalid: :replace, replace: '')
+                       .to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
                        .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'').gsub('&amp;', '&')
     end
   end
