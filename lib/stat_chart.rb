@@ -1,7 +1,5 @@
 class StatChart
   def data
-    timeframe = 6.months
-
     chart = {
       total_products: [],
       total_products_published: [],
@@ -27,33 +25,27 @@ class StatChart
       end
     end
 
-    added_without_upc = ProductUpc.connection.execute("
-      SELECT count(*), EXTRACT(YEAR FROM created_at)::text || '-' || EXTRACT(WEEK FROM created_at)::text AS created_week
-      FROM products
-      WHERE source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
-            AND (upc is null OR upc = '') AND created_at > '#{2.months.ago.utc}'
-      GROUP BY created_week
-    ")
+    dates = Product.matching.without_upc.where('created_at > ?', 2.months.ago.utc).order(:created_at).pluck(:created_at)
     chart[:added_without_upc] =
-      added_without_upc.sort{|a,b| a['created_week'] <=> b['created_week']}
-      .map do |el|
+      dates_to_weeks(dates).map do |el|
         week = el['created_week'].split('-').map(&:to_i)
-        [Date.commercial(week.first, week.last, 7).to_time.to_i*1000, el['count'].to_i]
+        [Date.commercial(week.first, week.last+1, 7).to_time.to_i*1000, el['count'].to_i]
       end
 
-    matched = ProductUpc.connection.execute("
-      SELECT count(*), EXTRACT(YEAR FROM created_at)::text || '-' || EXTRACT(WEEK FROM created_at)::text AS created_week
-      FROM product_upcs
-      WHERE created_at > '#{2.months.ago.utc}'
-      GROUP BY created_week
-    ")
+    matched = ProductUpc.where('created_at > ?', 2.months.ago.utc).order(:created_at).pluck(:created_at)
     chart[:matched] =
-      matched.sort{|a,b| a['created_week'] <=> b['created_week']}
-        .map do |el|
+      dates_to_weeks(matched).map do |el|
           week = el['created_week'].split('-').map(&:to_i)
-          [Date.commercial(week.first, week.last, 7).to_time.to_i*1000, el['count'].to_i]
+          [Date.commercial(week.first, week.last+1, 7).to_time.to_i*1000, el['count'].to_i]
         end
 
     chart
+  end
+
+  private
+
+  def dates_to_weeks(dates)
+    dates.map{|date| date.strftime("%Y-%U")}.group_by{|e| e}
+         .each_with_object([]){|(k,v), ar| ar << {'created_week' => k, 'count' => v.size}}
   end
 end
