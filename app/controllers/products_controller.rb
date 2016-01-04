@@ -235,10 +235,10 @@ ORDER BY t.found_count desc, avg_similarity desc
       {name: 'Managed', data: chart[:matched]},
     ]
 
-    @links = Dir.glob('public/downloads/shopbop_products_upc-*').sort.reverse[0..9].sort.map do |l|
+    @links = Dir.glob('public/downloads/shopbop_products_upc-*').map{|el| [Date.strptime(el.match(/shopbop_products_upc-(\d+_\d+_\d+)-/) && $1, '%m_%d_%y'), el]}.sort_by{|el| el[0]}.reverse[0..9].map do |(date, l)|
       [
         l.sub(/^public/, ''),
-        l.match(/shopbop_products_upc-([\d_]{8})/)[1].gsub('_', '/'),
+        date.strftime('%m/%d/%y'),
         File.readlines(l).size,
         File.mtime(l)
       ]
