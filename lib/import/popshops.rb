@@ -42,6 +42,7 @@ class Import::Popshops < Import::Base
     page = 1
     while page <= 100 do
       url = build_url_params(brand: brand_id, category: category_id, page: page)
+      log(url)
 
       resp = get_request(url)
       body = resp.body

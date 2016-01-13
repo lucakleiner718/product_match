@@ -268,7 +268,9 @@ class Import::Base
       followlocation: true,
       # verbose: true,
       maxredirs: 10,
-      params: params
+      params: params,
+      timeout: 10,
+      connecttimeout: 10
     )
   end
 
