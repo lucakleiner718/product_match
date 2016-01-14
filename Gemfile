@@ -61,7 +61,7 @@ source "https://058b026d:dbdee804@gems.contribsys.com/" do
   gem 'sidekiq-pro', '~> 3.0'
 end
 gem 'sidekiq-failures', '~> 0.4.5'
-gem 'sidekiq-unique-jobs', '~> 3.0'
+# gem 'sidekiq-unique-jobs', '~> 3.0'
 
 gem 'redis', '~> 3.2.1'
 gem 'redis-rails'

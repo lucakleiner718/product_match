@@ -108,7 +108,7 @@ class ProductsController < ApplicationController
           BrandStatWorker.new.perform(brand.id)
           stat = brand.reload.stat
         end
-        
+
         csv << [
           brand.name, stat.shopbop_size, stat.shopbop_noupc_size, stat.shopbop_matched_size, stat.shopbop_nothing_size,
           stat.amounts_values, stat.suggestions, stat.suggestions_green, stat.suggestions_yellow,
