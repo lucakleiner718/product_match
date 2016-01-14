@@ -66,11 +66,11 @@ class Import::Shopbop < Import::Platform::Bop
 
     resp = get_request(url)
 
-    style_code = resp.body.scan(/productPage\.productCode=['"]([^'"]+)['"]/).first.first
-    return false if product.style_code != style_code
+    style_code = resp.body.scan(/productPage\.productCode=['"]([^'"]+)['"]/).try(:first).try(:first)
+    return false if !style_code || product.style_code != style_code
 
-    list_price = resp.body.scan(/productPage\.listPrice=['"]([^'"]+)['"]/).first.first
-    sale_price = resp.body.scan(/productPage\.sellingPrice=['"]([^'"]+)['"]/).first.first
+    list_price = resp.body.scan(/productPage\.listPrice=['"]([^'"]+)['"]/).try(:first).try(:first)
+    sale_price = resp.body.scan(/productPage\.sellingPrice=['"]([^'"]+)['"]/).try(:first).try(:first)
 
     if product.price != list_price
       product.price = list_price
