@@ -1,5 +1,7 @@
 class Import::Base
 
+  class TyphoeusTimeoutError < StandardError; end
+
   def brand_name_default
     
   end
@@ -131,7 +133,9 @@ class Import::Base
 
   def get_request(url, params={})
     url = build_url(url)
-    send_typhoeus_get(url, params)
+    resp = send_typhoeus_get(url, params)
+    raise TyphoeusTimeoutError if resp.timed_out?
+    resp
   end
 
   def process_title_for_gender(title)
