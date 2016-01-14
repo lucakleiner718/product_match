@@ -30,7 +30,9 @@ class Import::Aliceandolivia < Import::Base
         break if rows.size == 0
 
         rows.each do |row|
-          process_product(build_url(row['page_name_s']))
+          row_url = row['page_name_s']
+          next unless url
+          process_product(build_url(row_url))
         end
 
         page_number += 1
