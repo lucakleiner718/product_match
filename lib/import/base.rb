@@ -269,8 +269,8 @@ class Import::Base
       # verbose: true,
       maxredirs: 10,
       params: params,
-      timeout: 10,
-      connecttimeout: 10
+      timeout: 30,
+      connecttimeout: 30
     )
   end
 
