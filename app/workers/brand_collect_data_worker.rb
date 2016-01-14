@@ -6,7 +6,7 @@ class BrandCollectDataWorker
   def perform product_source_id
     begin
       product_source = ProductSource.find(product_source_id)
-    rescue ActiveRecord::RecordNotUnique => e
+    rescue ActiveRecord::RecordNotFound
       return false
     end
 
