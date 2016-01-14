@@ -13,3 +13,10 @@ Sidekiq.configure_client do |config|
 end
 
 SidekiqUniqueJobs.config.unique_args_enabled = true
+
+# Sidekiq Pro Reliability feature
+Sidekiq::Client.reliable_push! unless Rails.env.test?
+Sidekiq.configure_server do |config|
+  config.reliable_fetch!
+  config.reliable_scheduler!
+end
