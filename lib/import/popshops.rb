@@ -56,16 +56,16 @@ class Import::Popshops < Import::Base
 
       items = prepare_data products
 
-      @exists_products = Product.where(source: source, source_id: items.map{|r| r[:source_id]})
+      @exists_products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).each_with_object({}){|el, obj| obj[el.source_id] = el}
       to_update = []
       to_create = []
 
       items.each do |r|
-        (r[:source_id].in?(@exists_products.map(&:source_id)) ? to_update : to_create) << r
+        (r[:source_id].in?(@exists_products.keys) ? to_update : to_create) << r
       end
 
-      process_to_create to_create
-      process_to_update to_update
+      process_to_create(to_create)
+      process_to_update(to_update)
 
       page += 1
     end
@@ -87,7 +87,7 @@ class Import::Popshops < Import::Base
 
   def process_to_update to_update
     to_update.each do |row|
-      product = @exists_products.select{|pr| pr.source_id == row[:source_id]}.first
+      product = @exists_products[row[:source_id]]
       row.delete :upc if row[:upc].blank?
       row.delete :size if row[:size].blank?
       row.delete :color if row[:color].blank?
