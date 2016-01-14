@@ -63,7 +63,7 @@ class Import::Base
   end
 
   def process_gender(item)
-    item[:gender] = process_title_for_gender(item[:title]) if item[:gender].blank?
+    item[:gender] = process_title_for_gender(item[:title]) if item[:gender].blank? && item[:title].present?
     item[:gender] = process_category_for_gender(item[:category]) if item[:gender].blank?
   end
 
