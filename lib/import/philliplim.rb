@@ -85,6 +85,7 @@ class Import::Philliplim < Import::Base
         end
       end
 
+      next unless color_images[color]
       images = [] + color_images[color]
       main_image = images.shift
       style_code = cxt['skus']['productId']
