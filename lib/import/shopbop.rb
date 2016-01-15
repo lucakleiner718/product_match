@@ -11,7 +11,8 @@ class Import::Shopbop < Import::Platform::Bop
     updated_ids = []
 
     process_batch(filename) do |rows|
-      items = prepare_data rows
+      items = prepare_data(rows)
+      brands += items.map{|item| item[:brand_name]}
 
       products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
       to_update = []
@@ -27,11 +28,11 @@ class Import::Shopbop < Import::Platform::Bop
 
       to_update.each do |row|
         product = products[row[:source_id]]
-        row.delete :upc if row[:upc].blank?
+        row.delete(:upc) if row[:upc].blank?
         product.attributes = row
 
         if product.price_changed?
-          ProcessImportUrlWorker.perform_async self.class.name, 'update_product_page', product.id
+          ProcessImportUrlWorker.perform_async(self.class.name, 'update_product_page', product.id)
         end
 
         product.save! if product.changed?
@@ -85,7 +86,7 @@ class Import::Shopbop < Import::Platform::Bop
 
   private
 
-  def prepare_data rows
+  def prepare_data(rows)
     results = []
     rows.each do |r|
       addit_images = [r[:additional_image_link], r[:additional_image_link1], r[:additional_image_link2],

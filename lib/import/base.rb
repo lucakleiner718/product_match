@@ -270,11 +270,11 @@ class Import::Base
   def send_typhoeus_get(url, params={})
     Typhoeus.get(url,
       followlocation: true,
-      # verbose: true,
       maxredirs: 10,
       params: params,
-      timeout: 30,
       connecttimeout: 30
+      # timeout: 30,
+      # verbose: true,
     )
   end
 
