@@ -28,6 +28,8 @@ ActiveAdmin.register ProductSource do
       case ps.source_name
         when 'popshops'
           link_to 'Full', Import::Popshops.new.build_url_params(brand: ps.source_id), target: :_blank
+        when 'popshops_merchant'
+          link_to 'Full', Import::Popshops.new.build_url_params(merchant: ps.source_id), target: :_blank
         when 'website'
           link_to 'Full', Module.const_get("Import::#{ps.source_id.titleize}").new.baseurl, target: :_blank rescue nil
         when 'shopbop'
@@ -44,7 +46,7 @@ ActiveAdmin.register ProductSource do
   form do |f|
     f.inputs do
       f.input :name, hint: 'Can be Brand name either just a name for shop. Brand name should be exact like added in brands section.'
-      f.input :source_name, collection: [['Popshops', 'popshops'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Eastdane', 'eastdane'], ['Website', 'website']]
+      f.input :source_name, collection: [['Popshops (brand)', 'popshops'], ['Popshops (merchant)', 'popshops_merchant'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Eastdane', 'eastdane'], ['Website', 'website']]
       f.input :source_id, label: 'Source ID'
       f.input :brand, collection: Brand.in_use.order(:name)
       f.input :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS, prompt: false

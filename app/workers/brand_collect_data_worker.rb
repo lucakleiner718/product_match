@@ -13,7 +13,10 @@ class BrandCollectDataWorker
     response =
       case product_source.source_name
         when 'popshops'
-          Import::Popshops.perform brand_id: product_source.source_id
+          Import::Popshops.perform(brand: product_source.source_id)
+          true
+        when 'popshops_merchant'
+          Import::Popshops.perform(merchant: product_source.source_id)
           true
         when 'linksynergy'
           Import::Linksynergy.perform mid: product_source.source_id, daily: true,

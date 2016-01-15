@@ -27,21 +27,24 @@ class Import::Popshops < Import::Base
     }
   }
 
-  def self.perform brand_id: nil, rewrite: false, category_id: nil
+  def self.perform(brand: nil, merchant: nil, category_id: nil)
     instance = self.new
-    instance.perform brand_id: brand_id, rewrite: rewrite, category_id: category_id
+    instance.perform(brand: brand, merchant: merchant, category_id: category_id)
   end
 
-  def perform brand_id: nil, rewrite: false, category_id: nil
-    raise unless brand_id
-
-    if rewrite
-      Product.where(source: source, brand_id: brand.id).delete_all
+  def perform(brand: nil, merchant: nil, category_id: nil)
+    base_url_params = {category: category_id}
+    if brand
+      base_url_params[:brand] = brand
+    elsif merchant
+      base_url_params[:merchant] = merchant
+    elsif
+      raise
     end
 
     page = 1
     while page <= 100 do
-      url = build_url_params(brand: brand_id, category: category_id, page: page)
+      url = build_url_params(base_url_params.merge({page: page}))
       log(url)
 
       resp = get_request(url)
@@ -171,7 +174,7 @@ class Import::Popshops < Import::Base
     "#{URL[:base]}?#{url_params.map{|k,v| "#{k}=#{v}"}.join('&')}"
   end
 
-  def self.get_info brand_id
+  def self.get_info(brand_id)
     url = self.new.build_url_params(brand: brand_id, count: 1)
 
     resp = get_request(url)
