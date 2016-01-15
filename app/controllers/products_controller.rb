@@ -244,7 +244,7 @@ ORDER BY t.found_count desc, avg_similarity desc
       [
         l.sub(/^public/, ''),
         date.strftime('%m/%d/%y'),
-        File.readlines(l).size,
+        Rails.cache.fetch("exported-file-#{date}-#{File.mtime(l)}") { File.readlines(l).size },
         File.mtime(l)
       ]
     end
