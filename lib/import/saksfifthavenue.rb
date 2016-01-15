@@ -3,34 +3,37 @@ class Import::Saksfifthavenue < Import::Base
   def baseurl; 'http://www.saksfifthavenue.com'; end
 
   def perform
-    resp = get_request 'main/ShopByBrand.jsp'
+    resp = get_request('main/ShopByBrand.jsp')
     html = Nokogiri::HTML(resp.body)
     brands_links = html.css('.designer-list li a').map{|a| a.attr('href').sub(/\?.*/, '')}
-    brands_links.shuffle.each do |link|
-      urls = []
-      while true
-        resp = get_request "#{link}?Nao=#{urls.size}"
-        html = Nokogiri::HTML(resp.body)
-
-        products = html.css('.image-container-large a[id^=image-url]').map{|a| a.attr('href')}
-        break if products.size == 0
-
-        urls += products
-      end
-
-      spawn_products_urls(urls)
+    brands_links.shuffle.each do |category_url|
+      process_category(category_url)
     end
   end
 
-  def process_product(original_url)
-    product_id = URI.decode(original_url).match(/PRODUCT<>prd_id=(\d+)/) && $1
-    if product_id
-      url = build_url("main/ProductDetail.jsp?PRODUCT<>prd_id=#{product_id}")
-    else
-      url = original_url
+  def process_category(category_url)
+    log(category_url)
+    urls = []
+    while true
+      resp = get_request("#{category_url}?Nao=#{urls.size}")
+      html = Nokogiri::HTML(resp.body)
+
+      products = html.css('.image-container-large a[id^=image-url]').map{|a| a.attr('href')}
+      break if products.size == 0
+
+      urls += products
     end
 
-    resp = get_request url
+    urls.map! do |url|
+      product_id = URI.decode(url).match(/PRODUCT<>prd_id=(\d+)/) && $1
+      build_url("main/ProductDetail.jsp?PRODUCT<>prd_id=#{product_id}")
+    end
+
+    spawn_products_urls(urls, false)
+  end
+
+  def process_product(url)
+    resp = get_request(url)
     html = Nokogiri::HTML(resp.body)
 
     script = html.css('script:contains("var mlrs")').first
