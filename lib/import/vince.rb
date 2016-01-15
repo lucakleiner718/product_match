@@ -1,5 +1,7 @@
 class Import::Vince < Import::Platform::Venda
 
+  # platform = venda
+
   def baseurl; 'http://www.vince.com'; end
   def brand_name_default; 'Vince'; end
 

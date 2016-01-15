@@ -1,5 +1,7 @@
 class Import::Rebeccataylor < Import::Platform::Venda
 
+  # platform = venda
+
   def baseurl; 'http://www.rebeccataylor.com'; end
   def brand_name_default; 'Rebecca Taylor'; end
 
