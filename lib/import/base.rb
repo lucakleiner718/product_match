@@ -106,7 +106,7 @@ class Import::Base
     brands_names = items.map{|it| it[:brand].to_s.sub(/\A"/, '').sub(/"\z/, '')}.uniq.select{|it| it.present?}
     brands_names << brand_name_default if brands_names.size == 0 && brand_name_default
 
-    exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub('"', '\"').gsub('{', '\{').gsub('}', '\}')}.join(',')}}")
+    exists_brands = Brand.where("name IN (?) OR synonyms && ?", brands_names, "{#{brands_names.map{|e| e.gsub(/("|\{|\}|,)/, '\\\\\1')}.join(',')}}")
     brands = brands_names.map do |brand_name|
       brand = exists_brands.select{|b| b.name == brand_name || brand_name.in?(b.synonyms)}.first
       begin
