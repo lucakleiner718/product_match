@@ -12,7 +12,6 @@ class Import::Shopbop < Import::Platform::Bop
 
     process_batch(filename) do |rows|
       items = prepare_data(rows)
-      brands += items.map{|item| item[:brand_name]}
 
       products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).inject({}){|obj, pr| obj[pr.source_id] = pr; obj}
       to_update = []
