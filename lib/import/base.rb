@@ -16,9 +16,11 @@ class Import::Base
 
   def normalize_title(item)
     if item[:title].present?
-      item[:title] = item[:title].encode("UTF-8", invalid: :replace, replace: '')
-                       .to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
-                       .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'').gsub('&amp;', '&')
+      item[:title] =
+        item[:title].encode("UTF-8", invalid: :replace, replace: '')
+          .to_s.sub(/#{Regexp.quote item[:brand].to_s}\s?/i, '')
+          .sub(/^(,|-)*/, '').strip.gsub('&#39;', '\'').gsub('&amp;', '&')
+          .sub(/^women's\s+/i, '').sub(/\swomen's\s+/i, ' ')
     end
   end
 
@@ -34,19 +36,15 @@ class Import::Base
     end
   end
 
-  def csv_chunk_size
-    1_000
-  end
-
   def prepare_items(items, check_upc_rule: false)
     items.map do |item|
       strip_data(item)
+      process_gender(item)
       normalize_title(item)
       normalize_color(item)
       prepare_prices(item)
       prepare_additional_images(item)
       check_upc(item, check_upc_rule)
-      process_gender(item)
       check_source(item)
     end
     convert_brand(items)
@@ -63,8 +61,12 @@ class Import::Base
   end
 
   def process_gender(item)
-    item[:gender] = process_title_for_gender(item[:title]) if item[:gender].blank? && item[:title].present?
-    item[:gender] = process_category_for_gender(item[:category]) if item[:gender].blank?
+    if item[:gender].blank? && item[:title].present?
+      item[:gender] = process_title_for_gender(item[:title])
+    end
+    if item[:gender].blank? && item[:category].present?
+      item[:gender] = process_category_for_gender(item[:category])
+    end
   end
 
   def prepare_prices(item)
@@ -139,9 +141,9 @@ class Import::Base
   end
 
   def process_title_for_gender(title)
-    if title.downcase =~ /^women's\s/
+    if title.downcase =~ /^women's\s/i || title.downcase =~ /\swomen's\s/i
       'Female'
-    elsif title.downcase =~ /^men's\s/
+    elsif title.downcase =~ /^men's\s/i || title.downcase =~ /\smen's\s/i
       'Male'
     end
   end
@@ -202,6 +204,12 @@ class Import::Base
     to_update = []
     to_create = []
 
+    # prevent wrong attributes to put in insert query
+    product_attributes = Product.column_names.map(&:to_sym) - [:id, :created_at, :updated_at]
+    results.map! do |row|
+      row.select{|(k, v)| k.in?(product_attributes)}
+    end
+
     if results.size == results.select{|r| r[:source_id].present?}.size
       products = Product.where(source: source, source_id: results.map{|r| r[:source_id]})
                    .group_by{|pr| pr.source_id}
@@ -242,11 +250,13 @@ class Import::Base
       keys = to_create.first.keys
       keys += [:created_at, :updated_at]
       tn = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
-      sql = "INSERT INTO products
+      to_create.in_groups_of(1_000, false) do |to_insert|
+        sql = "INSERT INTO products
                 (#{keys.join(',')})
-                VALUES #{to_create.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
+                VALUES #{to_insert.map{|r| "(#{r.values.concat([tn, tn]).map{|el| Product.sanitize(el.is_a?(Array) ? "{#{el.join(',')}}" : el)}.join(',')})"}.join(',')}
                 RETURNING id"
-      Product.connection.execute sql
+        Product.connection.execute(sql)
+      end
     end
 
     to_update.each do |row|
