@@ -5,7 +5,7 @@ ActiveAdmin.register Brand do
   config.sort_order = 'name_asc'
 
   filter :name
-  filter :synonyms
+  filter :synonyms_array_contains, label: 'Synonyms'
   filter :in_use
 
   controller do
