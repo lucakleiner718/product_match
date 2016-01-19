@@ -15,12 +15,12 @@ class Import::Linksynergy < Import::Base
     39655 => 'Sugnlass Hut',
   }
 
-  def self.perform mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil
-    instance = self.new mid: mid, rewrite: rewrite, update: update, daily: daily, product_source: product_source
-    instance.process_csv
+  def self.perform(mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil)
+    self.new(mid: mid, rewrite: rewrite, update: update, daily: daily,
+      product_source: product_source).process_csv
   end
 
-  def initialize mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil
+  def initialize(mid: 1237, rewrite: false, update: true, daily: nil, product_source: nil)
     @retailer = RETAILERS[mid.to_i]
     @mid = mid
     @update = update

@@ -28,8 +28,7 @@ class Import::Popshops < Import::Base
   }
 
   def self.perform(brand: nil, merchant: nil, category_id: nil)
-    instance = self.new
-    instance.perform(brand: brand, merchant: merchant, category_id: category_id)
+    self.new.perform(brand: brand, merchant: merchant, category_id: category_id)
   end
 
   def perform(brand: nil, merchant: nil, category_id: nil)
