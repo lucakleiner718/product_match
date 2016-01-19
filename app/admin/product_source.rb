@@ -27,7 +27,7 @@ ActiveAdmin.register ProductSource do
     column 'Source' do |ps|
       case ps.source_name
         when 'amazon_ad_api'
-          link_to 'Full', Import::Amazon.source_url(brand: ps.source_id), target: :_blank
+          link_to 'Full', Import::Amazon.source_url(ps.source_id), target: :_blank
         when 'popshops'
           link_to 'Full', Import::Popshops.new.build_url_params(brand: ps.source_id), target: :_blank
         when 'popshops_merchant'

@@ -92,7 +92,7 @@ module Import
     end
 
     def self.source_url(brand)
-      Amazon::Ecs.send(:prepare_url, Amazon::Ecs.options.merge({
+      ::Amazon::Ecs.send(:prepare_url, ::Amazon::Ecs.options.merge({
             brand: brand,
             operation: :ItemSearch, response_group: :Large,
             search_index: :FashionWomen, sort: :price,
