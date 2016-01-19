@@ -14,6 +14,12 @@ class BrandCollectDataWorker
       case product_source.source_name
         when 'amazon_ad_api'
           Import::Amazon.perform(product_source.source_id)
+          brand = Brand.get_by_name(product_source.source_id)
+          if brand
+            Product.where(source: :shopbop).where(brand_id: brand.id).pluck(:id).each do |pid|
+              ProductSuggestionsWorker.perform_async(pid)
+            end
+          end
           true
         when 'popshops'
           Import::Popshops.perform(brand: product_source.source_id)
