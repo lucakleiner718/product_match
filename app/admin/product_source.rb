@@ -26,6 +26,8 @@ ActiveAdmin.register ProductSource do
     actions
     column 'Source' do |ps|
       case ps.source_name
+        when 'amazon_ad_api'
+          link_to 'Full', Import::Amazon.source_url(brand: ps.source_id), target: :_blank
         when 'popshops'
           link_to 'Full', Import::Popshops.new.build_url_params(brand: ps.source_id), target: :_blank
         when 'popshops_merchant'
@@ -46,10 +48,10 @@ ActiveAdmin.register ProductSource do
   form do |f|
     f.inputs do
       f.input :name, hint: 'Can be Brand name either just a name for shop. Brand name should be exact like added in brands section.'
-      f.input :source_name, collection: [['Popshops (brand)', 'popshops'], ['Popshops (merchant)', 'popshops_merchant'], ['Linksynergy', 'linksynergy'], ['Shopbop', 'shopbop'], ['Eastdane', 'eastdane'], ['Website', 'website']]
+      f.input :source_name, collection: ProductSource::SOURCES
       f.input :source_id, label: 'Source ID'
       f.input :brand, collection: Brand.in_use.order(:name)
-      f.input :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS, prompt: false
+      f.input :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS, prompt: false, selected: (f.object.new_record? ? 7.days.to_i : f.object.period), include_blank: false
     end
     f.actions
   end

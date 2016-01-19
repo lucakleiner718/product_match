@@ -12,6 +12,9 @@ class BrandCollectDataWorker
 
     response =
       case product_source.source_name
+        when 'amazon_ad_api'
+          Import::Amazon.perform(product_source.source_id)
+          true
         when 'popshops'
           Import::Popshops.perform(brand: product_source.source_id)
           true

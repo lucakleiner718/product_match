@@ -1,5 +1,12 @@
 class ProductSource < ActiveRecord::Base
 
+  SOURCES = {
+    'Amazon Publisher API' => :amazon_ad_api,
+    'Popshops (brand)' => :popshops, 'Popshops (merchant)' => :popshops_merchant,
+    'Linksynergy' => :linksynergy, 'Shopbop' => :shopbop, 'Eastdane' => :eastdane,
+    'Website' => :website
+  }
+
   validates :source_name, presence: true
   validates :source_id, presence: true
 
@@ -22,7 +29,7 @@ class ProductSource < ActiveRecord::Base
     end
 
     if self.source_id.present? && self.source_id_changed?
-      self.source_id = self.source_id.gsub(/\s/, '').strip.gsub(/^,/, '').gsub(/,$/, '')
+      self.source_id = self.source_id.strip.gsub(/,$/, '')
     end
   end
 
