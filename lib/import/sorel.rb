@@ -57,7 +57,7 @@ class Import::Sorel < Import::Platform::Demandware
 
     color_param = "dwvar_#{product_id_param}_color"
 
-    images = html.css('.thumbnail-link').map{|img| img.attr('href')}#.sub(/\/#{product_id}_\d{1,3}_m/)}
+    images = html.css('a.thumbnail-link').map{|a| a.attr('href')}#.sub(/\/#{product_id}_\d{1,3}_m/)}
     if images.size == 0
       ppi = html.css('.product-primary-image').first
       if ppi
@@ -70,7 +70,10 @@ class Import::Sorel < Import::Platform::Demandware
     end
     # http://s7d5.scene7.com/is/image/ColumbiaSportswear2/1554681_010_m
     image = images.shift
-    default_color_id = image.match(/\/#{product_id}_([^\_]+)_/)[1] if image
+    if image
+      default_color_id = image.match(/\/#{product_id}_([^\_]+)_/) && $1
+      default_color_id = image.match(/\/#{product_id.match(/^([^\_]+)/)}_([^\_]+)_/) && $1 unless default_color_id
+    end
 
     data = get_json product_id
     return false unless data
