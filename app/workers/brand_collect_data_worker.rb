@@ -71,7 +71,7 @@ class BrandCollectDataWorker
     if response
       product_source.update_column :collected_at, Time.now if response
       if product_source.brand.try(:id)
-        ProductSuggestionsWorker.perform_async product_source.brand_id
+        ProductSuggestionsGeneratorWorker.perform_async(product_source.brand_id)
       end
     end
   end
