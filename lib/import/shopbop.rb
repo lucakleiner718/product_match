@@ -72,7 +72,7 @@ class Import::Shopbop < Import::Platform::Bop
     list_price = resp.body.scan(/productPage\.listPrice=['"]([^'"]+)['"]/).try(:first).try(:first)
     sale_price = resp.body.scan(/productPage\.sellingPrice=['"]([^'"]+)['"]/).try(:first).try(:first)
 
-    if product.price != list_price
+    if product.price.to_f != list_price.to_f
       product.price = list_price
       product.price_sale = nil
     end

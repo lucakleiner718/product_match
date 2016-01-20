@@ -87,8 +87,8 @@ class Import::Base
       item[:upc] = item[:ean]
     end
 
-    item.delete :ean
-    item[:upc] = nil if item[:upc].blank? || item[:upc] !~ /\A\d+\z/
+    item.delete(:ean)
+    item[:upc] = nil if item[:upc].blank? || item[:upc].to_s !~ /\A\d+\z/
     if check_upc_rule && item[:upc].present?
       item[:upc] = (GTIN.process(item[:upc]) || nil)
     end
