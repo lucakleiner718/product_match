@@ -1,7 +1,7 @@
 class ProductSuggestionsGeneratorWorker
 
   include Sidekiq::Worker
-  sidekiq_options unqiue: true#, queue: :middle
+  sidekiq_options unqiue: true, queue: :middle
 
   def perform(brand_id, *args)
     brand_id = brand_id.to_i

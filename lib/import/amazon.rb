@@ -56,8 +56,8 @@ module Import
       source_id = item.get('ASIN')
 
       # remove color and size from title
-      title = title.sub(/,\s#{size}$/, '').sub(/,\s#{color}$/, '')
-                .sub(/\s\(#{size}, #{color}\)/, '')
+      title = title.sub(/,\s#{Regexp.quote size}$/, '').sub(/,\s#{Regexp.quote color}$/, '')
+                .sub(/\s\(#{Regexp.quote size}, #{Regexp.quote color}\)/, '')
 
       return unless upc
 

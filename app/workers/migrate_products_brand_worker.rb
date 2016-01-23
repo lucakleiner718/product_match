@@ -2,7 +2,7 @@ class MigrateProductsBrandWorker
 
   include Sidekiq::Worker
 
-  def perform brand_name
+  def perform(brand_name)
     products = Product.where(brand_id: nil).where(brand: brand_name)
     brand = Brand.get_by_name(brand_name)
     brand = Brand.create(name: brand_name) unless brand

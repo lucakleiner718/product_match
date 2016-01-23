@@ -16,6 +16,7 @@ tops:
   - polo
   - popover
   - pullover
+  - overshirt
   - leotard
   - shell
   - shirt
@@ -81,6 +82,7 @@ outerwear:
   - anorak
   - apron
   - blazer
+  - bomber
   - british warm
   - cagoule
   - cape

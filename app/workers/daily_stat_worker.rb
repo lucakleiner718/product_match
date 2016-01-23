@@ -1,7 +1,7 @@
 class DailyStatWorker
 
   include Sidekiq::Worker
-  sidekiq_options queue: :critical#, unique: true
+  sidekiq_options queue: :critical, unique: true
 
   def perform
     date = Date.current
