@@ -6,6 +6,7 @@ class Import::Toryburch < Import::Platform::Demandware
   def brand_name_default; 'Tory Burch'; end
 
   def perform
+    urls = []
     [
       'clothing/new-arrivals', 'clothing/dresses', 'clothing/jackets-outerwear', 'clothing/pants-shorts',
       'clothing/skirts', 'clothing/sweaters', 'swimwear', 'clothing/tops', 'clothing/t-shirts', 'clothing/tunics',
@@ -24,7 +25,6 @@ class Import::Toryburch < Import::Platform::Demandware
     ].each do |url_part|
       log url_part
       size = 99
-      urls = []
       while true
         url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
         resp = get_request(url)
@@ -39,9 +39,9 @@ class Import::Toryburch < Import::Platform::Demandware
 
         break if url_part.in? ['accessories/the-wallet-guide', 'watches']
       end
-
-      spawn_products_urls(urls)
     end
+
+    spawn_products_urls(urls)
   end
 
   def process_product(original_url, allow_spawn=true)
