@@ -23,22 +23,24 @@ class Import::Toryburch < Import::Platform::Demandware
       'accessories/robinson', 'accessories/york', 'accessories/797',
       'watches',
     ].each do |url_part|
+      cat_urls = []
       log url_part
       size = 99
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{cat_urls.size}&format=ajax"
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
-        products = html.css('div.productresultarea div.product.producttile:not(.bannertile)')
-        break if products.size == 0
+        products = html.css('div.productresultarea div.producttile:not(.bannertile) .productimage a')
+        break if products.size == 0 || html.css('.nohitsmessage').size == 1
 
-        urls += products.map do |item|
-          item.css('.productimage a').first.attr('href').sub(/\?.*/, '')
+        cat_urls += products.map do |item|
+          item.attr('href').sub(/\?.*/, '')
         end
 
-        break if url_part.in? ['accessories/the-wallet-guide', 'watches']
+        break if cat_urls.size < size || url_part.in?(['accessories/the-wallet-guide', 'watches'])
       end
+      urls += cat_urls
     end
 
     spawn_products_urls(urls)
