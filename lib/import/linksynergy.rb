@@ -2,6 +2,8 @@ require 'net/ftp'
 
 class Import::Linksynergy < Import::Base
 
+  def source; 'linksynergy'; end
+
   RETAILERS = {
     1237 => 'Nordstrom',
     13867 => 'Bloomingdales',
@@ -33,14 +35,18 @@ class Import::Linksynergy < Import::Base
     filename = "tmp/sources/#{@mid}_2388513_mp#{"_delta" if @daily}.txt"
     filename_gz = "#{filename}.gz"
 
-    if !File.exists?(filename) || File.mtime(filename) < 12.hours.ago
-      ftp = Net::FTP.new('aftp.linksynergy.com')
-      ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
+    ftp = Net::FTP.new('aftp.linksynergy.com')
+    ftp.login ENV['LINKSYNERGY_FTP_LOGIN'], ENV['LINKSYNERGY_FTP_PASSWORD']
 
+    @file_updated = false
+
+    if !File.exists?(filename) || ftp_mtime(ftp, File.basename(filename_gz)) > File.mtime(filename)
+    # if !File.exists?(filename) || File.mtime(filename) < 12.hours.ago
       ftp.getbinaryfile(File.basename(filename_gz), filename_gz)
       txt = Zlib::GzipReader.open(filename_gz).read
-      File.write Rails.root.join(filename), txt
-      File.delete filename_gz
+      File.write(Rails.root.join(filename), txt)
+      File.delete(filename_gz)
+      @file_updated = true
     end
 
     filename
@@ -53,6 +59,8 @@ class Import::Linksynergy < Import::Base
       @product_source.update_columns collect_status_code: :fail, collect_status_message: e.message.strip
       return false
     end
+
+    return false unless @file_updated
 
     columns = %w(
       id title part_number category_primary category_secondary url image emtp1 description_short description_full empt2
@@ -168,8 +176,9 @@ class Import::Linksynergy < Import::Base
     end
   end
 
-  def source
-    'linksynergy'
+  def ftp_mtime(ftp, filename)
+    datetime = ftp.list("#{filename}*").first.match(/ftpgroup\s+\d+\s(.*)\s#{Regexp.quote filename}$/) && $1
+    Time.parse "#{datetime} UTC"
   end
 
 end
