@@ -28,8 +28,8 @@ class BrandCollectDataWorker
           Import::Popshops.perform(merchant: product_source.source_id)
           true
         when 'linksynergy'
-          Import::Linksynergy.perform mid: product_source.source_id, daily: true,
-            product_source: product_source
+          Import::Linksynergy.perform(mid: product_source.source_id, daily: true,
+            product_source: product_source)
           true
         when 'shopbop'
           resp = Import::Shopbop.perform product_source.source_id
