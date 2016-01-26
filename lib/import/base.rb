@@ -259,13 +259,19 @@ class Import::Base
       end
     end
 
+    updated = []
     to_update.each do |row|
       product, exist = row
 
       product.delete :upc if product[:upc].blank?
       exist.attributes = product
-      exist.save! if exist.changed?
+      if exist.changed?
+        exist.save!
+        updated << exist
+      end
     end
+
+    to_create.size + updated.size
   end
 
   def url_mtime(url)
