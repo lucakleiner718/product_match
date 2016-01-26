@@ -3,7 +3,7 @@ class BrandCollectDataWorker
   include Sidekiq::Worker
   sidekiq_options unique: true
 
-  def perform product_source_id
+  def perform(product_source_id)
     begin
       product_source = ProductSource.find(product_source_id)
     rescue ActiveRecord::RecordNotFound
@@ -78,7 +78,7 @@ class BrandCollectDataWorker
 
   def self.spawn
     ProductSource.outdated.order('collected_at ASC NULLS FIRST').each do |ps|
-      self.perform_async ps.id
+      self.perform_async(ps.id)
     end
   end
 

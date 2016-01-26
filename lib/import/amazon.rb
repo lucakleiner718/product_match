@@ -60,11 +60,13 @@ module Import
       title.sub!(/,\s#{Regexp.quote color}$/, '') if color
       title.sub!(/\s\(#{Regexp.quote size}, #{Regexp.quote color}\)/, '') if size && color
 
-      return unless upc
+      gtin = upc || ean
+
+      return unless gtin
 
       {
         title: title,
-        upc: upc || ean,
+        upc: gtin,
         brand: brand,
         category: category,
         price: price.to_i / 100.0,
