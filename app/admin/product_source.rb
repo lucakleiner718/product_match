@@ -62,4 +62,7 @@ ActiveAdmin.register ProductSource do
   filter :period, label: 'Regular update', as: :select, collection: ProductSource::PERIODS
   filter :status
 
+  scope :all, default: true
+  scope(:shopbop) { |scope| scope.where(source_name: [:shopbop, :eastdane])}
+
 end
