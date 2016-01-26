@@ -15,14 +15,16 @@ module Import
       get_total_products_amount
 
       perform(sort: :price)
-      perform(sort: '-price')
-      perform(sort: :reviewrank)
-      perform(sort: :relevancerank)
+      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
 
-      if reached_max?
-        log "reached max #{processed_items.uniq.size}/#{total_amount}"
-        return
-      end
+      perform(sort: '-price')
+      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
+      perform(sort: :reviewrank)
+      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
+      perform(sort: :relevancerank)
+      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
 
       categories = YAML.load_file('config/products_kinds.yml').values.flatten
       words = []
@@ -38,15 +40,19 @@ module Import
 
       words.each do |term|
         perform(term: term, sort: :price)
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: '-price')
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: :reviewrank)
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: :relevancerank)
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
       end
 
-      if reached_max?
-        log "reached max2 #{processed_items.uniq.size}/#{total_amount}"
-        return
-      end
+      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
 
       words2 = []
       Product.where(brand_id: brand.id).where(source: source).pluck(:title).each do |title|
@@ -61,9 +67,16 @@ module Import
       words2.each do |term|
         results = perform(term: term, sort: :price)
         next if results < 90
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: '-price')
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: :reviewrank)
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+
         perform(term: term, sort: :relevancerank)
+        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
       end
     end
 
@@ -152,6 +165,8 @@ module Import
         ::Amazon::Ecs.item_search(term, params)
       rescue ::Amazon::RequestError => e
         raise e if attempt > 5
+        sleep((attempt+1) * 3)
+        log "Amazon::RequestError / attempt #{attempt}"
         send_request(params, attempt+1)
       end
     end

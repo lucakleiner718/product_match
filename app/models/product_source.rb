@@ -52,4 +52,11 @@ class ProductSource < ActiveRecord::Base
     self.period / 1.hour.to_i if self.period && self.period > 0
   end
 
+  def products
+    search = Product.all
+    search = search.where(brand_id: self.brand_id) if self.brand_id.present?
+    search = search.where(source: self.source_name) if self.source_name.present?
+    search
+  end
+
 end
