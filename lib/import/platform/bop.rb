@@ -37,7 +37,7 @@ class Import::Platform::Bop < Import::Base
   def replace_original_tmp_file(filename_tmp)
     extension = filename_tmp.match(/\.([a-z]+)$/)[1]
     filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
-    File.delete(filename)
+    File.delete(filename) if File.exists?(filename)
     File.rename(filename_tmp, filename)
   end
 

@@ -28,7 +28,14 @@ class Import::Shopbop < Import::Platform::Bop
       to_update.each do |row|
         product = products[row[:source_id]]
         row.delete(:upc) if row[:upc].blank?
+        price = row.delete(:price)
+        price_sale = row.delete(:price_sale)
         product.attributes = row
+
+        if product.price != price
+          product.price = price
+          product.price_sale = price_sale
+        end
 
         if product.price_changed?
           ProcessImportUrlWorker.perform_async(self.class.name, 'update_product_page', product.id)
