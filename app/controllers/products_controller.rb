@@ -25,6 +25,7 @@ class ProductsController < ApplicationController
       @products = @products.where(upc: f[:upc]) if f[:upc]
       @products = @products.where(retailer: f[:retailer]) if f[:retailer]
       @products = @products.without_upc if f[:no_upc]
+      @products = @products.where(style_code: f[:style_code]) if f[:style_code].present?
     end
 
     @products = @products.order(:title).page(params[:page]).per(50)
@@ -54,6 +55,7 @@ class ProductsController < ApplicationController
       @products = @products.where(upc: f[:upc]) if f[:upc]
       @products = @products.where(retailer: f[:retailer]) if f[:retailer]
       @products = @products.without_upc if f[:no_upc]
+      @products = @products.where(style_code: f[:style_code]) if f[:style_code].present?
     end
 
     @products = @products.order(:title)
@@ -82,6 +84,11 @@ class ProductsController < ApplicationController
     end
     if params[:brand_id]
       brands = brands.where(id: params[:brand_id])
+    end
+
+    unless params[:sort]
+      params[:sort] = 'stats.not_matched'
+      params[:direction] = :desc
     end
 
     if params[:sort] =~ /^stats\./
