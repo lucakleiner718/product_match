@@ -9,26 +9,30 @@ class Import::Stevenalan < Import::Platform::Demandware
   def brand_name_default; 'Steven Alan'; end
 
   def perform
+    urls = []
     [
       'New-Arrivals', 'Women%27s-2', 'Men%27s-2', 'Jewelry', 'Kid%27s', 'Home-Store', 'Sale-1'
     ].each do |url_part|
       log url_part
-      urls = []
+      cat_urls = []
       size = 50
 
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
+        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{cat_urls.size}&format=page-element"
+        log url
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
         products = html.css('.product-tile .thumb-link').map{|a| a.attr('href')}.select{|l| l.present?}
-        break if products.size == 0
+        break if products.size == 0 || (cat_urls & products).size == products.size
 
-        urls.concat products
+        cat_urls.concat(products)
       end
 
-      spawn_products_urls(urls)
+      urls.concat(cat_urls)
     end
+
+    spawn_products_urls(urls)
   end
 
   def process_product(original_url)
