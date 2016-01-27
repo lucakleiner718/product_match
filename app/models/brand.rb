@@ -58,10 +58,10 @@ class Brand < ActiveRecord::Base
     con = Product.connection
     now = Time.zone.now
 
-    shopbop_size = Product.where(brand_id: self.id).matching
-                     .where(in_store: true).size
-    shopbop_noupc_size = Product.where(brand_id: self.id).matching.without_upc
-                           .where(in_store: true).size
+    matching_in_store = Product.where(brand_id: self.id).matching.where(in_store: true)
+
+    shopbop_size = matching_in_store.size
+    shopbop_noupc_size = matching_in_store.without_upc.size
 
     shopbop_matched_size = con.execute("
       SELECT count(distinct(product_id)) as amount
@@ -115,8 +115,9 @@ class Brand < ActiveRecord::Base
                            .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
                            .where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
 
-    new_match_today = Product.matching.where('created_at >= ?', 1.day.ago).where(brand_id: self.id).where(match: true).size
-    new_match_week = Product.matching.where('created_at >= ?', now.monday).where(brand_id: self.id).where(match: true).size
+    new_match_today = matching_in_store.where('created_at >= ?', 1.day.ago(now)).size
+    new_match_week = matching_in_store.where('created_at >= ?', now.monday).size
+
 
     not_matched = con.execute("
       SELECT count(distinct(products.id))

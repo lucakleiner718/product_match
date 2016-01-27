@@ -19,16 +19,26 @@ class Import::Platform::Bop < Import::Base
     url ||= default_file
     extension = url.match(/\.([a-z]+)$/)[1]
     filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
+    filename_tmp = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}_#{Time.now.to_i}.#{extension}"
 
     @file_updated = false
     if !File.exists?(filename) || (url_mtime(url) > File.mtime(filename))
       body = get_request(url).body
       body.force_encoding('UTF-8')
-      File.write filename, body
+      File.write(filename_tmp, body)
       @file_updated = true
-    end
 
-    filename
+      filename_tmp
+    else
+      filename
+    end
+  end
+
+  def replace_original_tmp_file(filename_tmp)
+    extension = filename_tmp.match(/\.([a-z]+)$/)[1]
+    filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
+    File.delete(filename)
+    File.rename(filename_tmp, filename)
   end
 
   def process_batch(filename)

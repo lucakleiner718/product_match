@@ -40,7 +40,7 @@ class ProductSource < ActiveRecord::Base
   belongs_to :brand
 
   PERIODS = [
-    ['Every 3 hours', 1.0/8], ['Every 6 hours', 1.0/4],
+    ['Every hour', 1.0/24], ['Every 3 hours', 1.0/8], ['Every 6 hours', 1.0/4],
     ['Every 12 hours', 0.5], ['Every day', 1], ['Every week', 7], ['Every month', 30], ['Manual', 0]
   ].map{|el| el[1] = (el[1] * 1.day).to_i; el}
 
