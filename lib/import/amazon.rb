@@ -154,6 +154,7 @@ module Import
     end
 
     def send_request(params, attempt=0)
+      sleep(0.5) if attempt == 0 # reduce amount of requests to amazon
       begin
         params = {
           response_group: :Large,
