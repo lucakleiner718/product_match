@@ -110,10 +110,10 @@ class Brand < ActiveRecord::Base
 
     suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product)
                           .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
-                          .where(percentage: 100).pluck(:product_id).uniq.size
+                          .where(percentage: 90..100).pluck(:product_id).uniq.size
     suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product)
                            .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
-                           .where('percentage < 100 AND percentage > 50').pluck(:product_id).uniq.size
+                           .where(percentage: 50...90).pluck(:product_id).uniq.size
 
     new_match_today = matching_in_store.where('created_at >= ?', 1.day.ago(now)).size
     new_match_week = matching_in_store.where('created_at >= ?', now.monday).size
