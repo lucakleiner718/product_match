@@ -114,7 +114,7 @@ module Import
       title = item.get('ItemAttributes/Title')
       upc = item.get('ItemAttributes/UPC')
       ean = item.get('ItemAttributes/EAN')
-      url = item.get('DetailPageURL').sub(/%3FSubscriptionId.*$/, '')
+      url = item.get('DetailPageURL').sub(/%3FSubscriptionId.*$/, '').sub(/%3Fpsc.*$/, '')
       image = item.get('LargeImage/URL')
       category = item.get('ItemAttributes/Binding')
       # response_brand = item.get('ItemAttributes/Brand')
