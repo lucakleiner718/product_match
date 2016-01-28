@@ -1,7 +1,7 @@
 class BrandCollectDataWorker
 
   include Sidekiq::Worker
-  sidekiq_options unique: true, queue: :import
+  sidekiq_options unique: true
 
   def perform(product_source_id)
     begin
@@ -13,14 +13,8 @@ class BrandCollectDataWorker
     response =
       case product_source.source_name
         when 'amazon_ad_api'
-          Import::Amazon.perform(product_source.source_id)
-          brand = Brand.get_by_name(product_source.source_id)
-          if brand
-            Product.where(source: :shopbop).where(brand_id: brand.id).pluck(:id).each do |pid|
-              ProductSuggestionsWorker.perform_async(pid)
-            end
-          end
-          true
+          ImportAmazonWorker.perform_async(product_source_id)
+          false
         when 'popshops'
           Import::Popshops.perform(brand: product_source.source_id)
           true
@@ -81,5 +75,4 @@ class BrandCollectDataWorker
       self.perform_async(ps.id)
     end
   end
-
 end
