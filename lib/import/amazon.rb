@@ -114,7 +114,7 @@ module Import
       title = item.get('ItemAttributes/Title')
       upc = item.get('ItemAttributes/UPC')
       ean = item.get('ItemAttributes/EAN')
-      url = item.get('DetailPageURL')
+      url = item.get('DetailPageURL').sub(/%3FSubscriptionId.*$/, '')
       image = item.get('LargeImage/URL')
       category = item.get('ItemAttributes/Binding')
       # response_brand = item.get('ItemAttributes/Brand')
@@ -127,6 +127,7 @@ module Import
       end
       size = item.get('ItemAttributes/Size')
       source_id = item.get('ASIN')
+      style_code = item.get('ParentASIN') || source_id
 
       # remove color and size from title
       title.sub!(/,\s#{Regexp.quote size}$/, '') if size
@@ -149,7 +150,7 @@ module Import
         url: url,
         image: image,
         source_id: source_id,
-        parent_asin: item.get('ParentASIN')
+        style_code: style_code
       }
     end
 
