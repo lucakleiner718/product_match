@@ -5,6 +5,7 @@ class Brand < ActiveRecord::Base
   has_many :products
 
   scope :in_use, -> { where in_use: true }
+  scope :disabled, -> { where disabled: true }
 
   after_save do
     if self.in_use

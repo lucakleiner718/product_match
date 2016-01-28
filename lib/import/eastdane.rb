@@ -76,7 +76,7 @@ class Import::Eastdane < Import::Platform::Bop
 
     prepare_items(results)
 
-    Brand.where(id: results.map{|r| r[:brand_id]}.uniq, in_use: false).update_all in_use: true
+    Brand.where(id: results.map{|r| r[:brand_id]}.uniq, in_use: false, disabled: false).update_all(in_use: true)
 
     results
   end

@@ -1,6 +1,6 @@
 ActiveAdmin.register Brand do
 
-  permit_params :name, :synonyms_text, :in_use
+  permit_params :name, :synonyms_text, :in_use, :disabled
 
   config.sort_order = 'name_asc'
 
@@ -15,6 +15,7 @@ ActiveAdmin.register Brand do
   end
 
   scope :in_use, default: true
+  scope :disabled
   scope :all
 
   form do |f|
@@ -22,6 +23,7 @@ ActiveAdmin.register Brand do
       f.input :name
       f.input :synonyms_text, hint: 'Separate synonyms with only comma', label: 'Synonyms'
       f.input :in_use
+      f.input :disabled
     end
     f.actions
   end
@@ -33,6 +35,7 @@ ActiveAdmin.register Brand do
       brand.synonyms.join(', ')
     end
     column :in_use
+    column :disabled
     column :products do |brand|
       Product.where(brand_id: brand.id).size
     end
@@ -54,4 +57,8 @@ ActiveAdmin.register Brand do
     redirect_to :back
   end
 
+  batch_action :disable, confirm: 'Are you sure to disabled selected brands?' do |ids|
+    Brand.where(id: ids).update_all(disabled: true, in_use: false)
+    redirect_to :back
+  end
 end
