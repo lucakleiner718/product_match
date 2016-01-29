@@ -284,14 +284,16 @@ class Import::Base
   private
 
   def send_typhoeus_get(url, params={})
-    Typhoeus.get(url,
+    options = {
       followlocation: true,
       maxredirs: 10,
       params: params,
-      connecttimeout: 30
-      # timeout: 30,
+      connecttimeout: 30,
+      timeout: 30,
       # verbose: true,
-    )
+    }
+    options[:timeout] = 180 if Rails.env.development?
+    Typhoeus.get(url, options)
   end
 
   def process_in_batch(urls)
