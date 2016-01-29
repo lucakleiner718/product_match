@@ -170,46 +170,22 @@ class ProductsController < ApplicationController
   end
 
   def selected_products
-    # ProductSelect.includes(:product, :selected).all.each do |select|
-    #   @products[select.product_id] ||= {
-    #     product: select.product,
-    #     selected: select.selected,
-    #     found_votes: 0,
-    #     nothing_votes: 0,
-    #     no_color_votes: 0,
-    #     no_size_votes: 0,
-    #     total_similarity: 0,
-    #     count: 0
-    #   }
-    #   if select[:decision] == 'found'
-    #     @products[select.product_id][:found_votes] += 1
-    #     @products[select.product_id][:total_similarity] += select.selected_percentage
-    #     @products[select.product_id][:count] += 1
-    #   elsif select[:decision] == 'no-color'
-    #     @products[select.product_id][:no_color_votes] += 1
-    #   elsif select[:decision] == 'no-size'
-    #     @products[select.product_id][:no_size_votes] += 1
-    #   elsif select[:decision] == 'nothing'
-    #     @products[select.product_id][:nothing_votes] += 1
-    #   end
-    # end
-
     ar = ProductSelect.connection.execute("
-SELECT *
-FROM (
-  SELECT product_id, selected_id,
-    sum(CASE WHEN decision='found' THEN 1 ELSE 0 END) as found_count,
-    sum(CASE WHEN decision='no-color' THEN 1 ELSE 0 END) as no_color_count,
-    sum(CASE WHEN decision='no-size' THEN 1 ELSE 0 END) as no_size_count,
-    sum(CASE WHEN decision='nothing' THEN 1 ELSE 0 END) as nothing_count,
-    count(product_id) as amount,
-    sum(selected_percentage) as similarity,
-    (sum(selected_percentage)/count(product_id)) as avg_similarity
-  FROM product_selects
-  GROUP by product_id, selected_id
-) AS t
-ORDER BY t.found_count desc, avg_similarity desc
-").to_a
+    SELECT *
+    FROM (
+      SELECT product_id, selected_id,
+        sum(CASE WHEN decision='found' THEN 1 ELSE 0 END) as found_count,
+        sum(CASE WHEN decision='no-color' THEN 1 ELSE 0 END) as no_color_count,
+        sum(CASE WHEN decision='no-size' THEN 1 ELSE 0 END) as no_size_count,
+        sum(CASE WHEN decision='nothing' THEN 1 ELSE 0 END) as nothing_count,
+        count(product_id) as amount,
+        sum(selected_percentage) as similarity,
+        (sum(selected_percentage)/count(product_id)) as avg_similarity
+      FROM product_selects
+      GROUP by product_id, selected_id
+    ) AS t
+    ORDER BY t.found_count desc, avg_similarity desc
+    ").to_a
 
     products_ids = ar.map{|row| row['product_id']} + ar.map{|row| row['selected_id']}
     products_exists = Product.where(id: products_ids)
