@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   get 'products/statistic/export' => 'products#statistic_export', as: :products_statistic_export
   get 'products/selected' => 'products#selected', as: :products_selected
   get 'products/selected/export' => 'products#selected_export', as: :products_selected_export
-  get 'marketing' => 'products#marketing', as: :marketing
+  get 'marketing' => 'marketing#index'
 
   get 'match' => 'match#show', as: :match
   post 'match/undo' => 'match#undo', as: :match_undo
