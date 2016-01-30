@@ -12,7 +12,7 @@ class Import::Herschelsupply < Import::Platform::Shopify
       page = get_request(url)
       html = Nokogiri::HTML(page.body)
 
-      urls = html.css('.product-row .product li a').map{|a| a.attr('href')}
+      urls = html.css('.product-row .product li .image-wrapper a').map{|a| a.attr('href')}
       break if urls.size == 0
 
       urls.each do |url|
@@ -24,7 +24,7 @@ class Import::Herschelsupply < Import::Platform::Shopify
   end
 
   def process_product(url)
-    url = build_url url
+    url = build_url(url)
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200
