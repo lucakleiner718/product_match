@@ -54,9 +54,9 @@ class Import::Popshops < Import::Base
       @categories = @xml.search('categories category').map{|c| [c.attr('id'), c.attr('name')]}.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
       @merchants = @xml.search('merchants merchant').map{|m| [m.attr('id'), m.attr('name')]}.inject({}){|obj, el| obj[el[0]] = el[1]; obj}
 
-      break if products.size == 0
+      break if products.size == 0 || products.size < 90
 
-      items = prepare_data products
+      items = prepare_data(products)
 
       @exists_products = Product.where(source: source, source_id: items.map{|r| r[:source_id]}).each_with_object({}){|el, obj| obj[el.source_id] = el}
       to_update = []
@@ -75,7 +75,7 @@ class Import::Popshops < Import::Base
     true
   end
 
-  def process_to_create to_create
+  def process_to_create(to_create)
     if to_create.size > 0
       keys = to_create.first.keys
       keys += [:created_at, :updated_at]
@@ -87,7 +87,7 @@ class Import::Popshops < Import::Base
     end
   end
 
-  def process_to_update to_update
+  def process_to_update(to_update)
     to_update.each do |row|
       product = @exists_products[row[:source_id]]
       row.delete :upc if row[:upc].blank?
@@ -98,7 +98,7 @@ class Import::Popshops < Import::Base
     end
   end
 
-  def prepare_data products
+  def prepare_data(products)
     results = []
     brands = @xml.search('resources brands brand').inject({}){|obj, el| obj[el.attr('id')] = normalize_brand(el.attr('name')); obj}
     products.each do |r|
