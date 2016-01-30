@@ -161,7 +161,7 @@ module Import
           response_group: :Large,
           search_index: :FashionWomen,
           sort: :price,
-        }.merge(params)
+        }.merge(params).merge(random_options)
         log params
         term = params.delete(:term)
         ::Amazon::Ecs.item_search(term, params)
@@ -189,6 +189,19 @@ module Import
 
     def reached_max?
       total_amount <= processed_items.uniq.compact.size
+    end
+
+    def random_options
+      keys = ENV['AMAZON_IMPORT_KEY'].split(',')
+      secrets = ENV['AMAZON_IMPORT_SECRET'].split(',')
+      tags = ENV['AMAZON_IMPORT_TAG'].split(',')
+      index = rand(keys.size)
+
+      {
+        AWS_access_key_id: keys[index],
+        AWS_secret_key: secrets[index],
+        associate_tag: tags[index]
+      }
     end
   end
 end
