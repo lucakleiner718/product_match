@@ -44,6 +44,8 @@ class Suggestion
     upc_patterns = product.upc_patterns
 
     related_products.find_each do |suggested|
+      next if incorrect?(suggested)
+
       percentage = similarity_to(suggested, upc_patterns)
       if percentage && percentage > SIMILARITY_MIN
         ps = exists[suggested.id]
@@ -313,4 +315,7 @@ class Suggestion
     @kinds = YAML.load_file('config/products_kinds.yml')
   end
 
+  def incorrect?(suggested)
+    suggested.source == 'amazon_ad_api' && suggested.upc =~ /^7010/
+  end
 end
