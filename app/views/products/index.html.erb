@@ -93,7 +93,7 @@
       <%= paginate @products %>
     </div>
     <div class="col-sm-4">
-      <%= link_to 'Export All', products_export_path(filter: params[:filter]), class: 'pull-right btn btn-success', style: 'margin: 20px 0;' %>
+      <%= link_to 'Export All', export_products_path(filter: params[:filter]), class: 'pull-right btn btn-success', style: 'margin: 20px 0;' %>
     </div>
   </div>
 

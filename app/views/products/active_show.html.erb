@@ -1,0 +1,54 @@
+<div class="row">
+  <div class="col-md-3">
+    <%= image_tag @active_product.image, class: "img-responsive" %>
+  </div>
+  <div class="col-md-3">
+    <div class="row">
+      <% @active_product.additional_images[0...4].each do |img| %>
+        <div class="col-md-6"><%= image_tag img, class: "img-responsive" %></div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <h4><%= @active_product.title %></h4>
+    <table class="table">
+      <tr><td>Brand:</td><td><%= @active_product.brand.name || 'N/A' %></td></tr>
+      <tr><td>Price:</td><td>$<%= @active_product.price %></td></tr>
+      <% if @active_product.gender.present? %>
+        <tr><td>Gender:</td><td><%= @active_product.gender %></td></tr>
+      <% end %>
+      <tr><td>Material:</td><td><%= @active_product.material || 'N/A' %></td></tr>
+      <tr><td>Bop Cat:</td><td><%= @active_product.category %></td></tr>
+      <tr><td>Goog Cat:</td><td><%= @active_product.google_category %></td></tr>
+      <tr><td>Style Code:</td><td><%= @active_product.style_code %></td></tr>
+      <tr><td colspan="2"><%= @active_product.source.titleize %></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-7">
+    <h3>Shop</h3>
+    <% if @other_retailers && @other_retailers.size > 0 %>
+      <% content_for :retailers do %>
+        <ul>
+          <li><%= @active_product.source %>: <%= link_to @active_product.title, @active_product.url, target: :_blank %></li>
+          <% @other_retailers.each do |retailer, products| %>
+            <% product = products.first %>
+            <li><%= retailer %>: <%= link_to product.title, product.url, target: :_blank %></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <%= yield :retailers %>
+    <% elsif @active_products_upc.blank? %>
+      <p>No upc provided to product</p>
+    <% else %>
+      <p>No product from other retailers</p>
+    <% end %>
+  </div>
+
+  <div class="col-sm-5">
+    <%= text_area_tag 'test', yield(:retailers), style: 'width: 100%; height: 200px;', onfocus: 'javascript: this.select();' %>
+  </div>
+</div>

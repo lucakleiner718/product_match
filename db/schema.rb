@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160128080012) do
+ActiveRecord::Schema.define(version: 20160201080040) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,6 +30,23 @@ ActiveRecord::Schema.define(version: 20160128080012) do
   add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
   add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace", using: :btree
   add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
+
+  create_table "active_products", force: :cascade do |t|
+    t.string   "title"
+    t.integer  "brand_id"
+    t.string   "price"
+    t.string   "category"
+    t.string   "source"
+    t.string   "style_code"
+    t.string   "image"
+    t.text     "additional_images", default: [], array: true
+    t.string   "gender"
+    t.string   "material"
+    t.string   "google_category"
+    t.string   "url"
+    t.datetime "shopbop_added_at"
+    t.integer  "retailers_count"
+  end
 
   create_table "brand_stats", force: :cascade do |t|
     t.integer  "brand_id"

@@ -3,7 +3,7 @@ class ProductsController < ApplicationController
   before_filter :authorize
 
   def root
-    redirect_to products_statistic_path
+    redirect_to statistic_products_path
   end
 
   def index
@@ -53,7 +53,7 @@ class ProductsController < ApplicationController
       @products = @products.where('title ILIKE ?', "%#{f[:title]}%") if f[:title]
       @products = @products.where(source: f[:source]) if f[:source].present?
       @products = @products.where(upc: f[:upc]) if f[:upc]
-      @products = @products.where(retailer: f[:retailer]) if f[:retailer]
+      @products = @products.where(retailer: f[:retailer]) if f[:retailer].present?
       @products = @products.without_upc if f[:no_upc]
       @products = @products.where(style_code: f[:style_code]) if f[:style_code].present?
     end
@@ -74,6 +74,20 @@ class ProductsController < ApplicationController
 
     filename = "upc-products#{"-#{brand.try(:name)}" if brand}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}.csv"
     send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
+  end
+
+  def active
+    @active_products = ActiveProduct.where('retailers_count > 0').includes(:brand)
+                         .order("#{params[:sort] || 'title'} #{params[:direction] || 'asc'}")
+                         .page(params[:page]).per(50)
+  end
+
+  def active_show
+    @active_product = ActiveProduct.find(params[:id])
+    @active_products_upc = Product.where(source: @active_product.source).where(style_code: @active_product.style_code).pluck(:upc).compact
+    if @active_products_upc.any?
+      @other_retailers = Product.not_matching.where(upc: @active_products_upc).select('distinct(style_code), *').group_by{|el| el.source}
+    end
   end
 
   def statistic
@@ -224,7 +238,7 @@ class ProductsController < ApplicationController
     if current_user.admin?
       true
     elsif current_user.manager? && ['statistic', 'marketing', 'statistic_export'].exclude?(params[:action])
-      redirect_to(products_statistic_path, alert: "You don't have access to this page")
+      redirect_to(statistic_products_path, alert: "You don't have access to this page")
     elsif current_user.regular? && ['match', 'match_select'].exclude?(params[:action])
       redirect_to(match_path, alert: "You don't have access to this page")
     end

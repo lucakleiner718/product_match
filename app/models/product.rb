@@ -15,6 +15,7 @@ class Product < ActiveRecord::Base
   scope :not_shopbop, -> { not_matching }
   scope :without_upc, -> { where(upc: [nil, '']) }
   scope :with_upc, -> { where.not(upc: [nil, '']) }
+  scope :in_stock, -> { where(in_store: true) }
 
   # validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
 

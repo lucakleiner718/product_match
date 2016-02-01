@@ -4,14 +4,19 @@ Rails.application.routes.draw do
   ActiveAdmin.routes(self)
 
   root to: 'products#root'
-  get 'products' => 'products#index', as: :products
-  get 'products/export' => 'products#index_export', as: :products_export
+  resources :products, only: [:index, :show] do
+    collection do
+      get :export, action: :index_export, as: :export
+      get :statistic, actino: :statistic, as: :statistic
+      get 'statistic/export', acition: :statistic_export, as: :statistic_export
+      # get 'products/statistic_brand' => 'products#statistic_brand', as: :products_statistic_brand
+      get :selected
+      get 'selected/export', action: :selected_export, as: :selected_export
+      get :active
+      get 'active/:id' => 'products#active_show', as: :active_show
+    end
+  end
 
-  get 'products/statistic' => 'products#statistic', as: :products_statistic
-  # get 'products/statistic_brand' => 'products#statistic_brand', as: :products_statistic_brand
-  get 'products/statistic/export' => 'products#statistic_export', as: :products_statistic_export
-  get 'products/selected' => 'products#selected', as: :products_selected
-  get 'products/selected/export' => 'products#selected_export', as: :products_selected_export
   get 'marketing' => 'marketing#index'
 
   get 'match' => 'match#show', as: :match
