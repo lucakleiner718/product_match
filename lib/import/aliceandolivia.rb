@@ -31,8 +31,9 @@ class Import::Aliceandolivia < Import::Base
 
         rows.each do |row|
           row_url = row['page_name_s']
-          next unless url
-          process_product(build_url(row_url))
+          if row_url
+            process_product(build_url(row_url))
+          end
         end
 
         page_number += 1
