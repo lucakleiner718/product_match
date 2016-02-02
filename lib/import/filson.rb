@@ -50,13 +50,13 @@ class Import::Filson < Import::Base
     url = build_url(original_url)
     price = html.css('.product-essential .price-info .price').text.sub('$', '')
 
-    cxt = V8::Context.new
     sctipt_tag = html.css('script:contains("sl:translate_json")').first
     return false unless sctipt_tag
     orig_js = sctipt_tag.text
     js = orig_js.strip.sub(/^\(function\(\$,undefined\) {/, '').sub(/}\)\(jQuery\);$/, '').strip
     js = 'window = {location: {href: ""}}; var Product = {Config: function(){}};' + js
-    cxt.eval(js)
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
 
     cxt[:handler][:config][:products].each do |product|
       row = {

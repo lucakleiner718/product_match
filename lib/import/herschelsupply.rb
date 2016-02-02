@@ -36,12 +36,12 @@ class Import::Herschelsupply < Import::Platform::Shopify
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     orig_js = html.css('script:contains("Shopify.product =")').first.text
     js = %|Shopify = { product: {} };| + orig_js
-    cxt.eval(js)
-    product_data = cxt['Shopify']['product']
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
 
+    product_data = cxt['Shopify']['product']
     style_code = product_data['id']
     product_name = product_data['title']
     category = product_data['type']

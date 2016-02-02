@@ -43,7 +43,6 @@ class Import::Philliplim < Import::Base
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     script_sku = html.css('script:contains("skuInfos")').first
     return unless script_sku
     orig_js = script_sku.text
@@ -51,12 +50,8 @@ class Import::Philliplim < Import::Base
       funcs: ['Social', 'optionRenderer', 'ajaxWithoutAuth', 'optionChangeHandler', 'simpleProductOptions'])
     js = "#{js_add};js_site_var = {context_path: ''};$ = function(){};$.cookie = function(){};#{orig_js}"
 
-    begin
-      cxt.eval(js)
-    rescue => e
-      Honeybadger.notify e
-      return false
-    end
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
 
     product_name = html.css('.product-content .product-content-head h2').first.text.strip
 

@@ -35,9 +35,9 @@ class Import::Ellamoss < Import::Base
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     js = html.css('script:contains("product_image")').first.text
-    cxt.eval(js)
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
     product_name = cxt[:utag_data][:product_name]
     style_code = cxt[:utag_data][:mfr_number]
     category = cxt[:utag_data][:category].gsub(':', ' > ')
@@ -45,7 +45,8 @@ class Import::Ellamoss < Import::Base
 
     cxt = V8::Context.new
     upc_js = html.css('script:contains("aUPC")').first.text
-    cxt.eval("function reload_sizes(){};window={onload: function(){}}" + upc_js)
+    upc_js = "function reload_sizes(){};window={onload: function(){}}" + upc_js
+    mutex { cxt.eval(upc_js) }
 
     data = {}
     cxt[:aUPC].each_with_index do |el, ind1|

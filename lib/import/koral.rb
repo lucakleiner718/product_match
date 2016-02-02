@@ -45,9 +45,9 @@ class Import::Koral < Import::Platform::Shopify
     js = orig_js.match(/jQuery\(function\(\$\)\s?\{\s+(new Shopify\.OptionSelectors\('product-selectors', {.*}\);).*\}\);/m)[1]
     js = %|$ = jQuery = function(func){console = {log: function(){}}; return typeof(func) == 'function' ? func() : { mouseenter: function(){}, mouseleave: function(){} }}; selectCallback_new = ''; Shopify = { linkOptionSelectors: function(){}, OptionSelectors: function(){ Shopify.product = arguments } };selectCallback = function(){};| + js
     cxt = V8::Context.new
-    cxt.eval(js)
-    product_data = cxt['Shopify']['product'][1]['product']
+    mutex { cxt.eval(js) }
 
+    product_data = cxt['Shopify']['product'][1]['product']
     style_code = product_data['id'].to_s
     product_name = product_data['title']
     category = product_data['type']

@@ -31,11 +31,11 @@ class Import::Rvca < Import::Base
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     js = html.css('script:contains("dataLayer =")').first.text
-    cxt.eval(js)
-    data = cxt['dataLayer'].first
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
 
+    data = cxt['dataLayer'].first
     return unless data['product']
 
     product_name = data['product']['name']

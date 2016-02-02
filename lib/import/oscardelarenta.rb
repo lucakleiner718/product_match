@@ -53,21 +53,22 @@ class Import::Oscardelarenta < Import::Base
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     orig_js = html.css('script:contains("sku")').first.text
     js = %|f = function(){}; window = {jQuery: function(){}};VarienForm = f;$ = f;| + orig_js
-    cxt.eval(js)
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
+
     product_data = cxt['personalShopperProduct']
     product_name = product_data['name']
 
-
-    cxt = V8::Context.new
     product_config_script = html.css('script:contains("Product.Config")').first
     return unless product_config_script
 
     orig_js = html.css('script:contains("Product.Config")').first.text
     js = %|f = function(){}; jQuery = function(){return jQuery;}; jQuery.hide = function(){}; window = {jQuery: function(){}};VarienForm = f;$ = f; Product = function(){}; Product.Config = function(){return arguments;};| + orig_js
-    cxt.eval(js)
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
+
     sizes = {}
     cxt['spConfig'].first.last['attributes'].first.last['options'].each do |el|
       el['products'].each do |prod_id|

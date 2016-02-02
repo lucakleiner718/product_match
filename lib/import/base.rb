@@ -319,4 +319,11 @@ class Import::Base
       ProcessImportUrlWorker.new.perform(self.class.name, "process_#{kind}", url, *args)
     end
   end
+
+  def mutex
+    semaphore = Mutex.new
+    semaphore.synchronize do
+      yield
+    end
+  end
 end

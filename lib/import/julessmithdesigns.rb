@@ -35,16 +35,16 @@ class Import::Julessmithdesigns < Import::Platform::Shopify
 
     return false if page =~ /404 Page/i
 
-    cxt = V8::Context.new
     js_script =  html.css('script:contains("Shopify.OptionSelectors")').first
     return unless js_script
     orig_js = js_script.text
 
     js = orig_js.sub(/^\s+#{Regexp.quote " // <![CDATA["}\s+#{Regexp.quote "$(function() {"}\s+/, '').sub(/\s+#{Regexp.quote "});"}\s+#{Regexp.quote "// ]]>"}\s+$/, '')
     js = %|$ = function(func){console = {log: function(){}}; return typeof(func) == 'function' ? function(){return {val: function(){return {trigger: function(){}}}}} : {val: function(){return {trigger: function(){}}}}}; selectCallback_new = ''; Shopify = { linkOptionSelectors: function(){}, OptionSelectors: function(){ Shopify.product = arguments } };selectCallback = function(){};| + js
-    cxt.eval(js)
-    product_data = cxt['Shopify']['product'][1]['product']
+    cxt = V8::Context.new
+    mutex { cxt.eval(js) }
 
+    product_data = cxt['Shopify']['product'][1]['product']
     style_code = product_data['id']
     product_name = product_data['title']
     category = product_data['type']
