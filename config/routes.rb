@@ -7,8 +7,8 @@ Rails.application.routes.draw do
   resources :products, only: [:index, :show] do
     collection do
       get :export, action: :index_export, as: :export
-      get :statistic, actino: :statistic, as: :statistic
-      get 'statistic/export', acition: :statistic_export, as: :statistic_export
+      get :statistic
+      get 'statistic/export', action: :statistic_export, as: :statistic_export
       # get 'products/statistic_brand' => 'products#statistic_brand', as: :products_statistic_brand
       get :selected
       get 'selected/export', action: :selected_export, as: :selected_export
