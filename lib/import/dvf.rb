@@ -37,7 +37,7 @@ class Import::Dvf < Import::Platform::Demandware
     product_id = original_url.match(product_id_pattern)[1]
 
     resp = get_request("#{baseurl}/#{product_id}.html")
-    return false if resp.response_code != 200
+    return false if resp.response_code != 200 || resp.body =~ /PAGE IS NOT FOUND/i
 
     url = resp.effective_url
 
@@ -56,12 +56,12 @@ class Import::Dvf < Import::Platform::Demandware
 
     product_name = html.css('#product-content .product-overview-title').first.text.sub(/^dvf/i, '').strip
     category = html.css('.breadcrumbs a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
-    color_param = "dwvar_#{product_id_param}_color"
     images = html.css("#pdp-image-container .pdp-slider-slide img").map{|img| img.attr('src')}
     main_image = images.shift
     price = html.css('.product-overview-sales-price').first.text
 
-    sizes = html.css('.pdp-default-size-select').first.css('option').map{|opt| opt.attr('value').match(/dwvar_#{product_id_param}_size=([^&$]+)/) && $1}.compact
+    sizes_select = html.css('.pdp-default-size-select').first
+    sizes = sizes_select ? sizes_select.css('option').map{|opt| opt.attr('value').match(/dwvar_#{product_id_param}_size=([^&$]+)/) && $1}.compact : ['']
     colors = html.css('.pdp-default-patterns-wrapper a').map{|color| [color.attr('data-color'), color.attr('title')]}
     color_param = "dwvar_#{product_id_param}_color"
 
@@ -69,7 +69,6 @@ class Import::Dvf < Import::Platform::Demandware
       color_url = "#{url}?#{color_param}=#{color_code}"
 
       sizes.each do |size|
-
         variant_url = internal_url('Product-Variation', pid: product_id, "dwvar_#{product_id_param}_size" => size, "#{color_param}" => color_code, format: :ajax)
         variant_page = get_request(variant_url)
         variant_html = Nokogiri::HTML(variant_page.body)

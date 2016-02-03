@@ -15,6 +15,7 @@
 //= require jquery.zoom
 //= require bootstrap
 //= require select2
+//= require bootstrap-datepicker
 
 //= require tools
 //= require products

@@ -77,9 +77,26 @@ class ProductsController < ApplicationController
   end
 
   def active
-    @active_products = ActiveProduct.where('retailers_count > 0').includes(:brand)
+    @active_products = ActiveProduct.includes(:brand)
                          .order("#{params[:sort] || 'title'} #{params[:direction] || 'asc'}")
-                         .page(params[:page]).per(50)
+
+    if params[:filter]
+      f = params[:filter]
+      @search = true
+
+      @active_products = @active_products.where(brand: f[:brand]) if f[:brand].present?
+      @active_products = @active_products.where(brand_id: f[:brand_id]) if f[:brand_id].present?
+      if f[:retailers_count].present?
+        @active_products = @active_products.where(retailers_count: f[:retailers_count])
+      else
+        @active_products = @active_products.where('retailers_count > 0')
+      end
+      @active_products = @active_products.where('shopbop_added_at >= ?', Date.strptime(f[:shopbop_added_at_from], "%m/%d/%Y")) if f[:shopbop_added_at_from].present?
+      @active_products = @active_products.where('shopbop_added_at <= ?', Date.strptime(f[:shopbop_added_at_to], "%m/%d/%Y")) if f[:shopbop_added_at_to].present?
+    end
+
+    @filter_brands = Brand.in_use.order(:name)
+    @active_products = @active_products.page(params[:page]).per(50)
   end
 
   def active_show

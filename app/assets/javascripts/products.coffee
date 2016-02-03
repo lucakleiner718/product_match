@@ -44,3 +44,6 @@ jQuery ($) ->
 
   $(".zoom-image").zoom
     on: 'right-click'
+
+
+  $('.datepicker').datepicker()

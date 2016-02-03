@@ -2,33 +2,79 @@
   <h1>Products Active</h1>
 </div>
 
-<table class="table">
-  <thead>
-  <tr>
-    <th>Brand</th>
-    <th>Title</th>
-    <th>Price</th>
-    <th>Category</th>
-    <th>Date added to Shopbop</th>
-    <th>Retailer product count</th>
-    <th></th>
-  </tr>
-  </thead>
-  <% @active_products.each do |active_product| %>
-    <tr>
-      <td><%= active_product.brand.try(:name) %></td>
-      <td><%= link_to active_product.title, active_show_products_path(active_product) %></td>
-      <td><%= active_product.price %></td>
-      <td><%= active_product.category %></td>
-      <td><%= active_product.shopbop_added_at.to_s(:long) %></td>
-      <td><%= active_product.retailers_count %></td>
-      <td><%= link_to 'Show', active_show_products_path(active_product), class: 'btn btn-default btn-xs' %></td>
-    </tr>
-  <% end %>
-</table>
+<button class="btn btn-primary" role="button" data-toggle="collapse" data-target="#filterbox">Show/hide filter</button>
+<div class="filter collapse<%= ' in' if !@search || ((!params[:page] || params[:page] == 1) && @active_products.size == 0) %>" id="filterbox">
+  <h2>Filter</h2>
+  <%= form_tag active_products_path, method: :get do %>
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="form-group">
+          <%= label_tag 'filter_brand_id', 'Brand' %>
+          <div class="row">
+            <div class="col-sm-12">
+              <%= select_tag 'filter[brand_id]', ("<option value=''>All</option>" + options_from_collection_for_select(@filter_brands, :id, :name, (params[:filter] && params[:filter][:brand_id]))).html_safe, class: "form-control select2", style: 'width: 100%; height: 34px;' %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-group">
+          <%= label_tag 'filter_retailers_count', 'Retailers count min.' %>
+          <%= text_field_tag 'filter[retailers_count]', (params[:filter] && params[:filter][:retailers_count]), class: "form-control" %>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-group">
+          <%= label_tag 'filter_shopbop_added_at_from', 'Shopbop added from' %>
+          <%= text_field_tag 'filter[shopbop_added_at_from]', (params[:filter] && params[:filter][:shopbop_added_at_from]), class: "form-control datepicker" %>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-group">
+          <%= label_tag 'filter_shopbop_added_at_to', 'Shopbop added to' %>
+          <%= text_field_tag 'filter[shopbop_added_at_to]', (params[:filter] && params[:filter][:shopbop_added_at_to]), class: "form-control datepicker" %>
+        </div>
+      </div>
+    </div>
 
-<div class="row">
-  <div class="col-sm-8">
-    <%= paginate @active_products %>
-  </div>
+    <button type="submit" class="btn btn-default">Search</button>
+  <% end %>
 </div>
+
+<br>
+<br>
+
+<% if @search %>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Brand</th>
+      <th>Title</th>
+      <th>Price</th>
+      <th>Category</th>
+      <th>Date added to Shopbop</th>
+      <th>Retailer product count</th>
+      <th></th>
+    </tr>
+    </thead>
+    <% @active_products.each do |active_product| %>
+      <tr>
+        <td><%= link_to_if active_product.brand.present?, active_product.brand.try(:name), active_products_path(filter: { brand_id: active_product.brand_id }) %></td>
+        <td><%= link_to active_product.title, active_show_products_path(active_product) %></td>
+        <td>$<%= active_product.price %></td>
+        <td><%= active_product.category %></td>
+        <td><%= active_product.shopbop_added_at.to_s(:long) %></td>
+        <td><%= active_product.retailers_count %></td>
+        <td><%= link_to 'Show', active_show_products_path(active_product), class: 'btn btn-default btn-xs' %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="row">
+    <div class="col-sm-8">
+      <%= paginate @active_products %>
+    </div>
+  </div>
+<% else %>
+  <p class="text-danger">Use filter to see active products</p>
+<% end %>
