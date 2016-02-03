@@ -3,32 +3,33 @@ class Import::Dvf < Import::Platform::Demandware
   def baseurl; 'https://www.dvf.com'; end
   def subdir; 'DvF_US'; end
   def product_id_pattern; /\/([^\.\/]+)\.html/; end
-  def brand_name_default; 'Diane von Furstenberg'; end
+  def brand_name; 'Diane von Furstenberg'; end
 
   def perform
+    urls = []
     [
-      'new-arrivals', 'dresses', 'designer-clothing', 'designer-handbags', 'shoes', 'accessories', 'sale'
+      'dresses', 'designer-clothing', 'designer-handbags', 'shoes', 'accessories',
+      'sale'
     ].each do |url_part|
-      log url_part
-      size = 99
-      urls = []
+      size = 1000
+      cat_urls = []
       while true
-        url = "#{baseurl}/#{url_part}/?sz=#{size}&start=#{urls.size}&format=ajax"
+        url = "#{url_part}/all/?sz=#{size}&start=#{cat_urls.size}&format=ajax"
+        log url
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
 
-        products = html.css('.search-result-content .product-tile')
-        break if products.size == 0
+        links = html.css('#search-result-items .product-tile .product-image a.thumb-link').map{|a| a.attr('href')}
+        cat_urls += links
 
-        urls += products.map do |item|
-          url = item.css('.product-image a').first.attr('href').sub(/\?.*/, '')
-          url = "#{baseurl}#{url}" if url !~ /^http/
-          url
-        end
+        break if links.size < size
       end
 
-      spawn_products_urls(urls)
+      urls += cat_urls
+      log "#{cat_urls.size}, #{process_products_urls(cat_urls).size}, #{process_products_urls(urls).size}"
     end
+
+    spawn_products_urls(urls)
   end
 
   def process_product(original_url)
@@ -53,35 +54,42 @@ class Import::Dvf < Import::Platform::Demandware
 
     results = []
 
-    product_name = html.css('#product-content .product-name').first.text.sub(/^dvf/i, '').strip
-    category = html.css('.product-breadcrumbs li a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
+    product_name = html.css('#product-content .product-overview-title').first.text.sub(/^dvf/i, '').strip
+    category = html.css('.breadcrumbs a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
     color_param = "dwvar_#{product_id_param}_color"
-    image_url = html.css("#pdp-pinterest-container img").first.attr('src')
+    images = html.css("#pdp-image-container .pdp-slider-slide img").map{|img| img.attr('src')}
+    main_image = images.shift
+    price = html.css('.product-overview-sales-price').first.text
 
-    data = get_json product_id
-    return false unless data
-    data.each do |k, v|
-      upc = v['id']
-      price = v['pricing']['standard']
-      price_sale = v['pricing']['sale']
-      color = v['attributes']['color']
-      size = v['attributes']['size']
-      color_id = k.split('|').inject({}){|obj, el| a = el.split('-'); obj[a[0]] = a[1]; obj}['color']
-      color_url = "#{url}?#{color_param}=#{color_id}"
+    sizes = html.css('.pdp-default-size-select').first.css('option').map{|opt| opt.attr('value').match(/dwvar_#{product_id_param}_size=([^&$]+)/) && $1}.compact
+    colors = html.css('.pdp-default-patterns-wrapper a').map{|color| [color.attr('data-color'), color.attr('title')]}
+    color_param = "dwvar_#{product_id_param}_color"
 
-      results << {
-        title: product_name,
-        category: category,
-        price: price,
-        price_sale: price_sale,
-        color: color,
-        size: size,
-        upc: upc,
-        url: color_url,
-        image: image_url,
-        style_code: product_id,
-        brand: brand_name_default,
-      }
+    colors.each do |color_code, color|
+      color_url = "#{url}?#{color_param}=#{color_code}"
+
+      sizes.each do |size|
+
+        variant_url = internal_url('Product-Variation', pid: product_id, "dwvar_#{product_id_param}_size" => size, "#{color_param}" => color_code, format: :ajax)
+        variant_page = get_request(variant_url)
+        variant_html = Nokogiri::HTML(variant_page.body)
+
+        upc = variant_html.css('#pid').first.attr('value')
+
+        results << {
+          title: product_name,
+          category: category,
+          price: price,
+          color: color,
+          size: size,
+          upc: upc,
+          url: color_url,
+          main_image: main_image,
+          additional_images: images,
+          style_code: product_id,
+          brand: brand_name,
+        }
+      end
     end
 
     prepare_items(results)
