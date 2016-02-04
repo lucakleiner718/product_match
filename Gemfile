@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.2.2'
+ruby '2.2.4'
 #ruby-gemset=retailer-products
 
 gem 'rails', '4.2.4'
