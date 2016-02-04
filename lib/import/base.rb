@@ -321,8 +321,8 @@ class Import::Base
   end
 
   def mutex
-    semaphore = Mutex.new
-    semaphore.synchronize do
+    @@semaphore ||= Mutex.new
+    @@semaphore.synchronize do
       yield
     end
   end

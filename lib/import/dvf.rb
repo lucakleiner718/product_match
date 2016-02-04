@@ -56,9 +56,10 @@ class Import::Dvf < Import::Platform::Demandware
 
     product_name = html.css('#product-content .product-overview-title').first.text.sub(/^dvf/i, '').strip
     category = html.css('.breadcrumbs a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text; ar}.join(' > ')
-    images = html.css("#pdp-image-container .pdp-slider-slide img").map{|img| img.attr('src')}
+    images = html.css("#pdp-image-container .pdp-slider-slide img").map{|img| img.attr('src')} - ['null']
     main_image = images.shift
-    price = html.css('.product-overview-sales-price').first.text
+    return unless main_image
+    price = html.css('.product-overview-sales-price').first.try(:text)
 
     sizes_select = html.css('.pdp-default-size-select').first
     sizes = sizes_select ? sizes_select.css('option').map{|opt| opt.attr('value').match(/dwvar_#{product_id_param}_size=([^&$]+)/) && $1}.compact : ['']
