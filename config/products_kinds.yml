@@ -34,24 +34,26 @@ tops:
 trousers and shorts:
   - bell-bottoms
   - chaps
-  - jodhpurs
-  - overall
-  - pedal pushers
-  - sweatpants
-  - windpants
   - chinos
-  - pant
-  - pants
   - jeans
+  - jodhpurs
   - joggers
   - legging
   - leggings
-  - stilt
-  - trouser
-  - trousers
+  - overall
+  - pant
+  - pants
+  - pedal pushers
   - short
   - shorts
+  - shortalls
+  - skinny
+  - stilt
+  - sweatpants
   - sweats
+  - trouser
+  - trousers
+  - windpants
 
 skirts:
   - skirt
@@ -149,6 +151,7 @@ footwear:
   - creeper
   - creepers
   - espadrilles
+  - flat
   - flats
   - flip flop
   - heels
@@ -173,9 +176,11 @@ footwear:
   - slides
   - slipper
   - slippers
+  - slip-on
   - sock
   - socks
   - stocking
+  - toe
   - wedge
   - wedges
 
@@ -268,6 +273,12 @@ belt:
   - belt
   - strap
   - thong
+
+lipstick:
+  - lipstick
+
+blush:
+  - blush
 
 accessories other:
   - bandana
