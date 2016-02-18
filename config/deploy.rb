@@ -30,7 +30,7 @@ set :puma_preload_app, false
 set :puma_threads, [0, 4]
 
 set :rvm_type, :user
-set :rvm_ruby_version, '2.3.0@retailer-products'
+set :rvm_ruby_version, '2.2.2@retailer-products'
 set :rvm_roles, %w{app web}
 
 set :bundle_binstubs, nil

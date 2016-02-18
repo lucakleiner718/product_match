@@ -90,9 +90,11 @@ class Import::Popshops < Import::Base
   def process_to_update(to_update)
     to_update.each do |row|
       product = @exists_products[row[:source_id]]
-      row.delete :upc if row[:upc].blank?
-      row.delete :size if row[:size].blank?
-      row.delete :color if row[:color].blank?
+
+      %i|upc size color price price_sale url image sku retailer price_currency|.each do |column|
+        row.delete(column) if row[column].blank?
+      end
+
       product.attributes = row
       product.save! if product.changed?
     end
