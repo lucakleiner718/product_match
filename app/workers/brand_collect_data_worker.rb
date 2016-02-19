@@ -3,12 +3,14 @@ class BrandCollectDataWorker
   include Sidekiq::Worker
   sidekiq_options unique: true
 
-  def perform(product_source_id)
+  def perform(product_source_id, force: false)
     begin
       product_source = ProductSource.find(product_source_id)
     rescue ActiveRecord::RecordNotFound
       return false
     end
+
+    return if product_source.up_to_date? && !force
 
     response =
       case product_source.source_name
@@ -63,7 +65,7 @@ class BrandCollectDataWorker
       end
 
     if response
-      product_source.update_column :collected_at, Time.now if response
+      product_source.touch(:collected_at) if response
       if product_source.brand.try(:id)
         ProductSuggestionsGeneratorWorker.perform_async(product_source.brand_id)
       end

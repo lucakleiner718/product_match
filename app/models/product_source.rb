@@ -59,4 +59,9 @@ class ProductSource < ActiveRecord::Base
     search
   end
 
+  def up_to_date?
+    return false unless self.collected_at
+    Time.zone.now - self.collected_at < self.period
+  end
+
 end
