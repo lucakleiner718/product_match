@@ -1,5 +1,7 @@
 module Import
   class Amazon < Import::Base
+    class ReachedMax < StandardError; end
+
     def source; 'amazon_ad_api'; end
 
     def self.perform(brand_name)
@@ -15,16 +17,9 @@ module Import
       get_total_products_amount
 
       perform(sort: :price)
-      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
       perform(sort: '-price')
-      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
       perform(sort: :reviewrank)
-      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
       perform(sort: :relevancerank)
-      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
 
       categories = YAML.load_file('config/products_kinds.yml').values.flatten
       words = []
@@ -40,19 +35,12 @@ module Import
 
       words.each do |term|
         perform(term: term, sort: :price)
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
         perform(term: term, sort: '-price')
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
         perform(term: term, sort: :reviewrank)
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
         perform(term: term, sort: :relevancerank)
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
       end
 
-      return log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
+      raise ReachedMax if reached_max?
 
       words2 = []
       Product.where(brand_id: brand.id).where(source: source).pluck(:title).each do |title|
@@ -67,17 +55,15 @@ module Import
       words2.each do |term|
         results = perform(term: term, sort: :price)
         next if results < 90
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
 
         perform(term: term, sort: '-price')
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
         perform(term: term, sort: :reviewrank)
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
-
         perform(term: term, sort: :relevancerank)
-        break log("reached max #{processed_items.uniq.size}/#{total_amount}") if reached_max?
       end
+
+    rescue ReachedMax => e
+      log("reached max #{processed_items.uniq.size}/#{total_amount}")
+      return
     end
 
     def perform(params={})
@@ -103,6 +89,9 @@ module Import
 
       prepare_items(results)
       process_results_batch(results)
+
+      raise ReachedMax if reached_max?
+
       results.size
     end
 
@@ -188,6 +177,7 @@ module Import
     end
 
     def reached_max?
+      puts "========= #{total_amount} / #{processed_items.uniq.compact.size} ========="
       total_amount <= processed_items.uniq.compact.size
     end
 
