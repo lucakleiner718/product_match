@@ -41,6 +41,7 @@ group :production do
   gem 'puma', '~> 2.8.2'
 end
 
+gem 'activerecord-import'
 gem 'pry-rails'
 gem 'simple_form'
 gem 'nokogiri'

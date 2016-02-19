@@ -50,6 +50,8 @@ GEM
       activemodel (= 4.2.5)
       activesupport (= 4.2.5)
       arel (~> 6.0)
+    activerecord-import (0.11.0)
+      activerecord (>= 3.0)
     activesupport (4.2.5)
       i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
@@ -493,6 +495,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeadmin!
+  activerecord-import
   amazon-ecs
   aws-sdk
   better_errors

@@ -18,12 +18,8 @@ class Suggestion
   end
 
   def build
-    # do not generate suggestions if upc already detected
-    if product.upc.present? || ProductUpc.where(product_id: product.id).first.try(:upc)
-      return false
-    end
-
-    return false unless product.brand.try(:name)
+    # do not generate suggestions if upc already detected or brand is blank
+    return false if with_upc? || product.brand.try(:name).blank?
 
     load_kinds
     process_related_products
@@ -34,9 +30,7 @@ class Suggestion
   attr_reader :product, :kinds
 
   def process_related_products
-    related_products = build_related_products
-
-    exists = ProductSuggestion.where(product_id: product.id).index_by{|el| el.suggested_id}
+    exists_suggestions = ProductSuggestion.where(product_id: product.id).index_by{|el| el.suggested_id}
 
     to_create = []
     actual_list = []
@@ -44,37 +38,37 @@ class Suggestion
     upc_patterns = product.upc_patterns
 
     related_products.find_each do |suggested|
-      next if incorrect?(suggested)
+      next if amazon_incorrect_upc?(suggested)
 
       percentage = similarity_to(suggested, upc_patterns)
-      if percentage && percentage > SIMILARITY_MIN
-        ps = exists[suggested.id]
-        actual_list << suggested.id
+      next if percentage < SIMILARITY_MIN
 
-        if ps
-          ps.percentage = percentage
-          ps.upc_patterns = upc_patterns
-          ps.save! if ps.changed?
-        else
-          to_create << {
-            product_id: product.id, suggested_id: suggested.id, percentage: percentage,
-            upc_patterns: "{#{upc_patterns.join(',')}}",
-            price: suggested.price, price_sale: suggested.price_sale,
-            created_at: Time.now, updated_at: Time.now
-          }
-        end
+      suggestion = exists_suggestions[suggested.id]
+      actual_list << suggested.id
+
+      if suggestion
+        suggestion.percentage = percentage
+        suggestion.upc_patterns = upc_patterns
+        suggestion.save! if suggestion.changed?
+      else
+        to_create << ProductSuggestion.new(
+          product_id: product.id, suggested_id: suggested.id, percentage: percentage,
+          upc_patterns: "{#{upc_patterns.join(',')}}",
+          price: suggested.price, price_sale: suggested.price_sale
+        )
       end
     end
 
-    not_actual = exists.values.uniq.map(&:suggested_id) - actual_list
+    not_actual = exists_suggestions.values.uniq.map(&:suggested_id) - actual_list
     if not_actual.size > 0
       ProductSuggestion.where(product_id: product.id, suggested_id: not_actual).delete_all
     end
 
     create_items(to_create)
-    to_create.size
+    actual_list.size
   end
 
+  # @returns [Integer] similarity percentage of initial product and suggested
   def similarity_to(suggested, upc_patterns)
     @params_amount = WEIGHTS.values.sum
     params_count = []
@@ -255,58 +249,46 @@ class Suggestion
     end
   end
 
-  def build_related_products
-    brand = product.brand
-
-    rp = Product.not_matching.where('products.source NOT IN (?)', EXCLUDE_SOURCES)
-           .where(brand_id: brand.id).with_upc.where.not(title: nil)
+  # @return [ActiveRecord::Relation] AR query to find related products
+  def related_products
+    query = Product.not_matching
+                    .where('products.source NOT IN (?)', EXCLUDE_SOURCES)
+                    .where(brand_id: product.brand.id)
+                    .where.not(title: nil).with_upc
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, ' ').split(/\s/)
                     .select{|el| el.strip.present? }
                     .map{|el| el.downcase.strip}
                     .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
 
-    kinds.each do |(name, synonyms)|
-      to_search = []
-      synonyms.each do |synonym|
-        if (synonym.split & title_parts).size > 0
-          to_search += synonyms
-          break
-        end
-      end
+    # search products with synonyms for main category
+    to_search = kinds.values.select do |synonyms|
+      synonyms.select { |synonym| (synonym.split & title_parts).size > 0 }.size > 0
+    end.flatten
 
-      to_search.uniq!
-      if to_search.size > 0
-        rp = rp.where(to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
-        title_parts -= to_search
-      end
+    if to_search.size > 0
+      synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
+        (to_search + title_parts).uniq.map do |el|
+          el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
+        end.join(' | ')}')"
+      query = query.where(synonyms_query)
     end
 
-    # if title_parts.size > 0
-    #   rp = rp.where(title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
-    # end
-
-    rp = rp.joins("LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
-                   AND p1.upc=products.upc AND p1.id != products.id
-                   AND p1.source IN (#{Product::MATCHED_SOURCES.map{|el| Product.sanitize el}.join(',')})")
-           .where('p1.id is null')
-
-    rp
+    query.joins(
+      "LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
+       AND p1.upc=products.upc AND p1.id != products.id
+       AND p1.source IN (#{Product::MATCHED_SOURCES.map{|el| Product.sanitize el}.join(',')})"
+    ).where('p1.id is null')
   end
 
   def create_items(to_create)
-    if to_create.size > 0
-      begin
-        ProductSuggestion.connection.execute("
-          INSERT INTO product_suggestions (#{to_create.first.keys.join(',')})
-          VALUES #{to_create.map{|r| "(#{r.values.map{|el| ProductSuggestion.sanitize el}.join(',')})"}.join(',')}
-          ")
-      rescue ActiveRecord::RecordNotUnique => e
-        to_create.each do |row|
-          row.delete :created_at
-          row.delete :updated_at
-          ProductSuggestion.create row rescue nil
-        end
+    return if to_create.size == 0
+
+    begin
+      ProductSuggestion.import(to_create)
+    rescue ActiveRecord::RecordNotUnique => e
+      to_create.each do |row|
+        ProductSuggestion.create!(row) rescue nil
       end
     end
   end
@@ -315,7 +297,11 @@ class Suggestion
     @kinds = YAML.load_file('config/products_kinds.yml')
   end
 
-  def incorrect?(suggested)
+  def amazon_incorrect_upc?(suggested)
     suggested.source == 'amazon_ad_api' && suggested.upc =~ /^7010/
+  end
+
+  def with_upc?
+    product.upc.present? || ProductUpc.where(product_id: product.id).where.not(upc: nil).exists?
   end
 end
