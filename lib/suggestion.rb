@@ -8,28 +8,17 @@ class Suggestion
   GENDER_WEIGHT = 5
   PRICE_WEIGHT  = 2
   STYLE_CODE_WEIGHT = 10
-  EXCLUDE_SOURCES = [
-    'lordandtaylor.com'
-  ]
   SIMILARITY_MIN = 40
 
   def initialize(product_id)
     @product = Product.find(product_id)
+    load_kinds
   end
 
   def build
     # do not generate suggestions if upc already detected or brand is blank
     return false if with_upc? || product.brand.try(:name).blank?
 
-    load_kinds
-    process_related_products
-  end
-
-  private
-
-  attr_reader :product, :kinds
-
-  def process_related_products
     exists_suggestions = ProductSuggestion.where(product_id: product.id).index_by{|el| el.suggested_id}
 
     to_create = []
@@ -37,7 +26,7 @@ class Suggestion
 
     upc_patterns = product.upc_patterns
 
-    related_products.find_each do |suggested|
+    related_products.each do |suggested|
       next if amazon_incorrect_upc?(suggested)
 
       percentage = similarity_to(suggested, upc_patterns)
@@ -67,6 +56,10 @@ class Suggestion
     create_items(to_create)
     actual_list.size
   end
+
+  private
+
+  attr_reader :product, :kinds
 
   # @returns [Integer] similarity percentage of initial product and suggested
   def similarity_to(suggested, upc_patterns)
@@ -251,34 +244,30 @@ class Suggestion
 
   # @return [ActiveRecord::Relation] AR query to find related products
   def related_products
-    query = Product.not_matching
-                    .where('products.source NOT IN (?)', EXCLUDE_SOURCES)
-                    .where(brand_id: product.brand.id)
-                    .where.not(title: nil).with_upc
+    query = Product.not_matching.where(brand_id: product.brand.id)
+              .with_upc.limit(1_000)
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, ' ').split(/\s/)
-                    .select{|el| el.strip.present? }
-                    .map{|el| el.downcase.strip}
+                    .select{|el| el.strip.present? }.map{|el| el.downcase.strip}
                     .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
       synonyms.select { |synonym| (synonym.split & title_parts).size > 0 }.size > 0
-    end.flatten
-
-    if to_search.size > 0
-      synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
-        (to_search + title_parts).uniq.map do |el|
-          el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
-        end.join(' | ')}')"
-      query = query.where(synonyms_query)
     end
 
-    query.joins(
-      "LEFT JOIN products AS p1 ON p1.upc IS NOT NULL AND p1.upc != ''
-       AND p1.upc=products.upc AND p1.id != products.id
-       AND p1.source IN (#{Product::MATCHED_SOURCES.map{|el| Product.sanitize el}.join(',')})"
-    ).where('p1.id is null')
+    to_search = (to_search.flatten + title_parts).uniq
+
+    # synonyms_query = to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
+    synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
+      to_search.uniq.map do |el|
+        el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
+      end.join(' | ')}')"
+    items = query.where(synonyms_query).to_a
+
+    exists_upc = Set.new(Product.where(upc: items.map(&:upc).uniq).matching.pluck(:upc))
+
+    items.reject{|item| exists_upc.member?(item.upc)}
   end
 
   def create_items(to_create)

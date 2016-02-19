@@ -3,12 +3,14 @@ class ImportAmazonWorker
   include Sidekiq::Worker
   sidekiq_options unique: true, queue: :amazon_import
 
-  def perform(product_source_id)
+  def perform(product_source_id, force: false)
     begin
       product_source = ProductSource.find(product_source_id)
     rescue ActiveRecord::RecordNotFound
       return false
     end
+
+    return if product_source.up_to_date? && !force
 
     response =
       case product_source.source_name
