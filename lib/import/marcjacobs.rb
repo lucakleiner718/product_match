@@ -9,16 +9,18 @@ class Import::Marcjacobs < Import::Platform::Demandware
     urls = []
 
     [
-      'women/featured', 'women/ready-to-wear', 'women/bags-wallets', 'women/shoes', 'women/accessories',
-      'women/jewelry', 'women/sunglasses',
+      'women/featured', 'women/ready-to-wear', 'women/bags-wallets',
+      'women/shoes', 'women/accessories', 'women/jewelry', 'women/sunglasses',
       'watches',
-      'beauty/eyes', 'beauty/lips', 'beauty/face', 'beauty/nails', 'beauty/fragrance/', 'beauty/brushes-cosmetics-cases',
+      'beauty/eyes', 'beauty/lips', 'beauty/face', 'beauty/nails',
+      'beauty/fragrance', 'beauty/brushes-cosmetics-cases',
       'children',
-      'men/featured', 'men/ready-to-wear', 'men/bags-wallets', 'men/shoes', 'men/accessories', 'men/fragrance',
-      'men/sunglasses',
+      'men/featured', 'men/ready-to-wear', 'men/bags-accessories', 'men/shoes',
+      'men/fragrance', 'men/sunglasses',
       'sale'
     ].each do |url_part|
       size = 60
+      cat_urls = []
       while true
         url = "#{url_part}/?sz=#{size}&start=#{urls.size}&format=page-element"
         log(url)
@@ -27,10 +29,14 @@ class Import::Marcjacobs < Import::Platform::Demandware
 
         products = html.css('#search-result-items .product-tile')
                      .map{|item| item.css('.product-image a').first.attr('href')}
-        break if products.size == 0
+        break if products.size == 0 || (cat_urls & products).size == products.size
 
-        urls += products
+        cat_urls += products
+
+        break if products.size < size
       end
+
+      urls += cat_urls
     end
 
     spawn_products_urls(urls)
