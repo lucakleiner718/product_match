@@ -1,6 +1,7 @@
 class ExportShopbopWorker
 
   include Sidekiq::Worker
+  sidekiq_options queue: :critical, unique: true
 
   def perform(period, time_start=nil)
     weekly(time_start) if period == 'last'
