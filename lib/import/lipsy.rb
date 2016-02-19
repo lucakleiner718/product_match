@@ -79,6 +79,8 @@ class Import::Lipsy < Import::Base
     unless brand
       brand_slug = url.match(/\/store\/([^\/]+)\//) && $1
       brand = html.css(".nav-column li a[href*=\"/store/brands/#{brand_slug}\"]").map{|a| a.text}.first
+      brand = html.css(".nav-column li a[href*=\"/store/dresses/#{brand_slug}\"]").map{|a| a.text}.first unless brand
+      brand = page.match(/href="http:\/\/www\.lipsy\.co\.uk\/store\/Brands\/#{Regexp.quote brand_slug}" title="([^"]+)"/) && $1 unless brand
     end
 
     binding.pry if !brand && Rails.env.development?
