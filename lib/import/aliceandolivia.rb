@@ -83,7 +83,8 @@ class Import::Aliceandolivia < Import::Base
                  .sort_by{|e| e['imageTag']}
                  .map{|el| "#{IMAGE_PREFIX}#{el['filename']}"}
       main_image = images.shift
-      style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
+      # style_code = page.scan(/pid:'([^']+)'/i).first.first.strip
+      style_code = html.css('.product-id').first.text.match(/SKU# (.*)/i) && $1
 
       upc = item['skuCode'].sub(/x\z/, '')
 
