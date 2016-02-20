@@ -114,7 +114,7 @@ class Import::Vince < Import::Platform::Venda
       style_code = options['atrdssku']
 
       images = [] + colors_images[color]
-      images = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images2[color])}/) if images.size == 0
+      images = page.scan(/#{image_url_mask.gsub('{{style_code}}', style_code).sub('{{color}}', colors_images2[color] || colors_images2.values.first)}/) if images.size == 0
 
       image = images.shift
       raise "No image" unless image
