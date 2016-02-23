@@ -247,7 +247,7 @@ class Suggestion
     query = Product.not_matching.where(brand_id: product.brand.id)
               .with_upc.limit(1_000)
 
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"]/, ' ').split(/\s/)
+    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/)
                     .select{|el| el.strip.present? }.map{|el| el.downcase.strip}
                     .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
 
