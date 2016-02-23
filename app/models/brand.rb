@@ -146,7 +146,7 @@ class Brand < ActiveRecord::Base
     }
   end
 
-  def merge_with! brands_ids
+  def merge_with!(brands_ids)
     # protect from delete main brand
     brands_ids = brands_ids.map(&:to_i) - [self.id]
 

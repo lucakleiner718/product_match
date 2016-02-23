@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160201080040) do
+ActiveRecord::Schema.define(version: 20160223171356) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -46,6 +46,15 @@ ActiveRecord::Schema.define(version: 20160201080040) do
     t.string   "url"
     t.datetime "shopbop_added_at"
     t.integer  "retailers_count"
+  end
+
+  create_table "brand_duplicates", force: :cascade do |t|
+    t.integer  "target_brand_id"
+    t.integer  "duplicate_brand_id"
+    t.boolean  "processed"
+    t.datetime "processed_at"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
   end
 
   create_table "brand_stats", force: :cascade do |t|

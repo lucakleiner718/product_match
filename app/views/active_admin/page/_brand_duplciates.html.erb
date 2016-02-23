@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-sm-4">
+    <table style="width: 800px;">
+      <% brand_duplicates.each do |duplicate| %>
+        <% next unless duplicate.duplicate.try(:name) %>
+        <tr>
+          <td><%= duplicate.target.name %></td>
+          <td><%= duplicate.duplicate.name %></td>
+          <td>
+            <%= link_to '✔︎ Merge!', admin_brand_duplicates_update_path(duplicate_id: duplicate.id, same: 'yes'), data: { remote: true, method: :post }, class: 'brand-duplicate-decision' %>
+            &nbsp;
+            <%= link_to '✘ Forget!', admin_brand_duplicates_update_path(duplicate_id: duplicate.id, same: 'no'), data: { remote: true, method: :post }, class: 'brand-duplicate-decision' %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
