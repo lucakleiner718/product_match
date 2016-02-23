@@ -76,6 +76,7 @@ class ProductsController < ApplicationController
     send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
+
   def active
     @active_products = ActiveProduct.includes(:brand)
                          .order("#{params[:sort] || 'title'} #{params[:direction] || 'asc'}")
@@ -105,6 +106,48 @@ class ProductsController < ApplicationController
     if @active_products_upc.any?
       @other_retailers = Product.not_matching.where(upc: @active_products_upc).select('distinct(style_code), *').group_by{|el| el.source}
     end
+  end
+
+  def active_export
+    brand = nil
+    @active_products = ActiveProduct.includes(:brand)
+                         .order("#{params[:sort] || 'title'} #{params[:direction] || 'asc'}")
+
+    if params[:filter]
+      f = params[:filter]
+      @search = true
+
+      brand = f[:brand] if f[:brand]
+
+      @active_products = @active_products.where(brand: f[:brand]) if f[:brand].present?
+      @active_products = @active_products.where(brand_id: f[:brand_id]) if f[:brand_id].present?
+      if f[:retailers_count].present?
+        @active_products = @active_products.where(retailers_count: f[:retailers_count])
+      else
+        @active_products = @active_products.where('retailers_count > 0')
+      end
+      @active_products = @active_products.where('shopbop_added_at >= ?', Date.strptime(f[:shopbop_added_at_from], "%m/%d/%Y")) if f[:shopbop_added_at_from].present?
+      @active_products = @active_products.where('shopbop_added_at <= ?', Date.strptime(f[:shopbop_added_at_to], "%m/%d/%Y")) if f[:shopbop_added_at_to].present?
+    else
+      @active_products = @active_products.where('retailers_count > 0')
+    end
+
+    csv_string = CSV.generate do |csv|
+      csv << [
+        'Brand', 'Title', 'Price', 'Category', 'Date added to Shopbop',
+        'Retailer product count', 'Link to Shopbop product'
+      ]
+      @active_products.each do |ap|
+        csv << [
+          ap.brand.try(:name), ap.title, ap.price, ap.category,
+          ap.shopbop_added_at.to_s(:long), ap.retailers_count,
+          active_show_products_url(ap)
+        ]
+      end
+    end
+
+    filename = "upc-active-products#{"-#{brand.name}" if brand}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}.csv"
+    send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
   def statistic

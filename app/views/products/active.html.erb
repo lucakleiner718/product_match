@@ -69,12 +69,15 @@
       </tr>
     <% end %>
   </table>
-
-  <div class="row">
-    <div class="col-sm-8">
-      <%= paginate @active_products %>
-    </div>
-  </div>
 <% else %>
   <p class="text-danger">Use filter to see active products</p>
 <% end %>
+
+<div class="row">
+  <div class="col-sm-8">
+    <%= paginate @active_products if @search %>
+  </div>
+  <div class="col-sm-4">
+    <%= link_to 'Export All', active_export_products_path(filter: params[:filter]), class: 'pull-right btn btn-success', style: 'margin: 20px 0;' %>
+  </div>
+</div>

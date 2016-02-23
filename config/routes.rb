@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       get :selected
       get 'selected/export', action: :selected_export, as: :selected_export
       get :active
+      get 'active/export' => 'products#active_export', as: :active_export
       get 'active/:id' => 'products#active_show', as: :active_show
     end
   end
