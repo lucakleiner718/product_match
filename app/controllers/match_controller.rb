@@ -17,6 +17,10 @@ class MatchController < ApplicationController
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
         ").where("product_selects.id is null")
+      elsif params[:only] == 'updated'
+        products_ids = products_ids.joins("
+          LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id
+        ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.created_at")
       else
         products_ids = products_ids.joins("
           LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id
@@ -25,8 +29,8 @@ class MatchController < ApplicationController
               (product_selects.decision IN ('nothing', 'no-size', 'no-color', 'similar')
                 AND product_selects.created_at > '#{1.day.ago}'
               )
-            AND product_selects.user_id=#{current_user.id})"
-        ).where("product_selects.id is null")
+            AND product_selects.user_id=#{current_user.id})
+        ").where("product_selects.id is null")
       end
 
       if params[:only] == 'new_match_week'
@@ -37,8 +41,6 @@ class MatchController < ApplicationController
 
       if params[:has_color] == 'green' || params[:only] == 'has_green'
         products_ids = products_ids.where('product_suggestions.percentage = ?', 100)
-      else
-        products_ids = products_ids.where('product_suggestions.percentage > ?', 50)
       end
 
       @products_left = products_ids.uniq.size
