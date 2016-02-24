@@ -245,7 +245,7 @@ class Suggestion
   # @return [ActiveRecord::Relation] AR query to find related products
   def related_products
     query = Product.not_matching.where(brand_id: product.brand.id)
-              .with_upc.limit(1_000)
+              .with_upc.limit(1_000).with_image
 
     title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/)
                     .select{|el| el.strip.present? }.map{|el| el.downcase.strip}

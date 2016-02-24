@@ -29,8 +29,13 @@
         </div>
         <div class="clearfix"></div>
         <% if @products_left %>
-          <div class="products-left pull-right" style="padding: 10px 0;">
+          <div class="products-left pull-right text-right" style="padding: 10px 0;">
             Left: <%= @products_left %>
+            <br>
+            <% select = ProductSelect.order(created_at: :desc).where(product_id: @product.id).first %>
+            <% if select %>
+              Last Match:<br><%= select.created_at.to_s(:long) %>
+            <% end %>
           </div>
         <% end %>
       <% end %>

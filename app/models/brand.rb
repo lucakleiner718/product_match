@@ -120,15 +120,16 @@ class Brand < ActiveRecord::Base
     new_match_week = matching_in_store.where('created_at >= ?', now.monday).size
 
 
-    not_matched = con.execute("
-      SELECT count(distinct(products.id))
-      FROM products
-      LEFT JOIN product_selects ON product_selects.product_id=products.id
-      INNER JOIN product_suggestions on products.id=product_suggestions.product_id AND percentage > 50
-      WHERE products.brand_id=#{self.id}
-            AND source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
-            AND match=#{true} AND (upc IS NULL OR upc='') AND product_selects.id is null
-    ").to_a.first['count'].to_i
+    not_matched = not_matched_query.uniq.size
+    # not_matched = con.execute("
+    #   SELECT count(distinct(products.id))
+    #   FROM products
+    #   LEFT JOIN product_selects ON product_selects.product_id=products.id
+    #   INNER JOIN product_suggestions on products.id=product_suggestions.product_id AND percentage > 50
+    #   WHERE products.brand_id=#{}
+    #         AND source IN (#{Product::MATCHED_SOURCES.map{|e| Product.sanitize e}.join(',')})
+    #         AND match=#{true} AND (upc IS NULL OR upc='') AND product_selects.id is null
+    # ").to_a.first['count'].to_i
 
     {
       shopbop_size: shopbop_size,
@@ -164,6 +165,13 @@ class Brand < ActiveRecord::Base
 
     # remove old brands
     Brand.where(id: brands_ids).destroy_all
+  end
+
+  def not_matched_query
+    Product.matching.where(match: true).without_upc.joins(:suggestions)
+      .joins("LEFT JOIN product_selects AS product_selects ON product_selects.product_id=products.id")
+      .where("product_selects.id is null")
+      .where(brand_id: self.id)
   end
 
 end
