@@ -151,7 +151,7 @@ module Import
           search_index: :FashionWomen,
           sort: :price,
         }.merge(params).merge(random_options)
-        log params
+        # log params
         term = params.delete(:term)
         ::Amazon::Ecs.item_search(term, params)
       rescue ::Amazon::RequestError => e
@@ -177,8 +177,9 @@ module Import
     end
 
     def reached_max?
-      puts "========= #{total_amount} / #{processed_items.uniq.compact.size} ========="
-      total_amount <= processed_items.uniq.compact.size
+      log "========= #{total_amount} / #{processed_items.uniq.compact.size} ========="
+      # total_amount <= processed_items.uniq.compact.size
+      false
     end
 
     def random_options
