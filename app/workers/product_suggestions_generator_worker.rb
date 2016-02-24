@@ -35,5 +35,4 @@ class ProductSuggestionsGeneratorWorker
       yield
     end
   end
-
 end

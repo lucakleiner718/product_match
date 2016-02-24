@@ -163,6 +163,18 @@ class Import::Popshops < Import::Base
         item[:color] = mpn[1]
       end
 
+      if item[:price].blank?
+        price_max = r.attr('price_max').to_f
+        price_min = r.attr('price_min').to_f
+        if price_max > 0 && price_min > 0
+          item[:price] = (price_max + price_min) / 2
+        elsif price_max > 0
+          item[:price] = price_max
+        elsif price_min > 0
+          item[:price] = price_min
+        end
+      end
+
       results << item
     end
 
