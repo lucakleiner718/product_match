@@ -16,51 +16,27 @@ module Import
     def collect_data
       get_total_products_amount
 
-      perform(sort: :price)
-      perform(sort: '-price')
-      perform(sort: :reviewrank)
-      perform(sort: :relevancerank)
+      return if total_amount == 0
 
-      categories = YAML.load_file('config/products_kinds.yml').values.flatten
-      words = []
-      Product.where(brand_id: brand.id).where(source: source).pluck(:title).each do |title|
-        categories.each do |category|
-          if title =~ /^#{Regexp.quote category}\s/i || title =~ /\s#{Regexp.quote category}$/i || title =~ /\s#{Regexp.quote category}\s/i
-            words << category
-          end
-        end
-      end
+      collect_by_term
 
-      words = words.uniq.compact
-
+      words = get_keywords
       words.each do |term|
-        perform(term: term, sort: :price)
-        perform(term: term, sort: '-price')
-        perform(term: term, sort: :reviewrank)
-        perform(term: term, sort: :relevancerank)
+        collect_by_term(term)
       end
 
-      raise ReachedMax if reached_max?
-
-      words2 = []
-      Product.where(brand_id: brand.id).where(source: source).pluck(:title).each do |title|
-        categories.each do |category|
-          if title =~ /^#{Regexp.quote category}\s/i || title =~ /\s#{Regexp.quote category}$/i || title =~ /\s#{Regexp.quote category}\s/i
-            words2 << category
-          end
-        end
-      end
-
-      words2 = words2.uniq.compact - words
+      words2 = get_keywords - words
       words2.each do |term|
-        results = perform(term: term, sort: :price)
-        next if results < 90
-
-        perform(term: term, sort: '-price')
-        perform(term: term, sort: :reviewrank)
-        perform(term: term, sort: :relevancerank)
+        collect_by_term(term)
       end
 
+      words3 = get_popular_words - words2 - words
+      words3 = words3[0..30]
+      words3.each do |term|
+        collect_by_term(term)
+      end
+
+      log("Processed #{processed_items.uniq.size}/#{total_amount}")
     rescue ReachedMax => e
       log("reached max #{processed_items.uniq.size}/#{total_amount}")
       return
@@ -98,6 +74,13 @@ module Import
     private
 
     attr_reader :brand, :processed_items, :total_amount
+
+    def collect_by_term(term=nil)
+      perform(term: term, sort: :price)
+      perform(term: term, sort: '-price')
+      perform(term: term, sort: :reviewrank)
+      perform(term: term, sort: :relevancerank)
+    end
 
     def parse_item(item)
       title = item.get('ItemAttributes/Title')
@@ -193,6 +176,31 @@ module Import
         AWS_secret_key: secrets[index],
         associate_tag: tags[index]
       }
+    end
+
+    def products_kinds
+      @products_kinds ||= YAML.load_file('config/products_kinds.yml').values.flatten
+    end
+
+    def get_popular_words
+      brand_products_titles.map{|title| title.downcase.gsub('-', '').gsub(/[^a-z0-9]/, ' ').split(' ')}.flatten.select{|item| item.size > 2}.each_with_object(Hash.new(0)) {|e, obj| obj[e] += 1}.sort_by{|(k,v)| -v}.map(&:first)
+    end
+
+    def get_keywords
+      words = []
+      brand_products_titles.each do |title|
+        products_kinds.each do |category|
+          if title =~ /^#{Regexp.quote category}\s/i || title =~ /\s#{Regexp.quote category}$/i || title =~ /\s#{Regexp.quote category}\s/i
+            words << category
+          end
+        end
+      end
+
+      words.uniq.compact
+    end
+
+    def brand_products_titles
+      Product.where(brand_id: brand.id).where(source: source).pluck(:title)
     end
   end
 end
