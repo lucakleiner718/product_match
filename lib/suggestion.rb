@@ -256,7 +256,8 @@ class Suggestion
       synonyms.select { |synonym| (synonym.split & title_parts).size > 0 }.size > 0
     end
 
-    to_search = (to_search.flatten + title_parts).uniq
+    to_search = to_search.flatten.uniq
+    # to_search = (to_search.flatten + title_parts).uniq
 
     # synonyms_query = to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
     synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
