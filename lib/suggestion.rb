@@ -27,7 +27,7 @@ class Suggestion
     upc_patterns = product.upc_patterns
 
     related_products.each do |suggested|
-      next if amazon_incorrect_upc?(suggested)
+      next if incorrect_upc?(suggested)
 
       percentage = similarity_to(suggested, upc_patterns)
       next if percentage < SIMILARITY_MIN
@@ -287,8 +287,8 @@ class Suggestion
     @kinds = YAML.load_file('config/products_kinds.yml')
   end
 
-  def amazon_incorrect_upc?(suggested)
-    suggested.source == 'amazon_ad_api' && suggested.upc =~ /^7010/
+  def incorrect_upc?(suggested)
+    suggested.source == 'amazon_ad_api' && suggested.upc =~ /^7010/ || !GTIN.new(suggested.upc).valid?
   end
 
   def with_upc?
