@@ -47,6 +47,10 @@ class Import::Eastdane < Import::Platform::Bop
     Product.where(source: source).where(id: in_store_ids - processed_ids).update_all(in_store: false)
     Product.where(source: source).where(id: processed_ids).update_all(in_store: true)
 
+    if @file_updated
+      replace_original_tmp_file(filename)
+    end
+
     true
   end
 
