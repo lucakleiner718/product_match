@@ -77,7 +77,7 @@ class Suggestion
   end
 
   def style_code_similarity(suggested, upc_patterns)
-    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}$/ }.size > 0
+    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}\d+$/ }.size > 0
       @params_amount += STYLE_CODE_WEIGHT
       STYLE_CODE_WEIGHT
     end

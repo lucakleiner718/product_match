@@ -11,4 +11,12 @@ class ProductUpc < ActiveRecord::Base
     Product.where(id: self.selected_ids)
   end
 
+  def product_selects
+    if self.product_select_ids.size > 0
+      ProductSelect.where(id: self.product_select_ids)
+    else
+      []
+    end
+  end
+
 end

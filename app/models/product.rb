@@ -72,13 +72,17 @@ class Product < ActiveRecord::Base
   end
 
   def cancel_upc
-    product_upc = ProductUpc.find_by!(product_id: self.id)
-
-    if product_upc
+    ActiveRecord::Base.transaction do
       self.update! match: true, upc: nil
-      ProductSelect.find(product_upc.product_select_id).destroy
-      product_upc.destroy
-      ProductSuggestionsWorker.perform_async self.id
+
+      product_upc = ProductUpc.find_by!(product_id: self.id)
+      if product_upc
+        product_upc.product_selects.delete_all
+        product_upc.destroy!
+        
+        # build suggestions
+        ProductSuggestionsWorker.perform_async(self.id)
+      end
     end
   end
 
