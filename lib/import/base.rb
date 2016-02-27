@@ -61,12 +61,16 @@ class Import::Base
   end
 
   def process_gender(item)
+    item[:gender] = item[:gender].titleize if item[:gender].present?
+
     if item[:gender].blank? && item[:title].present?
       item[:gender] = process_title_for_gender(item[:title])
     end
     if item[:gender].blank? && item[:category].present?
       item[:gender] = process_category_for_gender(item[:category])
     end
+
+    item[:gender] = nil unless item[:gender].in?(['Female', 'Male', 'Kids'])
   end
 
   def prepare_prices(item)
