@@ -84,41 +84,49 @@ class Suggestion
   end
 
   def title_similarity(suggested)
+    ratio = nil
+
     if product.title.blank?
-      return 1
+      ratio = 1
     elsif suggested.title.blank?
-      return 0
+      ratio = 0
     end
 
-    title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^\-0-9a-z]/i, '')}.select{|el| el.size > 2}
-    title_parts -= %w(the and womens mens)
+    if !ratio && product.title.downcase.gsub(/[^0-9a-z]+/, '') == suggested.title.downcase.gsub(/[^0-9a-z]+/, '')
+      ratio = 1
+    end
 
-    suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+    unless ratio
+      title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^\-0-9a-z]/i, '')}.select{|el| el.size > 2}
+      title_parts -= %w(the and womens mens)
 
-    kinds.each do |(name, synonyms)|
-      group = []
-      synonyms.each do |synonym|
-        if (synonym.split & title_parts).size > 0 && (synonym.split & suggested_title_parts).size > 0
-          group += synonyms
-          break
+      suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+
+      kinds.each do |(name, synonyms)|
+        group = []
+        synonyms.each do |synonym|
+          if (synonym.split & title_parts).size > 0 && (synonym.split & suggested_title_parts).size > 0
+            group += synonyms
+            break
+          end
+        end
+        group.uniq!
+        if group.size > 0
+          title_parts -= group
+          suggested_title_parts -= group
         end
       end
-      group.uniq!
-      if group.size > 0
-        title_parts -= group
-        suggested_title_parts -= group
-      end
+
+      title_parts.uniq!
+      suggested_title_parts.uniq!
+
+      ratio =
+        if title_parts.size > 0
+          (title_parts & suggested_title_parts).size / title_parts.size.to_f
+        else
+          1
+        end
     end
-
-    title_parts.uniq!
-    suggested_title_parts.uniq!
-
-    ratio =
-      if title_parts.size > 0
-        (title_parts & suggested_title_parts).size / title_parts.size.to_f
-      else
-        1
-      end
 
     ratio * WEIGHTS[:title]
   end
