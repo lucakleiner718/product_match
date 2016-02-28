@@ -32,9 +32,9 @@
           <div class="products-left pull-right text-right" style="padding: 10px 0;">
             Left: <%= @products_left %>
             <br>
-            <% select = ProductSelect.order(created_at: :desc).where(product_id: @product.id).first %>
-            <% if select %>
-              Last Match:<br><%= select.created_at.to_s(:long) %>
+            <% @last_product_select = ProductSelect.order(created_at: :desc).where(product_id: @product.id).first %>
+            <% if @last_product_select %>
+              Last Match:<br><%= @last_product_select.created_at.to_s(:long) %>
             <% end %>
           </div>
         <% end %>
