@@ -110,11 +110,18 @@ class Brand < ActiveRecord::Base
     ").to_a.first['count'].to_i
 
     suggestions_green = ProductSuggestion.select('distinct(product_id').joins(:product)
-                          .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
-                          .where(percentage: 90..100).pluck(:product_id).uniq.size
+      .joins("
+        LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id
+      ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.created_at")
+      .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
+      .where(percentage: 90..100).pluck(:product_id).uniq.size
+
     suggestions_yellow = ProductSuggestion.select('distinct(product_id').joins(:product)
-                           .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
-                           .where(percentage: 50...90).pluck(:product_id).uniq.size
+     .joins("
+        LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id
+     ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.created_at")
+     .where(products: { brand_id: self.id, match: true, source: Product::MATCHED_SOURCES})
+     .where(percentage: 50...90).pluck(:product_id).uniq.size
 
     new_match_today = matching_in_store.where('created_at >= ?', 1.day.ago(now)).size
     new_match_week = matching_in_store.where('created_at >= ?', now.monday).size
