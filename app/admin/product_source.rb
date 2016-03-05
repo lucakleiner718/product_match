@@ -38,8 +38,8 @@ ActiveAdmin.register ProductSource do
           link_to 'Full', ps.source_id, target: :_blank
         when "linksynergy"
           [
-            link_to('Full', "ftp://aftp.linksynergy.com/#{ps.source_id}_2388513_mp.txt.gz", target: :_blank),
-            link_to('Delta', "ftp://aftp.linksynergy.com/#{ps.source_id}_2388513_mp_delta.txt.gz", target: :_blank)
+            link_to('Full', Import::Linksynergy.build_file_url(ps.source_id, type: :full), target: :_blank),
+            link_to('Delta', Import::Linksynergy.build_file_url(ps.source_id, type: :delta), target: :_blank)
           ].join('&nbsp;').html_safe
       end
     end

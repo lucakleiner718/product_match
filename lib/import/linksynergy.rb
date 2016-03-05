@@ -181,4 +181,7 @@ class Import::Linksynergy < Import::Base
     Time.parse "#{datetime} UTC"
   end
 
+  def self.build_file_url(mid, type: :delta)
+    "ftp://#{ENV['LINKSYNERGY_FTP_LOGIN']}:#{ENV['LINKSYNERGY_FTP_PASSWORD']}@aftp.linksynergy.com/#{mid}_2388513_mp#{"_delta" if type.to_sym == :delta}.txt.gz"
+  end
 end
