@@ -32,7 +32,10 @@ class ProductsController < ApplicationController
 
     @filter_brands = Brand.in_use.order(:name)
     @sources = {'All' => ''}.merge(ProductSource::SOURCES).merge(
-      ProductSource.where(source_name: :website).pluck(:source_id).map{|cn| URI(Module.const_get("Import::#{cn}").new.baseurl).host.sub(/^www\./, '')}.each_with_object({}){|host, obj| obj[host] = host})
+      ProductSource.where(source_name: :website).pluck(:source_id)
+        .map{|cn| Module.const_get("Import::#{cn}").new.baseurl}.compact
+        .map{|url| URI(url).host.sub(/^www\./, '')}
+        .each_with_object({}){|host, obj| obj[host] = host})
   end
 
   def index_export
