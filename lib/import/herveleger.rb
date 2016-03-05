@@ -64,7 +64,7 @@ class Import::Herveleger < Import::Platform::Demandware
 
     results = []
     # product_name = html.css('#pdpMain .product-detail .product-name').first.text.strip.sub(/^DKNY\s/, '')
-    product_name = page.match(/app\.page\.setContext\(\{"title":"([^"]+)"/)[1]
+    product_name = html.css('h1.product-name').first.text
     category = html.css('.breadcrumb a').inject([]){|ar, el| el.text == 'Home' ? '' : ar << el.text.strip; ar}.join(' > ')
 
     color_param = "dwvar_#{product_id_param}_color"
