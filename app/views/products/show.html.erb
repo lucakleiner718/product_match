@@ -74,9 +74,7 @@
             <% end %>
           </div>
 
-          <%= link_to 'Found', match_select_path(product_id: @product.id, selected_id: product.id, decision: :found), class: "btn btn-success select-action", remote: true, method: :post %>
-          <%= link_to 'Similar', match_select_path(product_id: @product.id, selected_id: product.id, decision: :similar), class: "btn btn-warning select-action", remote: true, method: :post %>
-          <%= link_to 'Source', product.url, class: "btn btn-default pull-right", target: :_blank %>
+          <%= link_to 'Match', match_path(product_id: product.id), class: "btn btn-success", target: :_blank %>
         </div>
       </div>
     <% end %>
