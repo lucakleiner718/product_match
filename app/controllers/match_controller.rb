@@ -66,6 +66,8 @@ class MatchController < ApplicationController
       end
 
       @brand = @product.brand unless @brand
+
+      @last_product_select = ProductSelect.order(created_at: :desc).where(product_id: @product.id).first
     end
 
     if !@product && @brand
