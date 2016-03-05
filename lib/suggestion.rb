@@ -101,11 +101,12 @@ class Suggestion
       title_parts -= %w(the and womens mens)
 
       suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+      title_parts -= %w(the and womens mens)
 
-      kinds.each do |(name, synonyms)|
+      kinds.each do |(_name, synonyms)|
         group = []
         synonyms.each do |synonym|
-          if (synonym.split & title_parts).size > 0 && (synonym.split & suggested_title_parts).size > 0
+          if (synonym.split & title_parts).size == synonym.split.size && (synonym.split & suggested_title_parts).size == synonym.split.size
             group += synonyms
             break
           end
@@ -263,7 +264,7 @@ class Suggestion
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
-      synonyms.select { |synonym| (synonym.split & title_parts).size > 0 }.size > 0
+      synonyms.select { |synonym| (synonym.split & title_parts).size == synonym.split.size }.size > 0
     end
 
     to_search = to_search.flatten.uniq
