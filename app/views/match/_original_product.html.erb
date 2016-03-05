@@ -23,6 +23,9 @@
     <tr><td>Bop Cat:</td><td><%= @product.category %></td></tr>
     <tr><td>Goog Cat:</td><td><%= @product.google_category %></td></tr>
     <tr><td>Style Code:</td><td><%= link_to @product.style_code, products_path(filter: { style_code: @product.style_code, source: @product.source }), target: :_blank %></td></tr>
-    <tr><td colspan="2"><%= link_to "#{@product.source.titleize} link", @product.url, target: :_blank %></td></tr>
+    <tr><td colspan="2">
+      <%= link_to "#{@product.source.titleize} link", @product.url, target: :_blank, class: 'btn btn-default btn-sm' %>
+      <%= link_to 'Product page', @product, target: :_blank, class: 'btn btn-default btn-sm' %>
+    </td></tr>
   </table>
 </div>
