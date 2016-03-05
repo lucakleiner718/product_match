@@ -89,7 +89,7 @@ module Import
       url = item.get('DetailPageURL').sub(/%3FSubscriptionId.*$/, '').sub(/%3Fpsc.*$/, '')
       image = item.get('LargeImage/URL')
       category = item.get('ItemAttributes/Binding')
-      # response_brand = item.get('ItemAttributes/Brand')
+      brand_name = item.get('ItemAttributes/Brand')
       color = item.get('ItemAttributes/Color')
       price = item.get('ItemAttributes/ListPrice/Amount')
       price_currency = item.get('ItemAttributes/ListPrice/CurrencyCode')
@@ -108,12 +108,18 @@ module Import
 
       gtin = upc || ean
 
+      department = item.get('ItemAttributes/Department').to_s.downcase
+
+      gender = nil
+      gender = 'Female' if department.in? ['womens', 'girls']
+      gender = 'Male' if department.in? ['mens', 'boys']
+
       return unless gtin
 
       {
         title: title,
         upc: gtin,
-        brand: brand.name,
+        brand: brand_name,
         category: category,
         price: price.to_i / 100.0,
         price_currency: price_currency,
@@ -122,7 +128,8 @@ module Import
         url: url,
         image: image,
         source_id: source_id,
-        style_code: style_code
+        style_code: style_code,
+        gender: gender
       }
     end
 

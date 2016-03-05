@@ -162,7 +162,6 @@ footwear:
   - clog
   - clogs
   - creeper
-  - creepers
   - derby
   - espadrilles
   - flat
@@ -173,7 +172,6 @@ footwear:
   - mule
   - mules
   - loafer
-  - loafers
   - oxford
   - oxfords
   - plimsole
@@ -181,22 +179,18 @@ footwear:
   - pumps
   - runners
   - sandal
-  - sandals
   - shoe
   - shoes
   - sneaker
-  - sneakers
   - spats
   - slides
   - slipper
-  - slippers
   - slip-on
   - sock
   - socks
   - stocking
   - toe
   - wedge
-  - wedges
 
 headwear:
   - beanie
@@ -251,10 +245,9 @@ bracelet:
   - bracelet
 
 earrings:
-  - earrings
+  - earring
   - earring set
   - stud
-  - studs
 
 necklace:
   - neckle
