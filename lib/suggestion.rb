@@ -277,11 +277,11 @@ class Suggestion
       end.join(' | ')}')"
     items = query.where(synonyms_query).to_a
 
+    items = add_items_by_siblings(items)
+
     # remove from list product with upc, if shopbop's product already have same upc
     exists_upc = Set.new(Product.where(upc: items.map(&:upc).uniq).matching.pluck(:upc))
     items = items.reject{|item| exists_upc.member?(item.upc)}
-
-    items = add_items_by_siblings(items)
 
     @related_products = items
   end
