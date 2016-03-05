@@ -79,6 +79,10 @@ class ProductsController < ApplicationController
     send_data csv_string, :type => 'text/csv; charset=utf-8; header=present', disposition: :attachment, filename: filename
   end
 
+  def show
+    @product = Product.find(params[:id])
+  end
+
 
   def active
     @active_products = ActiveProduct.includes(:brand)

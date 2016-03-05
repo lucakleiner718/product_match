@@ -1,0 +1,84 @@
+<div class="row">
+  <%= render partial: 'original_product' %>
+</div>
+
+<% if @selected_products %>
+  <h2>This product matched with:</h2>
+  <div class="row">
+    <% @selected_products.each do |product| %>
+      <div class="col-sm-3 col-xs-6">
+        <div class="thumbnail" data-id="<%= product.id %>">
+          <strong><%= product.title %></strong></br>
+          <em>Color:</em> <%= product.color %></br>
+          <em>Size:</em> <%= product.size %></br>
+          <em>Price:</em> <%= product.price %><%= " (#{product.price_sale})" if product.price_sale.present? && product.price != product.price_sale %></br>
+          <!--<em>Category:</em> <%= product.category %></br>-->
+          <em>Source:</em> <%= product.source %><%= "(#{product.retailer})" if product.retailer.present? %></br>
+          <em>UPC:</em> <%= product.upc %></br>
+
+          <div style="margin: 5px 0;">
+            <%= link_to image_tag(product_image(product.image), class: "img-responsive portfolio-item"), product.url, target: :_blank %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="row">
+    <h2>Different Sizes</h2>
+    <% Product.where(source: @product.source, style_code: @product.style_code).each do |product| %>
+      <div class="col-sm-3 col-xs-6">
+        <div class="thumbnail suggestion-thumbnail">
+          <div class="product-title">
+            <strong><%= link_to product.title, product, target: :_blank %></strong>
+          </div>
+          <table class="suggested-product-table">
+            <tr><td>Color:</td><td><%= product.color %></td></tr>
+            <tr><td>Size:</td><td><%= product.size %></td></tr>
+            <tr><td>Price:</td><td><%= product.display_price %></td></tr>
+            <% if product.gender.present? %>
+              <tr><td>Gender:</td><td><%= product.gender %></td></tr>
+            <% end %>
+            <tr><td>UPC:</td><td class="value"><span><%= product.upc %></span></td></tr>
+          </table>
+
+          <% product_info = capture do %>
+            <strong>Source:</strong><br>
+            <%= product.source %><br>
+            <% if product.retailer %>
+              <strong>Retailer:</strong><br>
+              <%= product.retailer %><br>
+            <% end %>
+            <% if product.description.present? %>
+              <strong>Description</strong><br>
+              <%= product.description %>
+            <% end %>
+          <% end %>
+
+          <%= button_tag 'Product Info', data: { toggle: "popover", html: true,
+              placement: :bottom, content: product_info },
+            class: 'btn btn-xs btn-default' %>
+
+          <div style="margin: 5px 0;" class="portfolio-item suggestion-images">
+            <%= suggestion_image(product.image_local.present? ? product.image_local : product.image) %>
+            <% if product.additional_images_local.size > 0 %>
+              <% product.additional_images_local.each do |ad_image| %>
+                <%= suggestion_image(ad_image) %>
+              <% end %>
+              <span class="images-amount"><%= product.additional_images_local.size + 1 %></span>
+            <% else %>
+              <% product.additional_images.each do |ad_image| %>
+                <%= suggestion_image(ad_image) %>
+              <% end %>
+              <span class="images-amount"><%= product.additional_images.size + 1 %></span>
+            <% end %>
+          </div>
+
+          <%= link_to 'Found', match_select_path(product_id: @product.id, selected_id: product.id, decision: :found), class: "btn btn-success select-action", remote: true, method: :post %>
+          <%= link_to 'Similar', match_select_path(product_id: @product.id, selected_id: product.id, decision: :similar), class: "btn btn-warning select-action", remote: true, method: :post %>
+          <%= link_to 'Source', product.url, class: "btn btn-default pull-right", target: :_blank %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
