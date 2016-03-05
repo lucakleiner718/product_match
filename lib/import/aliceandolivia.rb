@@ -100,7 +100,7 @@ class Import::Aliceandolivia < Import::Base
         image: main_image,
         additional_images: images,
         style_code: style_code,
-        gender: :Female,
+        gender: 'Female',
         source_id: item['itemId']
       }
     end
