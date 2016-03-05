@@ -29,7 +29,7 @@ class MatchController < ApplicationController
         ").where("product_selects.id is null")
         .joins("
           LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id
-        ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.created_at")
+        ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.updated_at")
       end
 
       if params[:only] == 'new_match_week'
