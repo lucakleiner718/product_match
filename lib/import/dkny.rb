@@ -40,6 +40,8 @@ class Import::Dkny < Import::Platform::Demandware
 
     url = resp.effective_url
 
+    return false if URI(url).path.in? ['', '/']
+
     page = resp.body
     html = Nokogiri::HTML(page)
 
