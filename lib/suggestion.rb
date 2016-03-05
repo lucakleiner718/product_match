@@ -302,11 +302,19 @@ class Suggestion
     similar_ids = Product.connection.execute("""
       SELECT p4.id
       FROM products as p1
-      JOIN products as p2 on p2.style_code=p1.style_code AND p2.source=p1.source AND p2.id != p1.id
-      JOIN products as p3 on p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id
+      JOIN products as p2 on p2.style_code=p1.style_code AND p2.source=p1.source AND p2.id != p1.id AND p2.upc IS NOT NULL
+      JOIN products as p3 on p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id AND p3.style_code IS NOT NULL AND p3.style_code != ''
       JOIN products as p4 on p4.style_code=p3.style_code AND p4.id != p3.id AND p4.source=p3.source AND p4.upc IS NOT NULL
       WHERE p1.id=#{product.id}
       """).to_a.map{|v| v['id'].to_i}.uniq
+
+    # p2 = Product.where(source: :shopbop, style_code: product.style_code).where.not(id: product.id, upc: nil)
+    # p3 = p2.map do |p2_entry|
+    #   Product.where(upc: p2_entry.upc, brand_id: p2_entry.brand_id).where.not(source: p2_entry.source).to_a
+    # end.flatten
+    # p4 = p3.map do |entry|
+    #   Product.where(style_code: entry.style_code, source: entry.source).where.not(id: entry.id, upc: nil).to_a
+    # end.flatten;nil
 
     similar_ids -= items.map(&:id) if items.size > 0
     items += Product.where(id: similar_ids).to_a if similar_ids.size > 0
