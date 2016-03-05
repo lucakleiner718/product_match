@@ -100,7 +100,7 @@ class Import::Oscardelarenta < Import::Base
         url: url,
         image: image,
         style_code: style_code,
-        gender: :Female,
+        gender: 'Female',
         source_id: source_id
       }
     end

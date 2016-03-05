@@ -61,7 +61,7 @@ class Import::Base
   end
 
   def process_gender(item)
-    item[:gender] = item[:gender].titleize if item[:gender].present?
+    item[:gender] = item[:gender].to_s.titleize if item[:gender].present?
 
     if item[:gender].blank? && item[:title].present?
       item[:gender] = process_title_for_gender(item[:title])
