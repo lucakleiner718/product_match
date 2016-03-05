@@ -17,6 +17,7 @@ class Product < ActiveRecord::Base
   scope :with_upc, -> { where.not(upc: [nil, '']) }
   scope :in_stock, -> { where(in_store: true) }
   scope :with_image, -> { where.not(image: nil) }
+  scope :by_title, -> (str) { where("to_tsvector(products.title) @@ to_tsquery('#{str}')") }
 
   # validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
 

@@ -40,7 +40,6 @@ trousers and shorts:
   - joggers
   - legging
   - leggings
-  - overall
   - pant
   - pants
   - pedal pushers
@@ -65,20 +64,30 @@ skirts:
   - tutu
   - wrap
 
+overalls:
+  - bodysuit
+  - body suit
+  - shamois suit
+  - playsuit
+  - jumpsuit
+  - romper
+  - jumper
+  - overall
+  - ski suit
+  - tri suit
+  - top shorts set
+
 dresses:
   - dress
   - gown
-  - jumpsuit
   - minidress
   - robe
-  - romper
   - shirtdress
   - slip
   - slipdress
   - coatdress
   - formal wear
   - frock
-  - jumper
   - sundress
 
 outerwear:
@@ -112,33 +121,36 @@ tights:
   - pantyhose
   - leotard
   - tricot
-  - maillot
+
+thong:
+  - bottoms
+  - boxer briefs
+  - boxer shorts
+  - briefs
+  - panties
+  - thong
+  - underpants
 
 underwear:
-  - cami
-  - camisole
   - bandeau
-  - bottoms
   - bra
   - bralette
-  - briefs
+
+  - cami
+  - camisole
+  - sleepshirt
+  - undershirt
+
+  - bodysuit
+  - body suit
+  - teddy
+
+  - diaper
+  - slip
   - chemise
   - lace
   - leotard
-  - panties
   - robe
-  - sleepshirt
-  - thong
-  - bodysuit
-  - body suit
-  - undershirt
-  - diaper
-  - slip
-  - underpants
-  - boxer briefs
-  - boxer shorts
-  - playsuit
-  - teddy
 
 footwear:
   - ankle-wrap platform

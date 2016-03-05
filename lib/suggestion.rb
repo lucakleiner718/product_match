@@ -13,7 +13,6 @@ class Suggestion
   def initialize(product_id)
     @product = Product.find(product_id)
     load_kinds
-    build_related_products
   end
 
   def build
@@ -60,7 +59,7 @@ class Suggestion
 
   private
 
-  attr_reader :product, :kinds, :related_products
+  attr_reader :product, :kinds
 
   # @returns [Integer] similarity percentage of initial product and suggested
   def similarity_to(suggested, upc_patterns)
@@ -252,7 +251,9 @@ class Suggestion
   end
 
   # @return [ActiveRecord::Relation] AR query to find related products
-  def build_related_products
+  def related_products
+    return @related_products if @related_products
+
     query = Product.not_matching.where(brand_id: product.brand.id)
               .with_upc.limit(1_000).with_image
 
@@ -303,12 +304,11 @@ class Suggestion
       JOIN products as p2 on p2.style_code=p1.style_code AND p2.source=p1.source AND p2.id != p1.id
       JOIN products as p3 on p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id
       JOIN products as p4 on p4.style_code=p3.style_code AND p4.id != p3.id AND p4.source=p3.source AND p4.upc IS NOT NULL
-      WHERE p1.id=#{product.id} #{"AND p4.id NOT IN (#{items.map(&:id).join(',')})" if items.size > 0}
+      WHERE p1.id=#{product.id}
       """).to_a.map{|v| v['id'].to_i}.uniq
 
-    if similar_ids.size > 0
-      items += Product.where(id: similar_ids).to_a
-    end
+    similar_ids -= items.map(&:id) if items.size > 0
+    items += Product.where(id: similar_ids).to_a if similar_ids.size > 0
 
     items
   end
