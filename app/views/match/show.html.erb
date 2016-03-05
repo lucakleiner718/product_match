@@ -75,13 +75,33 @@
       </div>
     </div>
 
-    <% @suggested_products.in_groups_of(4, false) do |products| %>
-      <div class="row">
-        <% products.each do |suggested_product| %>
-          <%= render partial: 'suggested', locals: { suggested_product: suggested_product } %>
-        <% end %>
-      </div>
-      <br>
+    <% if @last_product_select %>
+      <% @suggested_products.select{|suggested_product| @last_product_select.created_at <= suggested_product.updated_at}.in_groups_of(4, false) do |products| %>
+        <div class="row">
+          <% products.each do |suggested_product| %>
+            <%= render partial: 'suggested', locals: { suggested_product: suggested_product } %>
+          <% end %>
+        </div>
+        <br>
+      <% end %>
+
+      <% @suggested_products.select{|suggested_product| @last_product_select.created_at > suggested_product.updated_at}.in_groups_of(4, false) do |products| %>
+        <div class="row">
+          <% products.each do |suggested_product| %>
+            <%= render partial: 'suggested', locals: { suggested_product: suggested_product } %>
+          <% end %>
+        </div>
+        <br>
+      <% end %>
+    <% else %>
+      <% @suggested_products.in_groups_of(4, false) do |products| %>
+        <div class="row">
+          <% products.each do |suggested_product| %>
+            <%= render partial: 'suggested', locals: { suggested_product: suggested_product } %>
+          <% end %>
+        </div>
+        <br>
+      <% end %>
     <% end %>
   <% end %>
 
