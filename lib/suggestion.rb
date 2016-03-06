@@ -243,10 +243,9 @@ class Suggestion
   end
 
   def gender_similarity(suggested)
-    if suggested.gender.present?
-      @params_amount += GENDER_WEIGHT
-      if suggested.gender == product.gender
-        GENDER_WEIGHT
+    if product.gender.present? && suggested.gender.present?
+      if suggested.gender != product.gender
+        @params_amount += GENDER_WEIGHT
       end
     end
   end

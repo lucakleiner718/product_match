@@ -28,7 +28,7 @@ class BrandCollectDataWorker
             product_source: product_source)
           true
         when 'shopbop'
-          resp = Import::Shopbop.perform product_source.source_id
+          resp = Import::Shopbop.perform product_source.source_id, force
           return false unless resp
           Product.where(source: :shopbop).where('created_at > ?', 12.hours.ago).pluck(:id).each do |pid|
             ProductSuggestionsWorker.perform_async pid

@@ -87,7 +87,14 @@ module Import
       upc = item.get('ItemAttributes/UPC')
       ean = item.get('ItemAttributes/EAN')
       url = item.get('DetailPageURL').sub(/%3FSubscriptionId.*$/, '').sub(/%3Fpsc.*$/, '')
-      image = item.get('LargeImage/URL')
+
+      images = [item.get('LargeImage/URL')]
+      item.elem.css('ImageSets ImageSet LargeImage URL').each do |url|
+        images << url.text
+      end
+      images.uniq!
+      main_image = images.shift
+
       category = item.get('ItemAttributes/Binding')
       brand_name = item.get('ItemAttributes/Brand')
       color = item.get('ItemAttributes/Color')
@@ -126,7 +133,8 @@ module Import
         color: color,
         size: size,
         url: url,
-        image: image,
+        image: main_image,
+        additional_images: images,
         source_id: source_id,
         style_code: style_code,
         gender: gender

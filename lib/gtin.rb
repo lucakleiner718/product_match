@@ -20,8 +20,22 @@ class GTIN
   end
 
   def valid?
-    numbers = gtin.to_s.gsub(/[\D]+/, "").split(//)
+    valid = numbers[-1].to_i == last_digit
+    unless valid
+      log("Last digit should be #{last_digit} instead of #{numbers[-1].to_i}")
+    end
+    valid
+  end
 
+  def correct_last_digit
+    "#{gtin[0...-1]}#{last_digit}"
+  end
+
+  private
+
+  attr_reader :gtin
+
+  def last_digit
     checksum = 0
     case numbers.length
       when 8
@@ -36,17 +50,12 @@ class GTIN
         return false
     end
 
-    last_digit = (10 - checksum % 10)%10
-    valid = numbers[-1].to_i == last_digit
-    unless valid
-      log("Last digit should be #{last_digit} instead of #{numbers[-1].to_i}")
-    end
-    valid
+    (10 - checksum % 10)%10
   end
 
-  private
-
-  attr_reader :gtin
+  def numbers
+    gtin.to_s.gsub(/[\D]+/, '').split(//)
+  end
 
   def prepare_number
     @gtin = @gtin.to_s.gsub(/[\D]+/, "")
