@@ -27,9 +27,13 @@ class MatchController < ApplicationController
               )
             AND product_selects.user_id=#{current_user.id})
         ").where("product_selects.id is null")
-        .joins("
-          LEFT JOIN product_selects AS product_selects2 ON product_selects2.product_id=products.id
-        ").where("product_selects2.id is null OR product_selects2.created_at < product_suggestions.updated_at")
+        # .joins("
+        #   JOIN (
+        #     SELECT MAX(id) as id, product_id, created_at
+        #     FROM product_selects
+        #     GROUP BY product_id, created_at
+        #   ) as product_selects2 ON product_selects2.product_id=products.id AND (product_selects2.id is null OR product_selects2.created_at < product_suggestions.updated_at)
+        # ")
       end
 
       if params[:only] == 'new_match_week'

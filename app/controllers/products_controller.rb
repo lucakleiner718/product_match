@@ -81,6 +81,7 @@ class ProductsController < ApplicationController
 
   def show
     @product = Product.find(params[:id])
+    @sizes = Product.where(source: @product.source, style_code: @product.style_code, color: @product.color).order(upc: :asc)
   end
 
 

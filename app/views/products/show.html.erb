@@ -37,7 +37,7 @@
         <th>UPC</th>
       </tr>
       </thead>
-      <% Product.where(source: @product.source, style_code: @product.style_code).order(upc: :asc).each do |product| %>
+      <% @sizes.each do |product| %>
         <tr>
           <td><%= product.size || 'N/A' %></td>
           <td><%= product.upc || 'N/A' %></td>
