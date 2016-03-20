@@ -152,7 +152,7 @@ class Import::Popshops < Import::Base
       if item[:upc].blank?
         if item[:ean].present? && GTIN.new(item[:ean]).valid?
           item[:upc] = item[:ean]
-        if item[:sku].present? && GTIN.new(item[:sku]).valid?
+        elsif item[:sku].present? && GTIN.new(item[:sku]).valid?
           item[:upc] = item[:sku]
         elsif item[:mpn].present? && GTIN.new(item[:mpn]).valid?
           item[:upc] = item[:mpn]
