@@ -220,11 +220,11 @@ class Suggestion
 
     return 0 if suggested.price.blank? || product.price.blank?
 
-    suggested_price = suggested.price_m
-    suggested_price_sale = suggested.price_sale_m
+    suggested_price = price_m(suggested.price, suggested.price_currency)
+    suggested_price_sale = price_m(suggested.price_sale, suggested.price_currency)
 
-    product_price = product.price_m
-    product_price_sale = product.price_sale_m
+    product_price = price_m(product.price, product.price_currency)
+    product_price_sale = price_m(product.price_sale, product.price_currency)
 
     suggested_prices = [suggested_price, suggested_price_sale].compact.map(&:to_i).uniq
     product_prices = [product_price, product_price_sale].compact.map(&:to_i).uniq
@@ -255,12 +255,9 @@ class Suggestion
   def related_products
     return @related_products if @related_products
 
-    query = Product.not_matching.where(brand_id: product.brand.id)
-              .with_upc.limit(1_000).with_image
+    query = Product.not_matching.where(brand_id: product.brand.id).with_upc.with_image
 
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/)
-                    .select{|el| el.strip.present? }.map{|el| el.downcase.strip}
-                    .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
+    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).select{|el| el.strip.present? }.map{|el| el.downcase.strip}.select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
@@ -268,14 +265,13 @@ class Suggestion
     end
 
     to_search = to_search.flatten.uniq
-    # to_search = (to_search.flatten + title_parts).uniq
 
-    # synonyms_query = to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
     synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
       to_search.uniq.map do |el|
         el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
       end.join(' | ')}')"
-    items = query.where(synonyms_query).to_a
+    items = query.where(synonyms_query).pluck_to_hash
+    items.map!{|item| OpenStruct.new(item)}
 
     items = add_items_by_siblings(items)
 
@@ -317,7 +313,12 @@ class Suggestion
     # end.flatten;nil
 
     similar_ids -= items.map(&:id) if items.size > 0
-    items += Product.where(id: similar_ids).to_a if similar_ids.size > 0
+    if similar_ids.size > 0
+      new_items = Product.where(id: similar_ids).pluck_to_hash
+      new_items.map!{|item| OpenStruct.new(item)}
+
+      items += new_items
+    end
 
     items
   end
@@ -332,5 +333,10 @@ class Suggestion
 
   def with_upc?
     product.upc.present? || ProductUpc.where(product_id: product.id).where.not(upc: nil).exists?
+  end
+
+  def price_m(price, currency='USD')
+    return nil unless price
+    Money.new(price.to_f*100, currency).exchange_to("USD")
   end
 end
