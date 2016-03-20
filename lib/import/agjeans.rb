@@ -12,13 +12,30 @@ class Import::Agjeans < Import::Base
     categories = home_page_html.css('#globalnav a').map{|a| a.attr('href')}.select{|url| url =~ /^\//}.map{|url| url.match(/\/(\d+)$/) && $1}.compact.uniq.map(&:to_i).sort
     urls = []
     categories.each do |category_id|
-      url_part = "/store/productslist.aspx?categoryid=#{category_id}&PageNo=0"
-      log url_part
+      cat_urls = []
+      page_no = 1
+      total_pages = nil
+      while true
+        url_part = "/store/productslist.aspx?categoryid=#{category_id}&PageNo=#{page_no}"
+        log url_part
 
-      category_page = get_request(url_part).body
-      category_page_html = Nokogiri::HTML(category_page)
-      urls += category_page_html.css('.product-list .item .image-container a').map{|l| l.attr('href').sub(/_c_\d+$/, '')}
-      log "urls amount #{urls.size}"
+        category_page = get_request(url_part).body
+        category_page_html = Nokogiri::HTML(category_page)
+        page_urls = category_page_html.css('.product-list .item .image-container a').map{|l| l.attr('href').sub(/_c_\d+$/, '')}
+
+        break if page_urls.size == 0
+
+        total_pages ||= category_page_html.css('.pagination .pager .pagfloat').css('a, b').last.text.to_i rescue 1
+
+        break if (cat_urls & page_urls).size == page_urls.size
+
+        cat_urls.concat(page_urls)
+        break if total_pages <= page_no
+
+        page_no += 1
+      end
+
+      urls.concat(cat_urls)
     end
     urls = urls.uniq.reject{|url| url =~ /\.m4v$/}
 
