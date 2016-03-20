@@ -246,6 +246,7 @@ class Suggestion
     if product.gender.present? && suggested.gender.present?
       if suggested.gender != product.gender
         @params_amount += GENDER_WEIGHT
+        0
       end
     end
   end
