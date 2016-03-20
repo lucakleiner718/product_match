@@ -1,5 +1,7 @@
 class GTIN
 
+  attr_reader :gtin
+
   REGEXP = /\A\d+\z/
 
   def initialize(gtin)
@@ -20,11 +22,7 @@ class GTIN
   end
 
   def valid?
-    valid = numbers[-1].to_i == last_digit
-    unless valid
-      log("Last digit should be #{last_digit} instead of #{numbers[-1].to_i}")
-    end
-    valid
+    numbers[-1].to_i == last_digit
   end
 
   def correct_last_digit
@@ -32,8 +30,6 @@ class GTIN
   end
 
   private
-
-  attr_reader :gtin
 
   def last_digit
     checksum = 0
