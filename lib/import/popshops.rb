@@ -150,9 +150,11 @@ class Import::Popshops < Import::Base
       end
 
       if item[:upc].blank?
-        if item[:sku].present? && item[:sku] =~ /\A\d{8,14}\z/
+        if item[:ean].present? && GTIN.new(item[:ean]).valid?
+          item[:upc] = item[:ean]
+        if item[:sku].present? && GTIN.new(item[:sku]).valid?
           item[:upc] = item[:sku]
-        elsif item[:mpn].present? && item[:mpn] =~ /\A\d{8,14}\z/
+        elsif item[:mpn].present? && GTIN.new(item[:mpn]).valid?
           item[:upc] = item[:mpn]
         end
       end
