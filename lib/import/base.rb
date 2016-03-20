@@ -292,8 +292,8 @@ class Import::Base
       followlocation: true,
       maxredirs: 10,
       params: params,
-      connecttimeout: 30,
-      timeout: 30,
+      connecttimeout: 60,
+      timeout: 60,
       # verbose: true,
     }
     options[:timeout] = 180 if Rails.env.development?
