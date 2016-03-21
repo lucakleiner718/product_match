@@ -42,6 +42,8 @@ class Import::Clubmonaco < Import::Base
   end
 
   def process_product(url)
+    return unless url =~ /index\.jsp\?productId=\d+/
+
     log "Processing url: #{url}"
     resp = get_request(url)
     return false if resp.response_code != 200
