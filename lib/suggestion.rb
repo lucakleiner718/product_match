@@ -32,8 +32,8 @@ class Suggestion
       percentage = similarity_to(suggested, upc_patterns)
       next if percentage < SIMILARITY_MIN
 
-      suggestion = exists_suggestions[suggested.id]
-      actual_list << suggested.id
+      suggestion = exists_suggestions[suggested['id']]
+      actual_list << suggested['id']
 
       if suggestion
         suggestion.percentage = percentage
@@ -41,9 +41,9 @@ class Suggestion
         suggestion.save! if suggestion.changed?
       else
         to_create << ProductSuggestion.new(
-          product_id: product.id, suggested_id: suggested.id, percentage: percentage,
+          product_id: product.id, suggested_id: suggested['id'], percentage: percentage,
           upc_patterns: "{#{upc_patterns.join(',')}}",
-          price: suggested.price, price_sale: suggested.price_sale
+          price: suggested['price'], price_sale: suggested['price_sale']
         )
       end
     end
@@ -77,7 +77,7 @@ class Suggestion
   end
 
   def style_code_similarity(suggested, upc_patterns)
-    if upc_patterns.select{|upc| suggested.upc =~ /^#{upc}\d+$/ }.size > 0
+    if upc_patterns.select{|upc| suggested['upc'] =~ /^#{upc}\d+$/ }.size > 0
       @params_amount += STYLE_CODE_WEIGHT
       STYLE_CODE_WEIGHT
     end
@@ -88,11 +88,11 @@ class Suggestion
 
     if product.title.blank?
       ratio = 1
-    elsif suggested.title.blank?
+    elsif suggested['title'].blank?
       ratio = 0
     end
 
-    if !ratio && product.title.downcase.gsub(/[^0-9a-z]+/, '') == suggested.title.downcase.gsub(/[^0-9a-z]+/, '')
+    if !ratio && product.title.downcase.gsub(/[^0-9a-z]+/, '') == suggested['title'].downcase.gsub(/[^0-9a-z]+/, '')
       ratio = 1
     end
 
@@ -100,7 +100,7 @@ class Suggestion
       title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^\-0-9a-z]/i, '')}.select{|el| el.size > 2}
       title_parts -= %w(the and womens mens)
 
-      suggested_title_parts = suggested.title.split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
+      suggested_title_parts = suggested['title'].split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
       title_parts -= %w(the and womens mens)
 
       kinds.each do |(_name, synonyms)|
@@ -134,7 +134,7 @@ class Suggestion
 
   def color_similarity(suggested)
     color_p = product.color
-    color_s = suggested.color
+    color_s = suggested['color']
     if color_s.present? && color_p.present?
       ratio = nil
       if color_s.gsub(/[^a-z]/i, '').downcase == color_p.gsub(/[^a-z]/i, '').downcase
@@ -165,8 +165,8 @@ class Suggestion
   end
 
   def size_similarity(suggested)
-    if suggested.size.present? && product.size.present?
-      size_s = suggested.size.gsub(/\s/, '').downcase
+    if suggested['size'].present? && product.size.present?
+      size_s = suggested['size'].gsub(/\s/, '').downcase
       size_p = product.size.gsub(/\s/, '').downcase
 
       basic_sizes = [
@@ -207,21 +207,21 @@ class Suggestion
         end
       end
     else
-      if suggested.size.blank? && product.size.present? && product.size.downcase == 'one size'
+      if suggested['size'].blank? && product.size.present? && product.size.downcase == 'one size'
         WEIGHTS[:size]
       end
     end
   end
 
   def price_similarity(suggested)
-    return 0 if suggested.price.blank? && product.price.blank?
+    return 0 if suggested['price'].blank? && product.price.blank?
 
     @params_amount += PRICE_WEIGHT
 
-    return 0 if suggested.price.blank? || product.price.blank?
+    return 0 if suggested['price'].blank? || product.price.blank?
 
-    suggested_price = price_m(suggested.price, suggested.price_currency)
-    suggested_price_sale = price_m(suggested.price_sale, suggested.price_currency)
+    suggested_price = price_m(suggested['price'], suggested['price_currency'])
+    suggested_price_sale = price_m(suggested['price_sale'], suggested['price_currency'])
 
     product_price = price_m(product.price, product.price_currency)
     product_price_sale = price_m(product.price_sale, product.price_currency)
@@ -243,8 +243,8 @@ class Suggestion
   end
 
   def gender_similarity(suggested)
-    if product.gender.present? && suggested.gender.present?
-      if suggested.gender != product.gender
+    if product.gender.present? && suggested['gender'].present?
+      if suggested['gender'] != product.gender
         @params_amount += GENDER_WEIGHT
         0
       end
@@ -266,18 +266,24 @@ class Suggestion
 
     to_search = to_search.flatten.uniq
 
-    synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
-      to_search.uniq.map do |el|
-        el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
-      end.join(' | ')}')"
-    items = query.where(synonyms_query).pluck_to_hash
-    items.map!{|item| OpenStruct.new(item)}
+    if to_search.size > 0
+      synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{
+        to_search.uniq.map do |el|
+          el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
+        end.join(' | ')}')"
+
+      # synonyms_query = to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
+
+      query = query.where(synonyms_query)
+    end
+
+    items = query.pluck_to_hash#.map{|item| OpenStruct.new(item)}
 
     items = add_items_by_siblings(items)
 
     # remove from list product with upc, if shopbop's product already have same upc
-    exists_upc = Set.new(Product.where(upc: items.map(&:upc).uniq).matching.pluck(:upc))
-    items = items.reject{|item| exists_upc.member?(item.upc)}
+    exists_upc = Set.new(Product.where(upc: items.map{|item| item['upc']}.uniq).matching.pluck(:upc))
+    items.reject!{|item| exists_upc.member?(item['upc'])}
 
     @related_products = items
   end
@@ -304,18 +310,10 @@ class Suggestion
       WHERE p1.id=#{product.id}
       """).to_a.map{|v| v['id'].to_i}.uniq
 
-    # p2 = Product.where(source: :shopbop, style_code: product.style_code).where.not(id: product.id, upc: nil)
-    # p3 = p2.map do |p2_entry|
-    #   Product.where(upc: p2_entry.upc, brand_id: p2_entry.brand_id).where.not(source: p2_entry.source).to_a
-    # end.flatten
-    # p4 = p3.map do |entry|
-    #   Product.where(style_code: entry.style_code, source: entry.source).where.not(id: entry.id, upc: nil).to_a
-    # end.flatten;nil
-
-    similar_ids -= items.map(&:id) if items.size > 0
+    similar_ids -= items.map{|item| item['id']} if items.size > 0
     if similar_ids.size > 0
       new_items = Product.where(id: similar_ids).pluck_to_hash
-      new_items.map!{|item| OpenStruct.new(item)}
+      # new_items.map!{|item| OpenStruct.new(item)}
 
       items += new_items
     end
@@ -328,7 +326,7 @@ class Suggestion
   end
 
   def incorrect_upc?(suggested)
-    suggested.source == 'amazon_ad_api' && suggested.upc =~ /^7010/ || !GTIN.new(suggested.upc).valid?
+    suggested['source'] == 'amazon_ad_api' && suggested['upc'] =~ /^7010/ || !GTIN.new(suggested['upc']).valid?
   end
 
   def with_upc?
