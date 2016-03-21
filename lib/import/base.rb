@@ -161,12 +161,12 @@ class Import::Base
     end
   end
 
-  def log str
+  def log(str)
     Rails.logger.debug str
   end
 
-  def process_products_urls urls
-    urls.compact.map{|url| build_url(url).sub(/\?.*/, '')}.uniq
+  def process_products_urls(urls)
+    urls.map{|url| build_url(url).sub(/\?.*/, '')}
   end
 
   def self.perform(*args)
@@ -187,6 +187,8 @@ class Import::Base
 
   def spawn_products_urls(urls, process_urls=true)
     urls = process_products_urls(urls) if process_urls
+    urls = urls.compact.uniq
+
     if Rails.env.production?
       process_in_batch(urls)
     else
