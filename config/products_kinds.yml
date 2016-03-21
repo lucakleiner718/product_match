@@ -37,10 +37,8 @@ trousers and shorts:
   - jeans
   - jodhpurs
   - joggers
-  - legging
   - leggings
   - pant
-  - pants
   - pedal pushers
   - shorts
   - shortalls
@@ -49,18 +47,20 @@ trousers and shorts:
   - sweatpants
   - sweats
   - trouser
-  - trousers
   - windpants
 
 skirts:
   - culottes
   - microskirt
   - miniskirt
-  - sarong
   - skirt
   - skort
   - tutu
   - wrap
+
+sarong:
+  - sarong
+  - pareo
 
 overalls:
   - bodysuit
@@ -76,6 +76,7 @@ overalls:
   - top shorts set
 
 dresses:
+  - caftan
   - dress
   - gown
   - minidress
@@ -88,9 +89,11 @@ dresses:
   - frock
   - sundress
 
+apron:
+  - apron
+
 outerwear:
   - anorak
-  - apron
   - blazer
   - bomber
   - british warm
@@ -143,6 +146,7 @@ underwear:
   - body suit
   - teddy
 
+  - caftan
   - diaper
   - slip
   - chemise
@@ -157,12 +161,10 @@ footwear:
   - bootie
   - booties
   - chukka
-  - clog
   - clogs
   - creeper
   - derby
   - espadrilles
-  - flat
   - flats
   - flip flop
   - heels
@@ -171,9 +173,7 @@ footwear:
   - mules
   - loafer
   - oxford
-  - oxfords
   - plimsole
-  - pump
   - pumps
   - runners
   - sandal
@@ -206,6 +206,7 @@ headwear:
 nightwear:
   - babydoll
   - blanket sleeper
+  - caftan
   - negligee
   - nightgown
   - nightshirt
