@@ -27,8 +27,6 @@ class Suggestion
     upc_patterns = product.upc_patterns
 
     related_products.each do |suggested|
-      next if incorrect_upc?(suggested)
-
       percentage = similarity_to(suggested, upc_patterns)
       next if percentage < SIMILARITY_MIN
 
@@ -281,8 +279,9 @@ class Suggestion
     end
 
     items = query.pluck_to_hash
-
     items = add_items_by_siblings(items)
+
+    items.select!{|item| have_valid_upc?(item)}
 
     # remove from list product with upc, if shopbop's product already have same upc
     exists_upc = Set.new(Product.where(upc: items.map{|item| item['upc']}.uniq).matching.pluck(:upc))
@@ -325,8 +324,8 @@ class Suggestion
     @kinds = YAML.load_file('config/products_kinds.yml')
   end
 
-  def incorrect_upc?(suggested)
-    suggested['source'] == 'amazon_ad_api' && suggested['upc'] =~ /^7010/ || !GTIN.new(suggested['upc']).valid?
+  def have_valid_upc?(suggested)
+    GTIN.new(suggested['upc']).valid? && !(suggested['source'] == 'amazon_ad_api' && suggested['upc'] =~ /^7010/)
   end
 
   def with_upc?
