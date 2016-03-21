@@ -34,7 +34,6 @@ class Import::Clubmonaco < Import::Base
         page_no += 1
       end
 
-      puts "cat_urls: #{cat_urls.size}/#{(cat_urls - urls).size}"
       urls += cat_urls
     end
 

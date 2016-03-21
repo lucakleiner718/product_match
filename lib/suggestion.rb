@@ -255,9 +255,12 @@ class Suggestion
   def related_products
     return @related_products if @related_products
 
-    query = Product.not_matching.where(brand_id: product.brand.id).with_upc.with_image
+    query = Product.not_matching.where(brand_id: product.brand.id)
+              .with_upc.with_image
 
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).select{|el| el.strip.present? }.map{|el| el.downcase.strip}.select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
+    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/)
+                    .select{|el| el.strip.present? }.map{|el| el.downcase.strip}
+                    .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
@@ -277,7 +280,7 @@ class Suggestion
       query = query.where(synonyms_query)
     end
 
-    items = query.pluck_to_hash#.map{|item| OpenStruct.new(item)}
+    items = query.pluck_to_hash
 
     items = add_items_by_siblings(items)
 
@@ -312,10 +315,7 @@ class Suggestion
 
     similar_ids -= items.map{|item| item['id']} if items.size > 0
     if similar_ids.size > 0
-      new_items = Product.where(id: similar_ids).pluck_to_hash
-      # new_items.map!{|item| OpenStruct.new(item)}
-
-      items += new_items
+      items += Product.where(id: similar_ids).pluck_to_hash
     end
 
     items
