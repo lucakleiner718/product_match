@@ -18,7 +18,7 @@ class Import::Clubmonaco < Import::Base
 
       while true
         url = "family/index.jsp?page=#{page_no}&size=#{page_size}&categoryId=#{category_id}"
-        log url
+        log(url)
 
         resp = get_request(url)
         html = Nokogiri::HTML(resp.body)
@@ -38,7 +38,7 @@ class Import::Clubmonaco < Import::Base
       urls += cat_urls
     end
 
-    spawn_products_urls(urls)
+    spawn_products_urls(urls, false)
   end
 
   def process_product(url)
