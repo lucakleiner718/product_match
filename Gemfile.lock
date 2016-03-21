@@ -18,7 +18,7 @@ GIT
 
 GEM
   remote: https://rubygems.org/
-  remote: https://058b026d:dbdee804@gems.contribsys.com/
+  remote: https://b76a1d1d:0f27412d@gems.contribsys.com/
   specs:
     CFPropertyList (2.3.2)
     actionmailer (4.2.5)
