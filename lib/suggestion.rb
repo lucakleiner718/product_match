@@ -31,7 +31,7 @@ class Suggestion
       next if percentage < SIMILARITY_MIN
 
       suggestion = exists_suggestions[suggested['id']]
-      actual_list << suggested['id']
+      actual_list << suggested['id'].to_i
 
       if suggestion
         suggestion.percentage = percentage
@@ -45,6 +45,8 @@ class Suggestion
         )
       end
     end
+
+    actual_list.uniq!
 
     not_actual = exists_suggestions.values.uniq.map(&:suggested_id) - actual_list
     if not_actual.size > 0
@@ -278,17 +280,13 @@ class Suggestion
       query = query.where(synonyms_query)
     end
 
-    resp = Product.connection.execute(query.to_sql)
-    items = resp.to_a
-    # items = query.pluck_to_hash
+    # remove from list product with upc, if shopbop's product already have same upc
+    query = query.joins("LEFT JOIN products AS products_upc ON products_upc.upc=products.upc AND products_upc.source IN ('shopbop', 'eastdane')").where('products_upc.id is null')
 
+    items = Product.connection.execute(query.to_sql).to_a
     items = add_items_by_siblings(items)
 
     items.select!{|item| have_valid_upc?(item)}
-
-    # remove from list product with upc, if shopbop's product already have same upc
-    exists_upc = Set.new(Product.where(upc: items.map{|item| item['upc']}.uniq).matching.pluck(:upc))
-    items.reject!{|item| exists_upc.member?(item['upc'])}
 
     @related_products = items
   end
@@ -308,11 +306,12 @@ class Suggestion
   def add_items_by_siblings(items)
     similar_products = Product.connection.execute("""
       SELECT p4.*
-      FROM products as p1
-      JOIN products as p2 on p2.style_code=p1.style_code AND p2.source=p1.source AND p2.id != p1.id AND p2.upc IS NOT NULL
+      FROM products as products
+      JOIN products as p2 on p2.style_code=products.style_code AND p2.source=products.source AND p2.id != products.id AND p2.upc IS NOT NULL
       JOIN products as p3 on p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id AND p3.style_code IS NOT NULL AND p3.style_code != ''
       JOIN products as p4 on p4.style_code=p3.style_code AND p4.id != p3.id AND p4.source=p3.source AND p4.upc IS NOT NULL
-      WHERE p1.id=#{product.id}
+      LEFT JOIN products AS products_upc ON products_upc.upc=p4.upc AND products_upc.source IN ('shopbop', 'eastdane')
+      WHERE products.id=#{product.id} AND products_upc.id is null
       """).to_a.uniq
 
     if items.size > 0
