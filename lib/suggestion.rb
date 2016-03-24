@@ -84,52 +84,63 @@ class Suggestion
   end
 
   def title_similarity(suggested)
+    strings_similarity(product.title, suggested['title']) * WEIGHTS[:title]
+  end
+
+  def strings_similarity(string_a, string_b)
     ratio = nil
 
-    if product.title.blank?
+    if string_a.blank?
       ratio = 1
-    elsif suggested['title'].blank?
+    elsif string_b.blank?
       ratio = 0
     end
 
-    if !ratio && product.title.downcase.gsub(/[^0-9a-z]+/, '') == suggested['title'].downcase.gsub(/[^0-9a-z]+/, '')
+    string_a_parts = product_title_parts(string_a)
+    string_b_parts = product_title_parts(string_b)
+
+    if !ratio && string_a_parts.sort.join == string_b_parts.sort.join
       ratio = 1
     end
 
     unless ratio
-      title_parts = product.title.split(/\s/).map{|el| el.downcase.gsub(/[^\-0-9a-z]/i, '')}.select{|el| el.size > 2}
-      title_parts -= %w(the and womens mens)
-
-      suggested_title_parts = suggested['title'].split(/\s/).map{|el| el.downcase.gsub(/[^0-9a-z]/i, '')}.select{|r| r.present?}
-      title_parts -= %w(the and womens mens)
-
+      similar_words = []
       kinds.each do |(_name, synonyms)|
-        group = []
+        has_word_a = false
+        has_word_b = false
+
         synonyms.each do |synonym|
-          if (synonym.split & title_parts).size == synonym.split.size && (synonym.split & suggested_title_parts).size == synonym.split.size
-            group += synonyms
+          if !has_word_a && (synonym.split & string_a_parts).size == synonym.split.size
+            has_word_a = synonym
             break
           end
         end
-        group.uniq!
-        if group.size > 0
-          title_parts -= group
-          suggested_title_parts -= group
+
+        if has_word_a
+          synonyms.each do |synonym|
+            if (synonym.split & string_b_parts).size == synonym.split.size
+              has_word_b = synonym
+              break
+            end
+          end
+
+          if has_word_b
+            similar_words << [has_word_a, has_word_b]
+            string_a_parts -= [has_word_a]
+            string_b_parts -= [has_word_b]
+          end
         end
       end
 
-      title_parts.uniq!
-      suggested_title_parts.uniq!
-
       ratio =
-        if title_parts.size > 0
-          (title_parts & suggested_title_parts).size / title_parts.size.to_f
+        if string_a_parts.size > 0 || similar_words.size > 0
+          ((string_a_parts & string_b_parts).size + similar_words.size) / (string_a_parts.size.to_f + similar_words.size)
         else
           1
         end
     end
 
-    ratio * WEIGHTS[:title]
+    ratio
   end
 
   def color_similarity(suggested)
@@ -258,9 +269,7 @@ class Suggestion
     query = Product.not_matching.where(brand_id: product.brand.id)
               .with_upc.with_image
 
-    title_parts = product.title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/)
-                    .select{|el| el.strip.present? }.map{|el| el.downcase.strip}
-                    .select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size']
+    title_parts = product_title_parts(product.title)
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
@@ -301,7 +310,7 @@ class Suggestion
       ProductSuggestion.import(to_create)
     rescue ActiveRecord::RecordNotUnique => e
       to_create.each do |row|
-        ProductSuggestion.create!(row) rescue nil
+        row.save! rescue nil
       end
     end
   end
@@ -340,5 +349,12 @@ class Suggestion
   def price_m(price, currency='USD')
     return nil unless price
     Money.new(price.to_f*100, currency).exchange_to("USD")
+  end
+
+  def product_title_parts(title)
+    title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).
+      select{|el| el.strip.present? }.map{|el| el.downcase.strip}.
+      select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size'].
+      uniq
   end
 end
