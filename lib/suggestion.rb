@@ -278,6 +278,9 @@ class Suggestion
       # synonyms_query = to_search.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
 
       query = query.where(synonyms_query)
+    elsif title_parts.size > 0
+      synonyms_query = title_parts.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR ')
+      query = query.where(synonyms_query)
     end
 
     # remove from list product with upc, if shopbop's product already have same upc
