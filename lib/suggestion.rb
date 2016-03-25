@@ -30,7 +30,7 @@ class Suggestion
       percentage = similarity_to(suggested, upc_patterns)
       next if percentage < SIMILARITY_MIN
 
-      suggestion = exists_suggestions[suggested['id']]
+      suggestion = exists_suggestions[suggested['id'].to_i]
       actual_list << suggested['id'].to_i
 
       if suggestion
@@ -38,11 +38,11 @@ class Suggestion
         suggestion.upc_patterns = upc_patterns
         suggestion.save! if suggestion.changed?
       else
-        to_create << ProductSuggestion.new(
-          product_id: product.id, suggested_id: suggested['id'], percentage: percentage,
-          upc_patterns: "{#{upc_patterns.join(',')}}",
-          price: suggested['price'], price_sale: suggested['price_sale']
-        )
+        to_create << [
+          product.id, suggested['id'], percentage,
+          "{#{upc_patterns.join(',')}}",
+          suggested['price'], suggested['price_sale']
+        ]
       end
     end
 
@@ -296,9 +296,9 @@ class Suggestion
     query = query.joins("LEFT JOIN products AS products_upc ON products_upc.upc=products.upc AND products_upc.source IN ('shopbop', 'eastdane')").where('products_upc.id is null')
 
     items = Product.connection.execute(query.to_sql).to_a
-    items = add_items_by_siblings(items)
+    # items = add_items_by_siblings(items)
 
-    items.select!{|item| have_valid_upc?(item)}
+    items = items.uniq.select{|item| have_valid_upc?(item)}
 
     @related_products = items
   end
@@ -306,11 +306,18 @@ class Suggestion
   def create_items(to_create)
     return if to_create.size == 0
 
+    columns = [:product_id, :suggested_id, :percentage, :upc_patterns, :price, :price_sale]
+
+    to_create = to_create.sort{|a, b| b[2] <=> a[2]}[0...100] if to_create.size > 100
+
     begin
-      ProductSuggestion.import(to_create)
+      ProductSuggestion.import(columns, to_create)
     rescue ActiveRecord::RecordNotUnique => e
       to_create.each do |row|
-        row.save! rescue nil
+        begin
+          ProductSuggestion.create!(Hash[columns.zip(row)])
+        rescue ActiveRecord::RecordNotUnique => e
+        end
       end
     end
   end
