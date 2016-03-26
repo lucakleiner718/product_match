@@ -218,7 +218,7 @@ class Import::Base
 
     if results.size == results.select{|r| r[:retailer].present?}.size
       products = Product.where(source: source, source_id: results.map{|r| r[:source_id]},
-        retailer: results.map{|r| r[:retailer]}).group_by{|pr| pr.source_id}
+        retailer: results.map{|r| r[:retailer]}.uniq).group_by{|pr| pr.source_id}
       results.each do |r|
         exists = products[r[:source_id]].try(:first)
         if exists

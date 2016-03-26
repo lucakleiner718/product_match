@@ -5,6 +5,7 @@ class Import::Eastdane < Import::Platform::Bop
   def source; 'eastdane'; end
 
   def perform url, force=false
+    url ||= default_file
     filename = get_file(url)
     return false if !@file_updated && !force
 
@@ -48,7 +49,7 @@ class Import::Eastdane < Import::Platform::Bop
     Product.where(source: source).where(id: processed_ids).update_all(in_store: true)
 
     if @file_updated
-      replace_original_tmp_file(filename)
+      replace_original_tmp_file(filename, url)
     end
 
     true

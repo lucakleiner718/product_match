@@ -4,6 +4,7 @@ class Import::Shopbop < Import::Platform::Bop
   def source; 'shopbop'; end
 
   def perform url=nil, force=false
+    url ||= default_file
     filename = get_file(url)
     return false if !@file_updated && !force
 
@@ -59,7 +60,7 @@ class Import::Shopbop < Import::Platform::Bop
     Product.where(source: source).where(id: processed_ids).update_all(in_store: true)
 
     if @file_updated
-      replace_original_tmp_file(filename)
+      replace_original_tmp_file(filename, url)
     end
 
     true
