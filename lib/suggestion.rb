@@ -274,7 +274,7 @@ class Suggestion
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
-      synonyms.select { |synonym| (synonym.singulrize.split & title_parts).size == synonym.split.size }.size > 0
+      synonyms.select { |synonym| (synonym.singularize.split & title_parts).size == synonym.split.size }.size > 0
     end
 
     to_search = to_search.flatten.uniq
@@ -363,7 +363,7 @@ class Suggestion
     title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).
       select{|el| el.strip.present? }.map{|el| el.downcase.strip}.
       select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size'].
-      map{|item| item.singularize}
+      map{|item| item.singularize}.
       uniq
   end
 end
