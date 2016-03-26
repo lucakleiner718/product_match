@@ -216,7 +216,18 @@ class Import::Base
       row.select{|(k, v)| k.in?(product_attributes)}
     end
 
-    if results.size == results.select{|r| r[:source_id].present?}.size
+    if results.size == results.select{|r| r[:retailer].present?}.size
+      products = Product.where(source: source, source_id: results.map{|r| r[:source_id]},
+        retailer: results.map{|r| r[:retailer]}).group_by{|pr| pr.source_id}
+      results.each do |r|
+        exists = products[r[:source_id]].try(:first)
+        if exists
+          to_update << [r, exists]
+        else
+          to_create << r
+        end
+      end
+    elsif results.size == results.select{|r| r[:source_id].present?}.size
       products = Product.where(source: source, source_id: results.map{|r| r[:source_id]})
                    .group_by{|pr| pr.source_id}
       results.each do |r|

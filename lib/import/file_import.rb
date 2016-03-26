@@ -6,11 +6,10 @@ module Import
 
     private
 
-    def get_file(url=nil)
-      url ||= default_file
-      extension = url.match(/\.([a-z]+)$/)[1]
-      filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
-      filename_tmp = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}_#{Time.now.to_i}.#{extension}"
+    def get_file(url)
+      source_filename = File.basename(url)
+      filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}-#{source_filename}"
+      filename_tmp = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}_#{Time.now.to_i}-#{source_filename}"
 
       @file_updated = false
       if !File.exists?(filename) || (url_mtime(url) > File.mtime(filename))
@@ -25,9 +24,9 @@ module Import
       end
     end
 
-    def replace_original_tmp_file(filename_tmp)
-      extension = filename_tmp.match(/\.([a-z]+)$/)[1]
-      filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}.#{extension}"
+    def replace_original_tmp_file(filename_tmp, url)
+      source_filename = File.basename(url)
+      filename = "tmp/sources/#{self.class.name.match(/::([a-z]+)/i)[1].downcase}-#{source_filename}"
       File.delete(filename) if File.exists?(filename)
       File.rename(filename_tmp, filename)
     end
