@@ -19,7 +19,8 @@ class Suggestion
     # do not generate suggestions if upc already detected or brand is blank
     return false if with_upc? || product.brand.try(:name).blank?
 
-    exists_suggestions = ProductSuggestion.where(product_id: product.id).index_by{|el| el.suggested_id}
+    exists_suggestions = ProductSuggestion.where(
+      product_id: product.id).index_by{|el| el.suggested_id}
 
     to_create = []
     actual_list = []
@@ -266,14 +267,14 @@ class Suggestion
   def related_products
     return @related_products if @related_products
 
-    query = Product.not_matching.where(brand_id: product.brand.id)
-              .with_upc.with_image
+    query = Product.not_matching.where(brand_id: product.brand.id).
+      with_upc.with_image
 
     title_parts = product_title_parts(product.title)
 
     # search products with synonyms for main category
     to_search = kinds.values.select do |synonyms|
-      synonyms.select { |synonym| (synonym.split & title_parts).size == synonym.split.size }.size > 0
+      synonyms.select { |synonym| (synonym.singulrize.split & title_parts).size == synonym.split.size }.size > 0
     end
 
     to_search = to_search.flatten.uniq
@@ -296,7 +297,7 @@ class Suggestion
     query = query.joins("LEFT JOIN products AS products_upc ON products_upc.upc=products.upc AND products_upc.source IN ('shopbop', 'eastdane')").where('products_upc.id is null')
 
     items = Product.connection.execute(query.to_sql).to_a
-    # items = add_items_by_siblings(items)
+    items = add_items_by_siblings(items)
 
     items = items.uniq.select{|item| have_valid_upc?(item)}
 
@@ -325,13 +326,13 @@ class Suggestion
   def add_items_by_siblings(items)
     similar_products = Product.connection.execute("""
       SELECT p4.*
-      FROM products as products
-      JOIN products as p2 on p2.style_code=products.style_code AND p2.source=products.source AND p2.id != products.id AND p2.upc IS NOT NULL
-      JOIN products as p3 on p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id AND p3.style_code IS NOT NULL AND p3.style_code != ''
-      JOIN products as p4 on p4.style_code=p3.style_code AND p4.id != p3.id AND p4.source=p3.source AND p4.upc IS NOT NULL
+      FROM products AS products
+      JOIN products AS p2 ON p2.style_code=products.style_code AND p2.source=products.source AND p2.id != products.id AND p2.upc IS NOT NULL
+      JOIN products AS p3 ON p3.upc=p2.upc AND p3.source NOT IN ('shopbop', 'eastdane') AND p3.brand_id=p2.brand_id AND p3.style_code IS NOT NULL AND p3.style_code != ''
+      JOIN products AS p4 ON p4.style_code=p3.style_code AND p4.id != p3.id AND p4.source=p3.source AND p4.upc IS NOT NULL
       LEFT JOIN products AS products_upc ON products_upc.upc=p4.upc AND products_upc.source IN ('shopbop', 'eastdane')
       WHERE products.id=#{product.id} AND products_upc.id is null
-      """).to_a.uniq
+    """).to_a.uniq
 
     if items.size > 0
       items_ids = Set.new(items.map{|item| item['id']})
@@ -362,6 +363,7 @@ class Suggestion
     title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).
       select{|el| el.strip.present? }.map{|el| el.downcase.strip}.
       select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size'].
+      map{|item| item.singularize}
       uniq
   end
 end

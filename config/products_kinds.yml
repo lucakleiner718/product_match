@@ -156,7 +156,6 @@ underwear:
 
 footwear:
   - ankle-wrap platform
-  - boots
   - boot
   - bootie
   - booties
@@ -178,14 +177,12 @@ footwear:
   - runners
   - sandal
   - shoe
-  - shoes
   - sneaker
   - spats
   - slides
   - slipper
   - slip-on
   - sock
-  - socks
   - stocking
   - toe
   - wedge
@@ -232,13 +229,11 @@ swimwear:
 
 # accessories
 sunglasses:
-  - sunglasses
-  - glasses
-  - spectacles
   - eyeglasses
   - glass
-  - spectacle
   - specs
+  - spectacle
+  - sunglasses
 
 bracelet:
   - bracelet
@@ -252,9 +247,8 @@ necklace:
   - neckle
   - necklace
 
-rings:
+ring:
   - ring
-  - rings
 
 umbrella:
   - umbrella
@@ -266,9 +260,7 @@ watch:
 
 cufflink:
   - cufflink
-  - cufflinks
   - cuff links
-  - stud
   - studs
 
 cases:
@@ -340,4 +332,3 @@ bags:
 
 blanket:
   - blanket
-  
