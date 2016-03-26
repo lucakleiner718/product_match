@@ -57,8 +57,14 @@ class MatchController < ApplicationController
 
       @upc_patterns = @product.upc_patterns
 
-      suggested_products = ProductSuggestion.where(product_id: product_id).joins(:suggested).where("products.upc is not null AND products.upc != ''").order('percentage desc').where('percentage is not null AND percentage > 0').limit(30).includes(:suggested)
-      #show same upc close to green suggestion
+      suggested_products = ProductSuggestion.where(product_id: product_id).
+        joins(:suggested).includes(:suggested).
+        where("products.upc is not null AND products.upc != ''").
+        where('percentage is not null AND percentage > 0').
+        order('percentage desc').
+        limit(100)
+
+      # show same upc close to green suggestion
       @suggested_products = []
       suggested_products.each do |product|
         @suggested_products << product unless @suggested_products.include?(product)

@@ -161,8 +161,11 @@ underwear:
 ### ----------------
 # Footwear
 ### ----------------
-sandal:
+sandals:
   - sandal
+
+sneakers:
+  - sneaker
 
 footwear:
   - ankle-wrap platform
@@ -186,7 +189,6 @@ footwear:
   - pumps
   - runners
   - shoe
-  - sneaker
   - spats
   - slides
   - slipper
