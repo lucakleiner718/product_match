@@ -362,8 +362,8 @@ class Suggestion
   def product_title_parts(title)
     title.gsub(/[,\.\-\(\)\'\"\!]/, ' ').split(/\s/).
       select{|el| el.strip.present? }.map{|el| el.downcase.strip}.
-      select{|el| el.size > 2} - ['the', 'and', 'womens', 'mens', 'size'].
+      select{|el| el.size > 2}.
       map{|item| item.singularize}.
-      uniq
+      uniq - ['the', 'and', 'womens', 'mens', 'size']
   end
 end

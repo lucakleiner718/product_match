@@ -158,6 +158,12 @@ underwear:
   - leotard
   - robe
 
+### ----------------
+# Footwear
+### ----------------
+sandal:
+  - sandal
+
 footwear:
   - ankle-wrap platform
   - boot
@@ -179,7 +185,6 @@ footwear:
   - plimsole
   - pumps
   - runners
-  - sandal
   - shoe
   - sneaker
   - spats
@@ -188,6 +193,10 @@ footwear:
   - slip-on
   - toe
   - wedge
+
+### ----------------
+# Footwear END
+### ----------------
 
 headwear:
   - beanie
@@ -229,7 +238,10 @@ swimwear:
   - trunks
   - wetsuit
 
-# accessories
+### ----------------
+# Accessories
+### ----------------
+
 sunglasses:
   - eyeglasses
   - glass
@@ -311,6 +323,10 @@ accessories other:
   - sash
   - scarf
   - key leash
+
+### ----------------
+# Accessories END
+### ----------------
 
 bags:
   - backpack
