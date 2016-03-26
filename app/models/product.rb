@@ -18,6 +18,16 @@ class Product < ActiveRecord::Base
   scope :in_stock, -> { where(in_store: true) }
   scope :with_image, -> { where.not(image: nil) }
   scope :by_title, -> (str) { where("to_tsvector(products.title) @@ to_tsquery('#{str}')") }
+  scope :title_contains, -> (words) {
+    query_words = words.map do |el|
+      el.split(' ').size > 1 ? "(#{el.split(' ').join(' & ')})" : el
+    end
+    synonyms_query = "to_tsvector(products.title) @@ to_tsquery('#{query_words.join(' | ')}')"
+    where(synonyms_query)
+  }
+  scope :title_like, -> (words) {
+    where(words.map{|el| "products.title ILIKE #{Product.sanitize "%#{el}%"}"}.join(' OR '))
+  }
 
   # validates :upc, format: { with: /\A\d+\z/ }, allow_nil: true
 

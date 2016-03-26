@@ -122,6 +122,10 @@ tights:
   - pantyhose
   - leotard
   - tricot
+  - stocking
+  - sock
+  - hose
+  - hosiery
 
 thong:
   - bottoms
@@ -166,8 +170,8 @@ footwear:
   - espadrilles
   - flats
   - flip flop
+  - gaiters
   - heels
-  - hosiery
   - mule
   - mules
   - loafer
@@ -182,8 +186,6 @@ footwear:
   - slides
   - slipper
   - slip-on
-  - sock
-  - stocking
   - toe
   - wedge
 
@@ -270,8 +272,10 @@ cases:
 
 belt:
   - belt
+  - coin belt
   - strap
   - thong
+  - cummerbund
 
 lipstick:
   - lipstick
@@ -279,27 +283,33 @@ lipstick:
 blush:
   - blush
 
+tie:
+  - necktie
+  - bow tie
+  - tie
+
+wallet:
+  - coin purse
+  - wallet
+
+cravat:
+  - cravat
+  - neckcloth
+  - neckerchief
+  - handkerchief
+
+suspenders:
+  - suspenders
+
 accessories other:
   - bandana
-  - bow tie
-  - coin purse
-  - coin belt
-  - cravat
-  - cummerbund
-  - gaiters
   - gloves
   - headband
-  - handkerchief
   - muff
-  - neckcloth
-  - necktie
   - pony holder
   - overlay
   - sash
   - scarf
-  - suspenders
-  - tie
-  - wallet
   - key leash
 
 bags:
