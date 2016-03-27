@@ -34,7 +34,7 @@ ActiveAdmin.register ProductSource do
           link_to 'Full', Import::Popshops.new.build_url_params(merchant: ps.source_id), target: :_blank
         when 'website'
           link_to 'Full', Module.const_get("Import::#{ps.source_id.titleize}").new.baseurl, target: :_blank rescue nil
-        when 'shopbop', 'eastdane'
+        when 'shopbop', 'eastdane', 'cj'
           link_to 'Full', ps.source_id, target: :_blank
         when "linksynergy"
           [

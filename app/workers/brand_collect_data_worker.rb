@@ -17,6 +17,9 @@ class BrandCollectDataWorker
         when 'amazon_ad_api'
           ImportAmazonWorker.perform_async(product_source_id)
           false
+        when 'cj'
+          Import::Cj.perform(product_source_id)
+          true
         when 'popshops'
           Import::Popshops.perform(brand: product_source.source_id)
           true

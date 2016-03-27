@@ -2,6 +2,7 @@ class ProductSource < ActiveRecord::Base
 
   SOURCES = {
     'Amazon Publisher API' => :amazon_ad_api,
+    'CJ.com' => :cj,
     'Popshops (brand)' => :popshops, 'Popshops (merchant)' => :popshops_merchant,
     'Linksynergy' => :linksynergy, 'Shopbop' => :shopbop, 'Eastdane' => :eastdane,
     'Website' => :website
