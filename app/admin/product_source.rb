@@ -6,7 +6,7 @@ ActiveAdmin.register ProductSource do
     selectable_column
     column :name
     column :source_name
-    column :source_id
+    column 'Source ID', :source_id
     column :brand
     column 'Regular update' do |it|
       if it.period && it.period > 0
@@ -23,7 +23,6 @@ ActiveAdmin.register ProductSource do
     column :collect_status do |ps|
       status_tag(ps.collect_status_code || :ok, title: ps.collect_status_message)
     end
-    actions
     column 'Source' do |ps|
       case ps.source_name
         when 'amazon_ad_api'
@@ -40,8 +39,12 @@ ActiveAdmin.register ProductSource do
           [
             link_to('Full', Import::Linksynergy.build_file_url(ps.source_id, type: :full), target: :_blank),
             link_to('Delta', Import::Linksynergy.build_file_url(ps.source_id, type: :delta), target: :_blank)
-          ].join('&nbsp;').html_safe
+          ].join(' / ').html_safe
       end
+    end
+
+    actions defaults: true do |product_source|
+      link_to "Pull", pull_admin_product_source_path(product_source), class: "member_link"
     end
   end
 
@@ -65,4 +68,9 @@ ActiveAdmin.register ProductSource do
   scope :all, default: true
   scope(:shopbop) { |scope| scope.where(source_name: [:shopbop, :eastdane])}
 
+  member_action :pull, method: :get do
+    product_source = ProductSource.find(params[:id])
+    BrandCollectDataWorker.perform_async(params[:id])
+    redirect_to :back, notice: "Collect data from '#{product_source.name}' Product Source added in queue"
+  end
 end
