@@ -200,18 +200,29 @@ footwear:
 # Footwear END
 ### ----------------
 
+### ----------------
+# Headwear
+### ----------------
+
+ear gear:
+  - ear gear
+
+cap:
+  - cap
+
 headwear:
   - beanie
   - fedora
   - hat
-  - cap
-  - beanie
   - beret
   - helmet
   - hood
   - toque
-  - turban
   - veil
+
+### ----------------
+# Headwear END
+### ----------------
 
 nightwear:
   - babydoll
@@ -244,20 +255,49 @@ swimwear:
 # Accessories
 ### ----------------
 
-sunglasses:
-  - eyeglasses
-  - glass
-  - specs
-  - spectacle
-  - sunglasses
+belt:
+  - belt
+  - coin belt
+  - strap
+  - thong
+  - cummerbund
+
+blush:
+  - blush
 
 bracelet:
   - bracelet
+
+card case:
+  - card case
+
+cases:
+  - iphone case
+  - table case
+  - computer case
+
+cravat:
+  - cravat
+  - neckcloth
+  - neckerchief
+  - handkerchief
+
+cufflink:
+  - cufflink
+  - cuff links
+  - studs
 
 earrings:
   - earring
   - earring set
   - stud
+
+gloves:
+  - gloves
+  - muff
+
+lipstick:
+  - lipstick
 
 necklace:
   - neckle
@@ -266,61 +306,44 @@ necklace:
 ring:
   - ring
 
-umbrella:
-  - umbrella
+scrunchie:
+  - scrunchy
+  - scrunchie
+  - pony holder
 
-watch:
-  - pocketwatch
-  - watch
-  - wristwatch
+sunglasses:
+  - eyeglasses
+  - glass
+  - specs
+  - spectacle
+  - sunglasses
 
-cufflink:
-  - cufflink
-  - cuff links
-  - studs
-
-cases:
-  - iphone case
-  - table case
-  - computer case
-
-belt:
-  - belt
-  - coin belt
-  - strap
-  - thong
-  - cummerbund
-
-lipstick:
-  - lipstick
-
-blush:
-  - blush
+suspenders:
+  - suspenders
 
 tie:
   - necktie
   - bow tie
   - tie
 
+turban:
+  - turban
+  - headband
+
+umbrella:
+  - umbrella
+
 wallet:
   - coin purse
   - wallet
 
-cravat:
-  - cravat
-  - neckcloth
-  - neckerchief
-  - handkerchief
-
-suspenders:
-  - suspenders
+watch:
+  - pocketwatch
+  - watch
+  - wristwatch
 
 accessories other:
   - bandana
-  - gloves
-  - headband
-  - muff
-  - pony holder
   - overlay
   - sash
   - scarf
@@ -330,11 +353,13 @@ accessories other:
 # Accessories END
 ### ----------------
 
-bags:
+backpack:
   - backpack
   - bag
+
+bags:
+  - bag
   - briefcase
-  - card case
   - carpetbag
   - case
   - clutch
