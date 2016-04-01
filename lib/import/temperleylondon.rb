@@ -17,7 +17,7 @@ class Import::Temperleylondon < Import::Base
     process_results_batch(results)
 
     if @file_updated
-      replace_original_tmp_file(filename)
+      replace_original_tmp_file(filename, url)
     end
 
     true
