@@ -2,6 +2,9 @@ module Import
   class Amazon < Import::Base
     class ReachedMax < StandardError; end
 
+    SORT = [:price, :'-price', :'launch-date', :'popularity-rank', :relevancerank, :reviewrank]
+    SEARCH_INDEX = :Fashion
+
     def source; 'amazon_ad_api'; end
 
     def self.perform(brand_name)
@@ -51,7 +54,6 @@ module Import
         params[:item_page] = pageno
         res = send_request(params)
         break if res.items.size == 0
-        # log("#{pageno}: #{res.items.size}")
         res.items.each do |item|
           processed_items << item.get('ASIN')
 
@@ -76,10 +78,9 @@ module Import
     attr_reader :brand, :processed_items, :total_amount
 
     def collect_by_term(term=nil)
-      perform(term: term, sort: :price)
-      perform(term: term, sort: '-price')
-      perform(term: term, sort: :reviewrank)
-      perform(term: term, sort: :relevancerank)
+      SORT.each do |sort|
+        perform(term: term, sort: sort)
+      end
     end
 
     def parse_item(item)
@@ -146,7 +147,7 @@ module Import
       begin
         params = {
           response_group: :Large,
-          search_index: :FashionWomen,
+          search_index: SEARCH_INDEX,
           sort: :price,
         }.merge(params).merge(random_options)
         # log params
@@ -164,7 +165,7 @@ module Import
       ::Amazon::Ecs.send(:prepare_url, ::Amazon::Ecs.options.merge({
             brand: brand_name,
             operation: :ItemSearch, response_group: :Large,
-            search_index: :FashionWomen, sort: :price,
+            search_index: SEARCH_INDEX, sort: :price,
             timestamp: Time.now.utc.strftime("%Y-%m-%dT%H:%M:%SZ")}))
     end
 
