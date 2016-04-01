@@ -1,0 +1,54 @@
+<%= paginate @matches %>
+
+<% @matches.each do |product_match| %>
+  <% product = product_match.product %>
+  <% matched = product_match.product_selects.first.selected %>
+  <% author = product_match.product_selects.first.user %>
+  <section>
+    <div class="row">
+      <div class="col-sm-3">
+        <%= image_tag(product_image(product.image), class: "img-responsive") %>
+      </div>
+      <div class="col-sm-3">
+        <h4><%= product.title %></h4>
+        <table class="table table-condensed">
+          <tr><td>Brand:</td><td><%= product.brand.name || 'N/A' %></td></tr>
+          <tr><td>Color:</td><td><%= product.color || 'N/A' %></td></tr>
+          <tr><td>Size:</td><td><%= product.size|| 'N/A' %></td></tr>
+          <tr><td>Price:</td><td><%= product.display_price %></td></tr>
+          <% if product.gender.present? %>
+            <tr><td>Gender:</td><td><%= product.gender %></td></tr>
+          <% end %>
+          <tr><td>Bop Cat:</td><td><%= product.category %></td></tr>
+          <tr><td>Goog Cat:</td><td><%= product.google_category %></td></tr>
+          <tr><td>Style Code:</td><td><%= product.style_code %></td></tr>
+          <tr><td>GTIN:</td><td><%= product.upc %></td></tr>
+          <tr><td>Author:</td><td><%= author.email %></td></tr>
+          <tr><td colspan="2"><%= link_to "#{product.source.titleize} link", product.url, target: :_blank %></td></tr>
+        </table>
+      </div>
+      <div class="col-sm-3">
+        <%= image_tag(product_image(matched.image), class: "img-responsive") %>
+      </div>
+      <div class="col-sm-3">
+        <h4><%= matched.title %></h4>
+        <table class="table table-condensed">
+          <tr><td>Brand:</td><td><%= matched.brand.name || 'N/A' %></td></tr>
+          <tr><td>Color:</td><td><%= matched.color || 'N/A' %></td></tr>
+          <tr><td>Size:</td><td><%= matched.size|| 'N/A' %></td></tr>
+          <tr><td>Price:</td><td><%= matched.display_price %></td></tr>
+          <% if matched.gender.present? %>
+            <tr><td>Gender:</td><td><%= matched.gender %></td></tr>
+          <% end %>
+          <tr><td>Bop Cat:</td><td><%= matched.category %></td></tr>
+          <tr><td>Goog Cat:</td><td><%= matched.google_category %></td></tr>
+          <tr><td>Style Code:</td><td><%= matched.style_code %></td></tr>
+          <tr><td>GTIN:</td><td><%= matched.upc %></td></tr>
+          <tr><td colspan="2"><%= link_to "#{matched.source.titleize} link", matched.url, target: :_blank %></td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<%= paginate @matches %>

@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-sm-5">
+  <div class="col-sm-6">
     <h3>Last matched</h3>
     <table class="table">
       <thead>
@@ -16,13 +16,16 @@
           <td><%= link[1] %></td>
           <td><%= link[2] %></td>
           <td><%= link[3].in_time_zone.strftime('%b %d %Y %H:%M:%S') %></td>
-          <td><%= link_to 'Open', link[0], target: :_blank %></td>
+          <td>
+            <%= link_to 'File', link[0], target: :_blank, class: 'btn btn-default btn-xs' %>
+            <%= link_to 'List', matched_products_path(date_from: link[1] == 'Current week' ? nil : link[1].gsub('/', '-')), target: :_blank, class: 'btn btn-default btn-xs' %>
+          </td>
         </tr>
       <% end %>
       </tbody>
     </table>
   </div>
-  <div class="col-sm-3 col-sm-offset-4">
+  <div class="col-sm-3 col-sm-offset-3">
     <h3>Current server time</h3>
     <time class='label label-primary'
           style="font-size: 110%;"

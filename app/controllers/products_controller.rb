@@ -290,6 +290,13 @@ class ProductsController < ApplicationController
     products
   end
 
+  def matched
+    @date_from = params[:date_from] ? Date.strptime(params[:date_from], "%m-%d-%y") : 1.week.ago
+    @date_to = params[:date_to] || @date_from + 1.week
+
+      @matches = ProductUpc.where('created_at >= ? AND created_at <= ?', @date_from, @date_to).includes(:product).page(params[:page]).per(50)
+  end
+
   helper_method :sort_column, :sort_direction
 
   private

@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get :active
       get 'active/export' => 'products#active_export', as: :active_export
       get 'active/:id' => 'products#active_show', as: :active_show
+      get 'matched' => 'products#matched', as: :matched
     end
   end
 
