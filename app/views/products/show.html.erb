@@ -71,7 +71,7 @@
 <% else %>
   <div class="row">
     <h2>Different Sizes</h2>
-    <% Product.where(source: @product.source, style_code: @product.style_code).where.not(id: @product.id).each do |product| %>
+    <% Product.where(source: @product.source, style_code: @product.style_code, color: @product.color).where.not(id: @product.id).each do |product| %>
       <div class="col-sm-3 col-xs-6">
         <div class="thumbnail suggestion-thumbnail">
           <div class="product-title">
