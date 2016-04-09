@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160304192159) do
+ActiveRecord::Schema.define(version: 20160409161247) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -155,6 +155,7 @@ ActiveRecord::Schema.define(version: 20160304192159) do
     t.text     "product_select_ids",              array: true
   end
 
+  add_index "product_upcs", ["created_at"], name: "index_product_upcs_on_created_at", using: :btree
   add_index "product_upcs", ["product_id"], name: "index_product_upcs_on_product_id", unique: true, using: :btree
 
   create_table "products", force: :cascade do |t|
@@ -194,6 +195,7 @@ ActiveRecord::Schema.define(version: 20160304192159) do
   add_index "products", ["brand_id"], name: "index_products_on_brand_id", using: :btree
   add_index "products", ["brand_name"], name: "index_products_on_brand_name", using: :btree
   add_index "products", ["color"], name: "index_products_on_color", using: :btree
+  add_index "products", ["created_at"], name: "index_products_on_created_at", where: "(((source)::text = ANY ((ARRAY['shopbop'::character varying, 'eastdane'::character varying])::text[])) AND ((upc IS NULL) OR ((upc)::text = ''::text)))", using: :btree
   add_index "products", ["in_store"], name: "index_products_on_in_store", using: :btree
   add_index "products", ["match"], name: "index_products_on_match", using: :btree
   add_index "products", ["mpn"], name: "index_products_on_mpn", using: :btree
