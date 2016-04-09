@@ -1,6 +1,6 @@
 class MarketingController < ApplicationController
   def index
-    chart = StatChart.new.data
+    chart = StatChart.new.build_data
     @chart_db = [
       {name: 'Total products', data: chart[:total_products]},
       {name: 'Total without UPC', data: chart[:total_without_upc]},
